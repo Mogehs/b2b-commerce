@@ -2,9 +2,9 @@
 import React, { useState } from "react";
 
 import Navbar from "@/app/components/common/Navbar";
-import RelatedProducts from "@/app/components/common/detail-page/RelatedProducts";
+import RelatedProducts from "@/app/components/detail-page/RelatedProducts";
 import { AiOutlineHeart, AiOutlineShareAlt } from "react-icons/ai";
-import MoreFromSeller from "@/app/components/common/detail-page/MoreFromSeller";
+import MoreFromSeller from "@/app/components/detail-page/MoreFromSeller";
 import Footer from "@/app/components/common/Footer";
 
 import { Button } from "@/components/ui/button";
@@ -21,67 +21,67 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import InfoCertificates from "@/app/components/common/information-certificates/InfoCertificates";
+const relatedProducts = [
+  {
+    title:
+      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
+    price: "PKR - 2500",
+    minQty: "Min Qty - 100 Pcs",
+    seller: "Madina Traders - Lahore",
+    image: "/detail-page/related-products-image.jpg",
+  },
+  {
+    title:
+      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
+    price: "PKR - 2500",
+    minQty: "Min Qty - 100 Pcs",
+    seller: "Madina Traders - Lahore",
+    image: "/detail-page/related-products-image.jpg",
+  },
+  {
+    title:
+      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
+    price: "PKR - 2500",
+    minQty: "Min Qty - 100 Pcs",
+    seller: "Madina Traders - Lahore",
+    image: "/detail-page/related-products-image.jpg",
+  },
+  {
+    title:
+      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
+    price: "PKR - 2500",
+    minQty: "Min Qty - 100 Pcs",
+    seller: "Madina Traders - Lahore",
+    image: "/detail-page/related-products-image.jpg",
+  },
+  {
+    title:
+      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
+    price: "PKR - 2500",
+    minQty: "Min Qty - 100 Pcs",
+    seller: "Madina Traders - Lahore",
+    image: "/detail-page/related-products-image.jpg",
+  },
+  {
+    title:
+      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
+    price: "PKR - 2500",
+    minQty: "Min Qty - 100 Pcs",
+    seller: "Madina Traders - Lahore",
+    image: "/detail-page/related-products-image.jpg",
+  },
+];
+const thumbnails = [
+  "/detail-page/product-image.png",
+  "/detail-page/related-product-detail-1.png",
+  "/detail-page/related-product-detail-2.png",
+  "/detail-page/related-product-detail-3.png",
+];
 const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(
     "/detail-page/product-image.png"
   );
-  const relatedProducts = [
-    {
-      title:
-        "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-      price: "PKR - 2500",
-      minQty: "Min Qty - 100 Pcs",
-      seller: "Madina Traders - Lahore",
-      image: "/detail-page/related-products-image.jpg",
-    },
-    {
-      title:
-        "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-      price: "PKR - 2500",
-      minQty: "Min Qty - 100 Pcs",
-      seller: "Madina Traders - Lahore",
-      image: "/detail-page/related-products-image.jpg",
-    },
-    {
-      title:
-        "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-      price: "PKR - 2500",
-      minQty: "Min Qty - 100 Pcs",
-      seller: "Madina Traders - Lahore",
-      image: "/detail-page/related-products-image.jpg",
-    },
-    {
-      title:
-        "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-      price: "PKR - 2500",
-      minQty: "Min Qty - 100 Pcs",
-      seller: "Madina Traders - Lahore",
-      image: "/detail-page/related-products-image.jpg",
-    },
-    {
-      title:
-        "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-      price: "PKR - 2500",
-      minQty: "Min Qty - 100 Pcs",
-      seller: "Madina Traders - Lahore",
-      image: "/detail-page/related-products-image.jpg",
-    },
-    {
-      title:
-        "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-      price: "PKR - 2500",
-      minQty: "Min Qty - 100 Pcs",
-      seller: "Madina Traders - Lahore",
-      image: "/detail-page/related-products-image.jpg",
-    },
-  ];
-  const thumbnails = [
-    "/detail-page/product-image.png",
-    "/detail-page/related-product-detail-1.png",
-    "/detail-page/related-product-detail-2.png",
-    "/detail-page/related-product-detail-3.png",
-  ];
 
   return (
     <>
@@ -312,45 +312,7 @@ const ProductDetailPage = () => {
             <MoreFromSeller relatedProducts={relatedProducts} />
             <RelatedProducts relatedProducts={relatedProducts} />
           </div>
-          <div className="mt-5 bg-white rounded-lg max-w-6xl mx-auto shadow-sm p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-              Basic Information
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-10">
-              {[
-                ["Business Type", "Manfucturer,Whole Seller,Importer Exporter"],
-                ["Business Legal Status", "Sole Propriter"],
-                ["Year of Established", "1988"],
-                ["Type Of Products", "Jackets, Bags, Laptops etc"],
-                ["Main Market", "USA, UK, Spain, Pakistan"],
-                ["Yearly Revenue", "230000/- Lakh"],
-              ].map(([label, value], i) => (
-                <div key={i} className="flex flex-col">
-                  <span className="text-gray-500 text-sm">{label}</span>
-                  <span className="text-gray-900 font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-5 bg-white rounded-lg max-w-6xl mx-auto shadow-sm p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-              Registeration And Certifications
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-10">
-              {[
-                ["National Tax Number", "2020"],
-                ["Professional Tax", "2020"],
-                ["ISO - 9001", "2020"],
-                ["Chamber of Commerce", "2020"],
-              ].map(([label, value], i) => (
-                <div key={i} className="flex flex-col">
-                  <span className="text-gray-500 text-sm">{label}</span>
-                  <span className="text-gray-900 font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <InfoCertificates />
         </div>
       </div>
       <Footer />
