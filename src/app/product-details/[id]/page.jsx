@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
 import Navbar from "@/app/components/common/Navbar";
 import RelatedProducts from "@/app/components/common/detail-page/RelatedProducts";
@@ -23,6 +23,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const ProductDetailPage = () => {
+  const [selectedImage, setSelectedImage] = useState(
+    "/detail-page/product-image.png"
+  );
   const relatedProducts = [
     {
       title:
@@ -73,6 +76,13 @@ const ProductDetailPage = () => {
       image: "/detail-page/related-products-image.jpg",
     },
   ];
+  const thumbnails = [
+    "/detail-page/product-image.png",
+    "/detail-page/related-product-detail-1.png",
+    "/detail-page/related-product-detail-2.png",
+    "/detail-page/related-product-detail-3.png",
+  ];
+
   return (
     <>
       <Navbar />
@@ -87,18 +97,25 @@ const ProductDetailPage = () => {
             <div>
               <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center">
                 <img
-                  src="/detail-page/product-image.png"
+                  src={selectedImage}
                   alt="Product"
-                  className="max-h-[400px] object-contain"
+                  className="h-[400px] object-contain"
                 />
               </div>
+
+              {/* Thumbnails */}
               <div className="flex mt-4 gap-2 justify-center">
-                {[...Array(4)].map((_, i) => (
+                {thumbnails.map((src, i) => (
                   <img
                     key={i}
-                    src="/detail-page/product-image.png"
+                    src={src}
                     alt={`Thumbnail ${i + 1}`}
-                    className="w-16 h-16 object-contain bg-gray-100 p-2 rounded cursor-pointer"
+                    onClick={() => setSelectedImage(src)}
+                    className={`w-16 h-16 object-contain bg-gray-100 p-2 rounded cursor-pointer border transition ${
+                      selectedImage === src
+                        ? "border-[#C9AF2F]"
+                        : "border-transparent"
+                    }`}
                   />
                 ))}
               </div>
