@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaUserCircle, FaHeart, FaSignInAlt, FaUser } from "react-icons/fa";
 import { TbRadar } from "react-icons/tb";
 import { BiMessageRoundedDetail } from "react-icons/bi";
@@ -8,21 +8,38 @@ import { MdOutlineRateReview } from "react-icons/md";
 import { BsFileEarmarkText } from "react-icons/bs";
 import { FaGlobeAsia } from "react-icons/fa";
 
+
 export default function Navbar() {
   const [showDialog, setShowDialog] = useState(false);
 
   // Dummy user data (backend will replace this)
   const user = {
-    isLoggedIn: false,
+    isLoggedIn: true,
     name: "Jahan Zaib",
     avatar: "/logo.png", // ✅ Set your dummy avatar path
   };
-
+  
+  // logic to close dialog when click anywhere
   const toggleDialog = () => setShowDialog(!showDialog);
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dialogRef.current && !dialogRef.current.contains(event.target)) {
+        setShowDialog(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   return (
     <header className="w-full bg-white border-b-1 border-[#ACAAAA] relative">
-      <div className="max-w-7xl mx-auto px-4 py-4 max-md:py-0 max-md:pb-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-4 max-md:py-0 max-md:pb-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-4">
 
         {/* Left Side: Logo */}
         <div className="flex flex-col items-start">
@@ -43,24 +60,24 @@ export default function Navbar() {
             <span className="cursor-pointer hover:text-gray-600">Buyer</span>
           </nav>
 
-          <div className="flex w-full h-[50px] border border-[#ACAAAA] rounded overflow-hidden shadow-sm p-1 mt-1">
+          <div className="flex w-full h-[45px] lg:h-[50px] border border-[#ACAAAA] rounded overflow-hidden shadow-sm p-1 mt-1">
             <input
               type="text"
               placeholder="I am Looking for"
-              className="flex-grow px-4 text-base outline-none"
+              className="flex-grow px-2 md:px-4 text-base outline-none"
             />
-            <button className="bg-[#d2b33a] text-black font-semibold px-6 hover:bg-[#c4a831] transition text-base cursor-pointer">
+            <button className="bg-[#d2b33a] text-black font-semibold px-6 max-md:px-2 hover:bg-[#c4a831] transition text-base cursor-pointer">
               Search
             </button>
           </div>
         </div>
 
         {/* Right Side: Icons */}
-        <div className="flex gap-6 text-center text-black text-sm md:text-base relative">
+        <div className="flex gap-6 text-center text-black md:text-base max-md:mt-[-3px] relative">
           {/* User Login / Avatar Section */}
           <div
             onClick={toggleDialog}
-            className="flex flex-col items-center justify-end   cursor-pointer w-[80px] h-[70px]"
+            className="flex flex-col items-center justify-end mb-2  cursor-pointer w-[80px] h-[70px]"
           >
             {user.isLoggedIn ? (
               <>
@@ -92,7 +109,9 @@ export default function Navbar() {
 
       {/* Dropdown Dialog */}
       {showDialog && (
-        <div className="absolute top-[100%] right-5 mt-2 w-[240px] bg-white shadow-lg rounded-lg border border-gray-300 z-50 p-4 text-black text-sm">
+        <div
+          ref={dialogRef}
+          className="absolute max-md:top-[98%] top-[95%] max-md:left-[1%] md:right-[1%] lg:right-[5%]  md mt-2 w-[240px] bg-white shadow-lg rounded-lg border border-gray-300 z-50 p-4 text-black text-sm">
           {user.isLoggedIn ? (
             <div className="flex items-center gap-3 mb-2 border-b pb-2">
               <Image

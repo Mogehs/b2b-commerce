@@ -89,7 +89,7 @@ export default function RegisterPage() {
           <div className="flex justify-center">
             <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
               <button className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs">
-                <img src="/google.png" alt="Google logo" className="w-5 h-5" />
+                <img src="/register/google.png" alt="Google logo" className="w-5 h-5" />
                 Log in with Google
               </button>
 
@@ -99,6 +99,7 @@ export default function RegisterPage() {
                   alt="Facebook logo"
                   className="w-5 h-5"
                 />
+                <img src="/register/facebook.png" alt="Facebook logo" className="w-5 h-5" />
                 Log in with Facebook
               </button>
             </div>
@@ -112,3 +113,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+
