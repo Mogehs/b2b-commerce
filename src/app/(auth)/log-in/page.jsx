@@ -21,21 +21,23 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
-      let res = await signIn("credentials", {
+      const res = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
-      if (res.ok) {
+
+      if (res?.ok) {
         toast.success("Login successful!");
         router.replace("/");
       } else {
         toast.error(
-          res.error || "Login failed. Please check your credentials."
+          res?.error || "Login failed. Please check your credentials."
         );
       }
     } catch (error) {
       console.error("Login failed:", error);
+      toast.error("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -68,6 +70,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your Email"
                   className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  required
                 />
               </div>
             </div>
@@ -93,6 +96,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your Password"
                   className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  required
                 />
               </div>
             </div>
@@ -101,8 +105,7 @@ export default function LoginPage() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:text-white text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer"
-                onClick={handleSubmit}
+                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:text-white text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={loading}
               >
                 <div className="flex items-center justify-center gap-5">
@@ -129,29 +132,25 @@ export default function LoginPage() {
           {/* Social Login Buttons */}
           <div className="flex justify-center">
             <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
-              <button className="flex items-center justify-center gap-3  px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border border-[#ACAAAA]">
+              <button
+                onClick={() => signIn("google")}
+                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
+                type="button"
+              >
                 <img src="/google.png" alt="Google" className="w-5 h-5" />
                 Log in with Google
               </button>
-  <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
-    <button className="flex items-center justify-center gap-3 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border border-[#ACAAAA]">
-      <img src="/login/google.png" alt="Google" className="w-5 h-5" />
-      Log in with Google
-    </button>
 
-              <button className="flex items-center justify-center gap-3 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border border-[#ACAAAA]">
+              <button
+                onClick={() => signIn("facebook")}
+                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
+                type="button"
+              >
                 <img src="/facebook.png" alt="Facebook" className="w-5 h-5" />
                 Log in with Facebook
               </button>
             </div>
           </div>
-    <button className="flex items-center justify-center gap-3 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border border-[#ACAAAA]">
-      <img src="/login/facebook.png" alt="Facebook" className="w-5 h-5" />
-      Log in with Facebook
-    </button>
-  </div>
-</div>
-
 
           {/* Terms & Conditions */}
           <p className="text-xs text-center text-gray-500 mt-4">
