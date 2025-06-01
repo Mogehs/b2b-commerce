@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Navbar from "@/app/components/common/Navbar"; // Adjust path if needed
+import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -27,7 +27,10 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex justify-center">
               <div className="w-full md:w-[80%]">
-                <label htmlFor="email" className="block text-md font-medium text-black mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-md font-medium text-black mb-1"
+                >
                   Email
                 </label>
                 <input
@@ -44,7 +47,10 @@ export default function RegisterPage() {
 
             <div className="flex justify-center">
               <div className="w-full md:w-[80%]">
-                <label htmlFor="password" className="block text-md font-medium text-black mb-1">
+                <label
+                  htmlFor="password"
+                  className="block text-md font-medium text-black mb-1"
+                >
                   Password
                 </label>
                 <input
@@ -88,7 +94,11 @@ export default function RegisterPage() {
               </button>
 
               <button className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs">
-                <img src="/facebook.png" alt="Facebook logo" className="w-5 h-5" />
+                <img
+                  src="/facebook.png"
+                  alt="Facebook logo"
+                  className="w-5 h-5"
+                />
                 Log in with Facebook
               </button>
             </div>
