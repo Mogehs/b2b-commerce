@@ -1,66 +1,94 @@
 import React from "react";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTwitter,
+  FaLinkedinIn,
+  FaWhatsapp,
+} from "react-icons/fa";
 
 const ContactInfo = () => {
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-white font-sans">
+    <div className="max-w-6xl mx-auto p-6 bg-white font-sans text-gray-800">
       {/* Title */}
-      <h1 className="text-2xl font-bold mb-4">Madina Traders</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-900">
+        Madina Traders
+      </h1>
 
       {/* Table-like layout */}
-      <div className="grid grid-cols-4 gap-0 text-sm">
-        {/* Row 1 */}
-        <div className="col-span-2 border-b border-r border-gray-300 p-2 flex">
-          <span className="font-medium w-20">website:</span>
-          <span>www.abc.com</span>
-        </div>
-        <div className="col-span-2 border-b border-gray-300 p-2 flex">
-          <span className="font-medium w-24">Whatsapp #:</span>
-          <span>+92-321-1234567</span>
-        </div>
-
-        {/* Row 2 */}
-        <div className="col-span-2 border-b border-r border-gray-300 p-2 flex">
-          <span className="font-medium w-20">E-mail:</span>
-          <span>abc@gmail.com</span>
-        </div>
-        <div className="col-span-2 border-b border-gray-300 p-2 flex">
-          <span className="font-medium w-24">Whatsapp # 2:</span>
-          <span>+92-321-1234567</span>
-        </div>
-
-        {/* Row 3 */}
-        <div className="col-span-2 border-b border-r border-gray-300 p-2 flex">
-          <span className="font-medium w-20">Phone #:</span>
-          <span>+92-321-1234567</span>
-        </div>
-        <div className="col-span-2 border-b border-gray-300 p-2"></div>
-
-        {/* Row 4 */}
-        <div className="col-span-2 border-b border-r border-gray-300 p-2 flex">
-          <span className="font-medium w-20">Phone # 2:</span>
-          <span>+92-321-1234567</span>
-        </div>
-        <div className="col-span-2 border-b border-gray-300 p-2 flex">
-          <span className="font-medium w-24">Address:</span>
-          <span>
-            122-S Bazar Area, Laal Building, Pindi Road, Rawalpindi Cantt
-          </span>
-        </div>
-
-        {/* Row 5 */}
-        <div className="col-span-2 border-b border-r border-gray-300 p-2 flex">
-          <span className="font-medium w-20">Phone # 3:</span>
-          <span>+92-321-1234567</span>
-        </div>
-        <div className="col-span-2 border-b border-gray-300 p-2 flex">
-          <span className="font-medium w-24">Land Mark Near:</span>
-          <span>Laal Hawaii</span>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 text-sm border border-gray-300">
+        {/* Row */}
+        {[
+          ["Website", "www.abc.com"],
+          ["Whatsapp #", "+92-321-1234567"],
+          ["Email", "abc@gmail.com"],
+          ["Whatsapp # 2", "+92-321-1234567"],
+          ["Phone #", "+92-321-1234567"],
+          ["Phone # 2", "+92-321-1234567"],
+          ["Phone # 3", "+92-321-1234567"],
+          [
+            "Address",
+            "122-S Bazar Area, Laal Building, Pindi Road, Rawalpindi Cantt",
+          ],
+          ["Land Mark Near", "Laal Hawaii"],
+        ].map(([label, value], index) => (
+          <div
+            key={index}
+            className={`border-b border-gray-300 p-3 flex ${
+              index % 2 === 0 ? "sm:border-r" : ""
+            }`}
+          >
+            <span className="font-medium w-28">{label}:</span>
+            <span className="text-gray-700">{value}</span>
+          </div>
+        ))}
       </div>
 
       {/* Follow Us */}
-      <div className="mt-4 text-center">
-        <p className="font-medium">Follow Us</p>
+      <div className="mt-6 text-center">
+        <p className="font-semibold text-lg mb-2">Follow Us</p>
+        <div className="flex justify-center gap-4 text-white text-lg">
+          <a
+            href="https://facebook.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-600 p-2 rounded-full hover:bg-blue-700 transition"
+          >
+            <FaFacebookF />
+          </a>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-pink-500 p-2 rounded-full hover:bg-pink-600 transition"
+          >
+            <FaInstagram />
+          </a>
+          <a
+            href="https://twitter.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-400 p-2 rounded-full hover:bg-blue-500 transition"
+          >
+            <FaTwitter />
+          </a>
+          <a
+            href="https://linkedin.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-700 p-2 rounded-full hover:bg-blue-800 transition"
+          >
+            <FaLinkedinIn />
+          </a>
+          <a
+            href="https://wa.me/923211234567"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-green-500 p-2 rounded-full hover:bg-green-600 transition"
+          >
+            <FaWhatsapp />
+          </a>
+        </div>
       </div>
     </div>
   );
