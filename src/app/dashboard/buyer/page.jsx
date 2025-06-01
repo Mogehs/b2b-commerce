@@ -1,6 +1,7 @@
 import ChatBox from "@/app/components/buyer-dashboard/ChatBox";
 import FavProducts from "@/app/components/buyer-dashboard/FavProducts";
 import FavSeller from "@/app/components/buyer-dashboard/FavSeller";
+import Home from "@/app/components/buyer-dashboard/Home";
 import Profile from "@/app/components/buyer-dashboard/Profile";
 import Navbar from "@/app/components/common/Navbar";
 import React from "react";
@@ -17,6 +18,7 @@ const page = () => {
           favorite products and sellers.
         </p>
         {/* You can import and use the components here */}
+        <Home />
         <Profile />
         <ChatBox />
         <FavProducts />
