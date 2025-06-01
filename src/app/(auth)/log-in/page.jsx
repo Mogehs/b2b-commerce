@@ -4,14 +4,41 @@ import React, { useState } from "react";
 import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
 
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
+
+    try {
+      setLoading(true);
+      let res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (res.ok) {
+        toast.success("Login successful!");
+        router.replace("/");
+      } else {
+        toast.error(
+          res.error || "Login failed. Please check your credentials."
+        );
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -74,9 +101,14 @@ export default function LoginPage() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:bg-yellow-700 text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer"
+                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:text-white text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer"
+                onClick={handleSubmit}
+                disabled={loading}
               >
-                Login
+                <div className="flex items-center justify-center gap-5">
+                  <p>Login</p>
+                  {loading && <Loader2 className="animate-spin text-white" />}
+                </div>
               </button>
             </div>
 
