@@ -92,12 +92,12 @@ export default function LoginPage() {
           <div className="flex justify-center">
   <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
     <button className="flex items-center justify-center gap-3 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border border-[#ACAAAA]">
-      <img src="/google.png" alt="Google" className="w-5 h-5" />
+      <img src="/login/google.png" alt="Google" className="w-5 h-5" />
       Log in with Google
     </button>
 
     <button className="flex items-center justify-center gap-3 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border border-[#ACAAAA]">
-      <img src="/facebook.png" alt="Facebook" className="w-5 h-5" />
+      <img src="/login/facebook.png" alt="Facebook" className="w-5 h-5" />
       Log in with Facebook
     </button>
   </div>
