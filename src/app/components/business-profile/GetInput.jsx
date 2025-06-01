@@ -24,7 +24,7 @@ export default function GetDealForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-md space-y-6">
+    <div className="max-w-xl mx-auto p-6 my-10 bg-white shadow-lg rounded-md space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-semibold">
           Get the best deals, Faster and Smarter
