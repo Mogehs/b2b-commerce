@@ -1,7 +1,3 @@
-import React from "react";
-
-const FavSeller = () => {
-  return <div>FavSeller</div>;
-};
-
-export default FavSeller;
+export default function FavSeller(){
+return <h1></h1>
+}
