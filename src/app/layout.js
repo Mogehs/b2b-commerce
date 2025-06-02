@@ -1,6 +1,11 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { Toaster } from "@/components/ui/sonner";
+import { authOptions } from "@/auth";
+import { SessionProviderWrapper } from "./lib/SessionProviderWrapper";
+import { getServerSession } from "next-auth";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,12 +22,16 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const session = getServerSession(authOptions);
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SessionProviderWrapper session={session}>
+          {children}
+        </SessionProviderWrapper>
+        <Toaster />
       </body>
     </html>
   );

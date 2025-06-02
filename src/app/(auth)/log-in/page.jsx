@@ -4,14 +4,43 @@ import React, { useState } from "react";
 import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
 
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
+
+    try {
+      setLoading(true);
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.ok) {
+        toast.success("Login successful!");
+        router.replace("/");
+      } else {
+        toast.error(
+          res?.error || "Login failed. Please check your credentials."
+        );
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,6 +70,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your Email"
                   className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  required
                 />
               </div>
             </div>
@@ -66,6 +96,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your Password"
                   className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  required
                 />
               </div>
             </div>
@@ -74,9 +105,13 @@ export default function LoginPage() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:bg-yellow-700 text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer"
+                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:text-white text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
               >
-                Login
+                <div className="flex items-center justify-center gap-5">
+                  <p>Login</p>
+                  {loading && <Loader2 className="animate-spin text-white" />}
+                </div>
               </button>
             </div>
 
@@ -97,11 +132,20 @@ export default function LoginPage() {
           {/* Social Login Buttons */}
           <div className="flex justify-center">
             <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
-              <button className="flex items-center justify-center gap-3 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border-[#ACAAAA]">
+              <button
+                onClick={() => signIn("google")}
+                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
+                type="button"
+              >
                 <img src="/login/google.png" alt="Google" className="w-5 h-5" />
                 Log in with Google
               </button>
-              <button className="flex items-center justify-center gap-3 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs border-[#ACAAAA]">
+
+              <button
+                onClick={() => signIn("facebook")}
+                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
+                type="button"
+              >
                 <img
                   src="/login/facebook.png"
                   alt="Facebook"
