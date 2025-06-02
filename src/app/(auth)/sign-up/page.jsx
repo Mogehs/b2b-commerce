@@ -94,11 +94,6 @@ export default function RegisterPage() {
               </button>
 
               <button className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs">
-                <img
-                  src="/facebook.png"
-                  alt="Facebook logo"
-                  className="w-5 h-5"
-                />
                 <img src="/register/facebook.png" alt="Facebook logo" className="w-5 h-5" />
                 Log in with Facebook
               </button>
@@ -113,4 +108,7 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+
+
 
