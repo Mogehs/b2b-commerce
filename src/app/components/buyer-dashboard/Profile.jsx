@@ -26,7 +26,7 @@ export default function Profile() {
     <div className="min-h-screen bg-[#f1f1f1] text-black flex flex-col items-center justify-center p-4 space-y-6">
       {/* Hero Section */}
       <div className="bg-white w-full max-w-6xl p-6 font-sans rounded-md border border-[#ACAAAA]">
-        <h2 className="text-2xl font-bold text-black">{fullName}</h2>
+        <h2 className="text-2xl font-bold text-black">Akhtar Hussain</h2>
         <p className="text-sm text-gray-700 mt-4">
           Member Since March, 2021 (1y - 5M)
         </p>
@@ -148,7 +148,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={handlePasswordSubmit}
-            className="bg-[#C9AF2F] hover:bg-yellow-700 text-black font-bold px-6 rounded cursor-pointer w-[170px] h-[50px]"
+            className="bg-[#C9AF2F] hover:bg-yellow-700 text-black font-bold px-6 rounded cursor-pointer w-[170px] h-[50px] text-nowrap"
           >
             Update Password
           </button>
