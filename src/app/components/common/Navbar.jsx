@@ -65,7 +65,7 @@ export default function Navbar() {
             </span>
             <span
               className="cursor-pointer hover:text-gray-600"
-              onClick={() => router.replace("/seller-profile")}
+              onClick={() => router.replace("/seller-application")}
             >
               Supplier
             </span>

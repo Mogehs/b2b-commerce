@@ -35,9 +35,21 @@ const userSchema = new mongoose.Schema(
       default: "buyer",
     },
 
+    sellerApplication: {
+      status: {
+        type: String,
+        enum: ["none", "pending", "approved", "rejected"],
+        default: "none",
+      },
+      appliedAt: Date,
+      reviewedAt: Date,
+      reason: String,
+    },
+
     profile: {
       phone: String,
       company: String,
+      whatsapp: String,
       address: String,
       country: String,
       website: String,
@@ -98,7 +110,12 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    store: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Store",
+    },
   },
+
   {
     timestamps: true,
   }
