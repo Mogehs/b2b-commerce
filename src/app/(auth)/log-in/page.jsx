@@ -1,20 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
 
-import { signIn, signOut } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // // Redirect if already authenticated
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     router.replace("/");
+  //   }
+  // }, [status, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,6 +50,26 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    const res = await signIn("google", { redirect: false });
+    if (res?.error) {
+      toast.error(res.error || "Google login failed");
+    } else if (res?.ok) {
+      toast.success("Google login successful!");
+      router.replace("/");
+    }
+    setLoading(false);
+  };
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin" size={48} />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -133,12 +161,13 @@ export default function LoginPage() {
           <div className="flex justify-center">
             <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
               <button
-                onClick={() => signIn("google")}
+                onClick={handleGoogleLogin}
                 className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
                 type="button"
+                disabled={loading}
               >
                 <img src="/login/google.png" alt="Google" className="w-5 h-5" />
-                Log in with Google
+                {loading ? "Loading..." : "Log in with Google"}
               </button>
 
               <button
