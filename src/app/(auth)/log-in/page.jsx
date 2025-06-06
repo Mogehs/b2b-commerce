@@ -19,11 +19,11 @@ export default function LoginPage() {
   const [fbLoading, setFbLoading] = useState(false); // Facebook loading state
 
   // Redirect if already authenticated
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.replace("/");
-    }
-  }, [status, router]);
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     router.replace("/");
+  //   }
+  // }, [status, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

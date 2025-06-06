@@ -2,16 +2,18 @@ import connectMongo from "@/lib/mongoose";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
-
-  const { name, email, password } = req.body;
+export async function POST(request) {
+  // parse JSON body from the request
+  const { name, email, password } = await request.json();
 
   await connectMongo();
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return res.status(400).json({ error: "User already exists" });
+    return new Response(JSON.stringify({ error: "User already exists" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,5 +25,8 @@ export default async function handler(req, res) {
     provider: "credentials",
   });
 
-  res.status(201).json({ success: true });
+  return new Response(JSON.stringify({ success: true }), {
+    status: 201,
+    headers: { "Content-Type": "application/json" },
+  });
 }
