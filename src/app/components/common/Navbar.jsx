@@ -57,9 +57,24 @@ export default function Navbar() {
 
         <div className="flex-1 w-full max-w-2xl">
           <nav className="flex gap-6 font-bold text-base text-gray-800 ps-5 max-md:ps-3 mt-[-12px]">
-            <span className="cursor-pointer hover:text-gray-600">Product</span>
-            <span className="cursor-pointer hover:text-gray-600">Supplier</span>
-            <span className="cursor-pointer hover:text-gray-600">Buyer</span>
+            <span
+              className="cursor-pointer hover:text-gray-600"
+              onClick={() => router.replace("/")}
+            >
+              Product
+            </span>
+            <span
+              className="cursor-pointer hover:text-gray-600"
+              onClick={() => router.replace("/seller-profile")}
+            >
+              Supplier
+            </span>
+            <span
+              className="cursor-pointer hover:text-gray-600"
+              onClick={() => router.replace("/dashboard/buyer")}
+            >
+              Buyer
+            </span>
           </nav>
 
           <div className="flex w-full h-[45px] lg:h-[50px] border border-[#ACAAAA] rounded overflow-hidden shadow-sm p-1 mt-1">
@@ -164,9 +179,9 @@ export default function Navbar() {
             <li className="flex items-center gap-2 cursor-pointer">
               <BsFileEarmarkText /> My RFQ
             </li>
-            <li className="flex items-center gap-2 cursor-pointer">
+            {/* <li className="flex items-center gap-2 cursor-pointer">
               <FaGlobeAsia /> Browsing History
-            </li>
+            </li> */}
             {session ? (
               <li
                 className="flex items-center gap-2 cursor-pointer"

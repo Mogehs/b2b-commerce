@@ -16,13 +16,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fbLoading, setFbLoading] = useState(false); // Facebook loading state
 
-  // // Redirect if already authenticated
-  // useEffect(() => {
-  //   if (status === "authenticated") {
-  //     router.replace("/");
-  //   }
-  // }, [status, router]);
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/");
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,6 +62,18 @@ export default function LoginPage() {
       router.replace("/");
     }
     setLoading(false);
+  };
+
+  const handleFacebookLogin = async () => {
+    setFbLoading(true);
+    const res = await signIn("facebook", { redirect: false });
+    if (res?.error) {
+      toast.error(res.error || "Facebook login failed");
+    } else if (res?.ok) {
+      toast.success("Facebook login successful!");
+      router.replace("/");
+    }
+    setFbLoading(false);
   };
 
   if (status === "loading") {
@@ -171,16 +184,17 @@ export default function LoginPage() {
               </button>
 
               <button
-                onClick={() => signIn("facebook")}
+                onClick={handleFacebookLogin}
                 className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
                 type="button"
+                disabled={fbLoading}
               >
                 <img
                   src="/login/facebook.png"
                   alt="Facebook"
                   className="w-5 h-5"
                 />
-                Log in with Facebook
+                {fbLoading ? "Loading..." : "Log in with Facebook"}
               </button>
             </div>
           </div>
