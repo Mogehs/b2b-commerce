@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
 
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";

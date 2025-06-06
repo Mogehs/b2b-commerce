@@ -20,4 +20,8 @@ export const authOptions = {
       },
     }),
   ],
+
+  pages: {
+    signIn: "/log-in",
+  },
 };
