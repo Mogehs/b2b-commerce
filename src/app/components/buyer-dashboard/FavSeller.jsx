@@ -113,7 +113,7 @@ const SellerCard = () => {
 };
 
 // Final merged component
-const ProductGroup = () => {
+const FavSeller = () => {
   return (
      <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
       {/* Header */}
@@ -144,4 +144,4 @@ const ProductGroup = () => {
   );
 };
 
-export default ProductGroup;
+export default FavSeller;
