@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
 
 // Product card used inside SellerCard
 const ProductCard = () => {
@@ -32,14 +32,19 @@ const GroupTwoCard = () => (
     <div className="text-sm font-medium text-black mt-2">
       Manufacturer, Online Seller , Exporter
     </div>
-    <div className="text-sm font-medium text-black mt-2">Garments, Industrial Machinery</div>
-    <div className="text-sm font-medium text-black mt-2 ">
+    <div className="text-sm font-medium text-black mt-2">
+      Garments, Industrial Machinery
+    </div>
+    <div className="text-sm font-medium text-black mt-2">
       OEM, Customization, Private labeling
     </div>
 
     <div className="flex justify-start items-center flex-wrap gap-2 mb-3 mt-8">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex flex-col items-center text-xs text-gray-700">
+        <div
+          key={i}
+          className="flex flex-col items-center text-xs text-gray-700"
+        >
           <Image
             src="/dashboardsupplier/p1.png"
             alt="item"
@@ -47,7 +52,9 @@ const GroupTwoCard = () => (
             height={135}
             className="rounded-md"
           />
-          <span className="text-center font-medium text-black text-sx mt-1">Get Bulk Price</span>
+          <span className="text-center font-medium text-black text-xs mt-1">
+            Get Bulk Price
+          </span>
         </div>
       ))}
 
@@ -113,16 +120,9 @@ const SellerCard = () => {
 };
 
 // Final merged component
-const FavSeller = () => {
+const SellerGroups = () => {
   return (
-     <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
-      {/* Header */}
-      <div className="bg-white border border-gray-300 rounded-md mb-6">
-        <div className="flex justify-center gap-4 text-center px-6 py-4 text-xl font-bold">
-          <span className="text-[#C9AF2F]">Product</span> | <span>Supplier</span>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
       {/* Group 1 Section */}
       <div className="bg-gray-100 p-6 space-y-6 w-full ">
         <h2 className="text-xl font-bold mb-4">Group Name 1</h2>
@@ -144,4 +144,4 @@ const FavSeller = () => {
   );
 };
 
-export default FavSeller;
+export default SellerGroups;

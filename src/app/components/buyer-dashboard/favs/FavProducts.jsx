@@ -1,8 +1,8 @@
-'use client';
+"use client";
 import React from "react";
 
 export default function FavProducts() {
-  const products = Array(4).fill(0); // Simulated product list
+  const products = Array(4).fill(0);
 
   const ProductCard = () => (
     <div className="bg-white rounded shadow-sm flex flex-col items-start">
@@ -14,8 +14,12 @@ export default function FavProducts() {
       <div className="text-sm text-left px-2 mb-2 text-black">
         Kids Custom Name T Shirt Is Free Delivery All Across Pakistan...
       </div>
-      <div className="text-sm font-bold text-left px-2 text-black">PKR - 1500</div>
-      <div className="text-xs text-gray-600 text-left px-2">Min Qty - 100 Pcs</div>
+      <div className="text-sm font-bold text-left px-2 text-black">
+        PKR - 1500
+      </div>
+      <div className="text-xs text-gray-600 text-left px-2">
+        Min Qty - 100 Pcs
+      </div>
       <div className="text-xs italic text-gray-500 mt-2 mb-3 text-left px-2">
         Madina Traders - Lahore
       </div>
@@ -32,26 +36,22 @@ export default function FavProducts() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
-      {/* Header */}
-      <div className="bg-white border border-gray-300 rounded-md mb-6">
-        <div className="flex justify-center gap-4 text-center px-6 py-4 text-xl font-bold">
-          <span className="text-[#C9AF2F]">Product</span> | <span>Supplier</span>
-        </div>
-      </div>
-
       <div className="flex flex-col md:flex-row rounded">
         {/* Sidebar */}
         <div className="w-full md:max-w-[250px] border border-[#ACAAAA] space-y-2 flex-shrink-0  bg-white overflow-y-auto rounded">
           {/* Company Buttons */}
-          {["Madina Traders", "ABC Agri", "Climax Electric Company"].map((company, idx) => (
-            <div
-              key={idx}
-              className={`${idx === 0 ? "bg-[#ACAAAA]" : "bg-white hover:bg-gray-100"
+          {["Madina Traders", "ABC Agri", "Climax Electric Company"].map(
+            (company, idx) => (
+              <div
+                key={idx}
+                className={`${
+                  idx === 0 ? "bg-[#ACAAAA]" : "bg-white hover:bg-gray-100"
                 } border-b text-center px-4 py-4 text-sm font-medium text-black cursor-pointer`}
-            >
-              {company}
-            </div>
-          ))}
+              >
+                {company}
+              </div>
+            )
+          )}
         </div>
 
         {/* Main Content */}
