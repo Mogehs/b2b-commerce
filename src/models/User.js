@@ -36,14 +36,8 @@ const userSchema = new mongoose.Schema(
     },
 
     sellerApplication: {
-      status: {
-        type: String,
-        enum: ["none", "pending", "approved", "rejected"],
-        default: "none",
-      },
-      appliedAt: Date,
-      reviewedAt: Date,
-      reason: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SellerApplication",
     },
 
     profile: {

@@ -1,10 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import Navbar from "../components/common/Navbar";
 
 const SellerProfile = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -12,26 +20,93 @@ const SellerProfile = () => {
     reset,
   } = useForm();
 
-  const onSubmit = (data) => {
-    const toArray = (value) =>
-      value
-        ?.split(",")
-        .map((item) => item.trim())
-        .filter(Boolean);
+  // Redirect if not authenticated
+  React.useEffect(() => {
+    if (status === "loading") return;
+    if (!session) {
+      toast.error("Please login to submit seller application");
+      router.push("/login");
+    }
+  }, [session, status, router]);
 
-    const imageFile = data.image[0];
+  const onSubmit = async (data) => {
+    if (!session) {
+      toast.error("Please login to submit application");
+      return;
+    }
 
-    const transformed = {
-      ...data,
-      business: toArray(data.business),
-      products: toArray(data.products),
-      offers: toArray(data.offers),
-      image: imageFile,
-    };
+    setIsSubmitting(true);
 
-    console.log("Submitted:", transformed);
-    reset();
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Add all form fields to FormData
+      Object.keys(data).forEach((key) => {
+        if (key === "image" && data[key]?.[0]) {
+          formData.append("image", data[key][0]);
+        } else if (data[key]) {
+          formData.append(key, data[key]);
+        }
+      });
+
+      const response = await axios.post("/api/seller/apply", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+        timeout: 60000,
+      });
+
+      if (response.status === 201) {
+        toast.success(
+          "Application submitted successfully! We'll review it soon.",
+          {
+            description: "You'll receive an email notification once reviewed.",
+            duration: 5000,
+          }
+        );
+        reset();
+        router.push("/dashboard/seller");
+      }
+    } catch (error) {
+      console.error("Application submission error:", error);
+
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+        router.push("/login");
+      } else if (error.response?.status === 400) {
+        toast.error(error.response.data.message || "Invalid application data");
+      } else if (error.response?.status === 409) {
+        toast.warning("You already have a pending application", {
+          description:
+            "Please wait for the current application to be reviewed.",
+        });
+      } else if (error.code === "ECONNABORTED") {
+        toast.error("Request timeout. Please try again.");
+      } else {
+        toast.error("Failed to submit application", {
+          description: "Please check your connection and try again.",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  // Show loading while checking authentication
+  if (status === "loading") {
+    return (
+      <>
+        <Navbar />
+        <main className="bg-gray-100 py-10 px-4 min-h-screen">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9AF2F]"></div>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   const fields = [
     { label: "Store Name", name: "name", type: "text", required: true },
@@ -199,9 +274,17 @@ const SellerProfile = () => {
           <div className="text-center pt-6">
             <button
               type="submit"
-              className="bg-[#C9AF2F] text-white font-semibold px-10 py-3 rounded-lg hover:bg-[#b79e29] transition-all duration-300 shadow-md w-full sm:w-48"
+              disabled={isSubmitting}
+              className="bg-[#C9AF2F] text-white font-semibold px-10 py-3 rounded-lg hover:bg-[#b79e29] transition-all duration-300 shadow-md w-full sm:w-48 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Submit
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Submitting...
+                </>
+              ) : (
+                "Submit Application"
+              )}
             </button>
           </div>
         </form>
