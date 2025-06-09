@@ -35,7 +35,7 @@ const GroupTwoCard = () => (
     <div className="text-sm font-medium text-black mt-2">
       Garments, Industrial Machinery
     </div>
-    <div className="text-sm font-medium text-black mt-2 ">
+    <div className="text-sm font-medium text-black mt-2">
       OEM, Customization, Private labeling
     </div>
 
@@ -52,7 +52,7 @@ const GroupTwoCard = () => (
             height={135}
             className="rounded-md"
           />
-          <span className="text-center font-medium text-black text-sx mt-1">
+          <span className="text-center font-medium text-black text-xs mt-1">
             Get Bulk Price
           </span>
         </div>
@@ -120,7 +120,7 @@ const SellerCard = () => {
 };
 
 // Final merged component
-const FavSellers = () => {
+const SellerGroups = () => {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
       {/* Group 1 Section */}
@@ -144,4 +144,4 @@ const FavSellers = () => {
   );
 };
 
-export default FavSellers;
+export default SellerGroups;
