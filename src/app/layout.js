@@ -25,6 +25,17 @@ export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
   return (
     <html lang="en">
+      <head>
+        <script
+          async
+          defer
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async&callback=initMap`}
+        />
+        <script
+          type="module"
+          src="https://unpkg.com/@googlemaps/extended-component-library@0.6"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

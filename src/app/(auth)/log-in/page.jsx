@@ -1,22 +1,30 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
-
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { loginSchema } from "@/lib/validations";
 
 export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [fbLoading, setFbLoading] = useState(false); // Facebook loading state
+  const [fbLoading, setFbLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
   // Redirect if already authenticated
   // useEffect(() => {
@@ -25,14 +33,12 @@ export default function LoginPage() {
   //   }
   // }, [status, router]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (data) => {
     try {
       setLoading(true);
       const res = await signIn("credentials", {
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         redirect: false,
       });
 
@@ -94,7 +100,7 @@ export default function LoginPage() {
             Login to your account
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Input */}
             <div className="flex justify-center">
               <div className="w-full md:w-[80%]">
@@ -107,12 +113,19 @@ export default function LoginPage() {
                 <input
                   type="email"
                   id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                   placeholder="Enter your Email"
-                  className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  required
+                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                    errors.email
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-[#ACAAAA] focus:ring-yellow-500"
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -133,12 +146,19 @@ export default function LoginPage() {
                 <input
                   type="password"
                   id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                   placeholder="Enter your Password"
-                  className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  required
+                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-[#ACAAAA] focus:ring-yellow-500"
+                  }`}
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
             </div>
 

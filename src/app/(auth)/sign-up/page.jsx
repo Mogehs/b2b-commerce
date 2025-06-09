@@ -1,37 +1,45 @@
 "use client";
 
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Navbar from "@/app/components/common/Navbar";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { registerSchema } from "@/lib/validations";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = async (data) => {
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
+      const responseData = await res.json();
 
       if (res.ok) {
         toast.success("Account created successfully! Please log in.");
-        // Optionally redirect to login page after registration
+        reset();
         router.push("/log-in");
       } else {
-        toast.error(data.error || "Failed to create account.");
+        toast.error(responseData.error || "Failed to create account.");
       }
     } catch (error) {
       console.error("Error registering:", error);
@@ -51,7 +59,7 @@ export default function RegisterPage() {
             Register Now
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name Input */}
             <div className="flex justify-center">
               <div className="w-full md:w-[80%]">
@@ -64,12 +72,19 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  {...register("name")}
                   placeholder="Enter your Name"
-                  className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  required
+                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                    errors.name
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-[#ACAAAA] focus:ring-yellow-500"
+                  }`}
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -85,12 +100,19 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                   placeholder="Enter your Email"
-                  className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  required
+                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                    errors.email
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-[#ACAAAA] focus:ring-yellow-500"
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -106,12 +128,23 @@ export default function RegisterPage() {
                 <input
                   type="password"
                   id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                   placeholder="Enter your Password"
-                  className="w-full px-4 py-2 border border-[#ACAAAA] rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  required
+                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-[#ACAAAA] focus:ring-yellow-500"
+                  }`}
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Password must contain at least 8 characters with uppercase,
+                  lowercase, and number
+                </p>
               </div>
             </div>
 

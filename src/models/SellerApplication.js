@@ -22,9 +22,46 @@ const sellerApplicationSchema = new mongoose.Schema(
         trim: true,
       },
       location: {
-        type: String,
-        required: true,
-        trim: true,
+        address: String,
+        coordinates: {
+          type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point",
+          },
+          coordinates: {
+            type: [Number], // [longitude, latitude]
+            required: true,
+          },
+        },
+        placeId: String,
+        formattedAddress: String,
+        addressComponents: {
+          streetNumber: String,
+          route: String,
+          locality: String,
+          sublocality: String,
+          administrativeAreaLevel1: String,
+          administrativeAreaLevel2: String,
+          country: String,
+          postalCode: String,
+        },
+        viewport: {
+          northeast: {
+            lat: Number,
+            lng: Number,
+          },
+          southwest: {
+            lat: Number,
+            lng: Number,
+          },
+        },
+      },
+      serviceRadius: {
+        type: Number,
+        default: 10,
+        min: 1,
+        max: 100,
       },
       businessType: {
         type: String,
@@ -60,6 +97,10 @@ const sellerApplicationSchema = new mongoose.Schema(
       titleImage: {
         url: String,
         publicId: String,
+        width: Number,
+        height: Number,
+        format: String,
+        bytes: Number,
       },
       socialMedia: {
         facebook: String,
@@ -117,7 +158,10 @@ const sellerApplicationSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for better query performance
+// Add geospatial index for location-based queries
+sellerApplicationSchema.index({
+  "applicationData.location.coordinates": "2dsphere",
+});
 sellerApplicationSchema.index({ user: 1 });
 sellerApplicationSchema.index({ status: 1 });
 sellerApplicationSchema.index({ createdAt: -1 });
