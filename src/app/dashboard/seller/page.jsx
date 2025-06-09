@@ -10,6 +10,8 @@ import Fav from "@/app/components/seller-dashboard/Fav";
 import Reviews from "@/app/components/seller-dashboard/Reviews";
 import RFQ from "@/app/components/seller-dashboard/RFQ";
 import History from "@/app/components/seller-dashboard/History";
+import StoreProfile from "@/app/components/seller-dashboard/StoreProfile";
+import AddProducts from "@/app/components/seller-dashboard/AddProducts";
 
 const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("Home");
@@ -18,10 +20,12 @@ const SellerDashboard = () => {
     "Home",
     "Profile",
     "Message",
-    "Favourite",
+    // "Favourite",
     "Reviews",
-    "My RFQ",
+    "RFQ",
     "History",
+    "Store Profile",
+    "Add Products",
   ];
 
   const renderTabContent = () => {
@@ -32,14 +36,18 @@ const SellerDashboard = () => {
         return <Profile />;
       case "Message":
         return <ChatBox />;
-      case "Favourite":
-        return <Fav />;
+      // case "Favourite":
+      //   return <Fav />;
       case "Reviews":
         return <Reviews />;
-      case "My RFQ":
+      case "RFQ":
         return <RFQ />;
       case "History":
         return <History />;
+      case "Store Profile":
+        return <StoreProfile />;
+      case "Add Products":
+        return <AddProducts />;
       default:
         return null;
     }

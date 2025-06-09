@@ -17,10 +17,8 @@ export const authOptions = {
         try {
           await connectMongo();
 
-          // Find user
           const user = await User.findOne({ email: credentials.email });
 
-          // If no user found or password doesn't match
           if (
             !user ||
             !(await bcrypt.compare(credentials.password, user.password))
@@ -28,15 +26,14 @@ export const authOptions = {
             return null;
           }
 
-          // Return user data
           return {
             id: user._id.toString(),
             name: user.name,
             email: user.email,
-            role: user.role,
-            provider: user.provider,
-            profile: user.profile,
-            createdAt: user.createdAt,
+            role: user.role || "buyer",
+            provider: user.provider || "credentials",
+            profile: user.profile || {},
+            createdAt: user.createdAt || new Date(),
           };
         } catch (error) {
           console.error("Authentication error:", error);
@@ -58,6 +55,7 @@ export const authOptions = {
 
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
   },
 
   pages: {
@@ -96,9 +94,15 @@ export const authOptions = {
               purchaseHistory: [],
               conversations: [],
             });
-            console.log(`Created new ${account.provider} user: ${user.email}`);
           } else {
             return false;
+          }
+        } else {
+          if (account.provider !== "credentials") {
+            user.role = existingUser.role;
+            user.profile = existingUser.profile;
+            user.createdAt = existingUser.createdAt;
+            user.id = existingUser._id.toString();
           }
         }
 
@@ -109,33 +113,49 @@ export const authOptions = {
       }
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (user) {
         token.sub = user.id || user._id?.toString();
-        token.role = user.role;
+        token.role = user.role || "buyer";
         token.provider = account?.provider || user.provider || "credentials";
-        token.profile = user.profile;
-        token.createdAt = user.createdAt;
+        token.profile = user.profile || {};
+        token.createdAt = user.createdAt || new Date();
 
         if (user.conversations) {
           token.conversations = user.conversations;
         }
       }
+
+      if (trigger === "update" && token.sub) {
+        try {
+          await connectMongo();
+          const updatedUser = await User.findById(token.sub);
+          if (updatedUser) {
+            token.role = updatedUser.role;
+            token.profile = updatedUser.profile;
+            token.conversations = updatedUser.conversations;
+          }
+        } catch (error) {
+          console.error("Error updating token:", error);
+        }
+      }
+
       return token;
     },
 
     async session({ session, token }) {
       if (session?.user) {
         session.user.id = token.sub;
-        session.user.role = token.role;
-        session.user.provider = token.provider;
-        session.user.profile = token.profile;
-        session.user.createdAt = token.createdAt;
+        session.user.role = token.role || "buyer";
+        session.user.provider = token.provider || "credentials";
+        session.user.profile = token.profile || {};
+        session.user.createdAt = token.createdAt || new Date();
 
         if (token.conversations) {
           session.user.conversations = token.conversations;
         }
       }
+
       return session;
     },
   },

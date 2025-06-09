@@ -60,7 +60,6 @@ export async function POST(request) {
         website: "",
         description: "",
       },
-      // Initialize arrays for the updated model
       favProducts: [],
       favSellers: [],
       reviews: [],
@@ -99,20 +98,17 @@ export async function POST(request) {
   } catch (error) {
     console.error("Error in signup:", error);
 
-    // Provide more specific error messages based on error type
     let errorMessage = "Failed to register user. Please try again.";
     let field = null;
 
     if (error.name === "ValidationError") {
       errorMessage = "Validation failed. Please check your information.";
-      // Find the first validation error field
       const errorKeys = Object.keys(error.errors);
       if (errorKeys.length > 0) {
         field = errorKeys[0];
         errorMessage = error.errors[field].message;
       }
     } else if (error.code === 11000) {
-      // Duplicate key error
       errorMessage =
         "This email is already registered. Please use another email.";
       field = "email";

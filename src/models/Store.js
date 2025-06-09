@@ -9,12 +9,10 @@ const storeSchema = new mongoose.Schema(
       unique: true,
     },
 
-    // Basic store information
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     businessType: { type: String, required: true },
 
-    // Location data (from approved application)
     location: {
       address: String,
       coordinates: {
@@ -24,7 +22,7 @@ const storeSchema = new mongoose.Schema(
           default: "Point",
         },
         coordinates: {
-          type: [Number], // [longitude, latitude]
+          type: [Number],
           required: true,
         },
       },
@@ -43,17 +41,15 @@ const storeSchema = new mongoose.Schema(
     // Contact information
     email: { type: String, required: true },
     phone: { type: String, required: true },
-    secondaryPhones: [String], // phone2, phone3
-    whatsappNumbers: [String], // whatsapp, whatsapp2
+    secondaryPhones: [String],
+    whatsappNumbers: [String],
     website: { type: String },
 
-    // Business details
-    productCategories: [{ type: String }], // Changed from products
-    offers: { type: String }, // Changed from array to string to match application
+    productCategories: [{ type: String }],
+    offers: { type: String },
 
-    // Media
     bannerImage: {
-      url: { type: String, required: true },
+      url: { type: String },
       publicId: String,
       width: Number,
       height: Number,
@@ -61,7 +57,6 @@ const storeSchema = new mongoose.Schema(
       bytes: Number,
     },
 
-    // Social media
     socialLinks: {
       facebook: String,
       instagram: String,
@@ -69,21 +64,19 @@ const storeSchema = new mongoose.Schema(
       linkedin: String,
     },
 
-    // Store status and metadata
     isActive: {
       type: Boolean,
       default: true,
     },
     isVerified: {
       type: Boolean,
-      default: true, // Set to true when created from approved application
+      default: true,
     },
     approvedAt: {
       type: Date,
       default: Date.now,
     },
 
-    // Reference to original application
     originalApplication: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SellerApplication",
@@ -92,7 +85,6 @@ const storeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Add geospatial index for location-based queries
 storeSchema.index({ "location.coordinates": "2dsphere" });
 storeSchema.index({ owner: 1 });
 storeSchema.index({ isActive: 1 });

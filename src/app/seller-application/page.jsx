@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import Navbar from "../components/common/Navbar";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import { sellerApplicationSchema } from "@/lib/validations";
+import Link from "next/link";
 
 const libraries = ["places"];
 
@@ -18,6 +19,8 @@ const SellerProfile = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [map, setMap] = useState(null);
   const [serviceRadius, setServiceRadius] = useState(10);
+  const [existingApplication, setExistingApplication] = useState(null);
+  const [checkingApplication, setCheckingApplication] = useState(true);
   const placeAutocompleteRef = useRef(null);
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -50,6 +53,23 @@ const SellerProfile = () => {
       router.push("/log-in");
     }
   }, [session, status, router]);
+
+  // Check for existing application on mountx
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    setCheckingApplication(true);
+    axios
+      .get("/api/seller/my-application")
+      .then((res) => {
+        if (res.data.success && res.data.application) {
+          setExistingApplication(res.data.application);
+        } else {
+          setExistingApplication(null);
+        }
+      })
+      .catch(() => setExistingApplication(null))
+      .finally(() => setCheckingApplication(false));
+  }, [session?.user?.id]);
 
   const handlePlaceSelect = useCallback((place) => {
     if (place.geometry && place.geometry.location) {
@@ -229,8 +249,8 @@ const SellerProfile = () => {
     }
   };
 
-  // Show loading while checking authentication
-  if (status === "loading") {
+  // Show loading while checking authentication or application
+  if (status === "loading" || checkingApplication) {
     return (
       <>
         <Navbar />
@@ -243,13 +263,70 @@ const SellerProfile = () => {
     );
   }
 
-  if (!isLoaded) {
+  // Show application status if exists
+  if (existingApplication) {
+    const { status, adminNotes, reason } = existingApplication;
     return (
       <>
         <Navbar />
-        <main className="bg-gray-100 py-10 px-4 min-h-screen">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9AF2F]"></div>
+        <main className="bg-gray-100 py-10 px-4 min-h-screen flex flex-col items-center justify-center">
+          <div className="bg-white shadow-xl rounded-xl p-8 max-w-2xl w-full text-center space-y-6">
+            {status === "pending" && (
+              <>
+                <h2 className="text-2xl font-bold text-[#C9AF2F] mb-2">
+                  Application Pending
+                </h2>
+                <p className="text-gray-700">
+                  Your seller application is under review. You will be notified
+                  once the admin reviews your application.
+                </p>
+                {adminNotes && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-4 mt-4 text-yellow-800">
+                    <strong>Admin Note:</strong>
+                    <div>{adminNotes}</div>
+                  </div>
+                )}
+              </>
+            )}
+            {status === "rejected" && (
+              <>
+                <h2 className="text-2xl font-bold text-red-600 mb-2">
+                  Application Rejected
+                </h2>
+                <p className="text-gray-700">
+                  Unfortunately, your seller application was rejected.
+                </p>
+                {(adminNotes || reason) && (
+                  <div className="bg-red-50 border border-red-200 rounded p-4 mt-4 text-red-800">
+                    <strong>Admin Note:</strong>
+                    <div>{adminNotes || reason}</div>
+                  </div>
+                )}
+                <button
+                  className="mt-6 bg-[#C9AF2F] text-white font-semibold px-8 py-3 rounded-lg hover:bg-[#b79e29] transition-all duration-300 shadow-md"
+                  onClick={() => setExistingApplication(null)}
+                >
+                  Apply Again
+                </button>
+              </>
+            )}
+            {status === "approved" && (
+              <>
+                <h2 className="text-2xl font-bold text-green-600 mb-2">
+                  Congratulations!
+                </h2>
+                <p className="text-gray-700">
+                  Your seller application has been approved. You can now access
+                  your seller dashboard.
+                </p>
+                <Link
+                  href="/dashboard/seller"
+                  className="inline-block mt-6 bg-[#C9AF2F] text-white font-semibold px-8 py-3 rounded-lg hover:bg-[#b79e29] transition-all duration-300 shadow-md"
+                >
+                  Go to Seller Dashboard
+                </Link>
+              </>
+            )}
           </div>
         </main>
       </>

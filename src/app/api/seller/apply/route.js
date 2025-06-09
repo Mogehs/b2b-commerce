@@ -10,7 +10,6 @@ export async function POST(request) {
   try {
     await connectMongo();
 
-    // Get user session
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -18,13 +17,11 @@ export async function POST(request) {
 
     const userId = session.user.id;
 
-    // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Check if user already has an application
     const existingApplication = await SellerApplication.findOne({
       user: userId,
     });
@@ -58,10 +55,8 @@ export async function POST(request) {
       }
     }
 
-    // Parse form data
     const formData = await request.formData();
 
-    // Extract all fields from form data
     const businessName = formData.get("name");
     const location = formData.get("location");
     const businessType = formData.get("business");
@@ -79,7 +74,6 @@ export async function POST(request) {
     const offers = formData.get("offers") || "";
     const landmark = formData.get("landmark");
 
-    // Secondary phones and WhatsApp numbers
     const phone2 = formData.get("phone2");
     const phone3 = formData.get("phone3");
     const whatsapp = formData.get("whatsapp");
@@ -88,7 +82,6 @@ export async function POST(request) {
     const secondaryPhones = [phone2, phone3].filter(Boolean);
     const whatsappNumbers = [whatsapp, whatsapp2].filter(Boolean);
 
-    // Social media
     const socialMedia = {
       facebook: formData.get("facebook") || "",
       instagram: formData.get("instagram") || "",
@@ -96,7 +89,6 @@ export async function POST(request) {
       linkedin: formData.get("linkedin") || "",
     };
 
-    // Validate required fields
     if (
       !businessName ||
       !location ||
@@ -115,7 +107,6 @@ export async function POST(request) {
       );
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(businessEmail)) {
       return NextResponse.json(
@@ -126,12 +117,10 @@ export async function POST(request) {
       );
     }
 
-    // Handle image upload with better validation
     let titleImage = null;
     const imageFile = formData.get("image");
 
     if (imageFile && imageFile instanceof File) {
-      // Validate file size (5MB limit)
       if (imageFile.size > 5 * 1024 * 1024) {
         return NextResponse.json(
           {
@@ -141,7 +130,6 @@ export async function POST(request) {
         );
       }
 
-      // Validate file type
       if (!imageFile.type.startsWith("image/")) {
         return NextResponse.json(
           {
@@ -209,10 +197,8 @@ export async function POST(request) {
       socialMedia,
     };
 
-    // Create or update application
     let application;
     if (existingApplication && existingApplication.status === "rejected") {
-      // Update existing rejected application
       application = await SellerApplication.findByIdAndUpdate(
         existingApplication._id,
         {
@@ -227,7 +213,6 @@ export async function POST(request) {
         { new: true }
       );
     } else {
-      // Create new application
       application = new SellerApplication({
         user: userId,
         applicationData,
@@ -235,7 +220,6 @@ export async function POST(request) {
 
       await application.save();
 
-      // Update user with application reference
       await User.findByIdAndUpdate(userId, {
         sellerApplication: application._id,
       });

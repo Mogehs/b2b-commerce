@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiSearch, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiSearch, FiEye } from "react-icons/fi";
+import { Dialog } from "@/components/ui/dialog";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 const initialRfqs = [
   {
@@ -50,36 +60,55 @@ const statusColor = {
 export default function MyRFQPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [rfqs, setRfqs] = useState(initialRfqs);
-
-  const handleDelete = (id) => {
-    const confirmDelete = confirm("Are you sure you want to delete this RFQ?");
-    if (confirmDelete) {
-      setRfqs((prev) => prev.filter((rfq) => rfq.id !== id));
-    }
-  };
+  const [selectedRFQ, setSelectedRFQ] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [quote, setQuote] = useState("");
+  const [quoteNote, setQuoteNote] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   const handleView = (rfq) => {
-    alert(`Viewing RFQ:\n\nProduct: ${rfq.product}\nQuantity: ${rfq.quantity}\nStatus: ${rfq.status}\nDate: ${rfq.date}`);
+    setSelectedRFQ(rfq);
+    setIsDialogOpen(true);
+    setQuote("");
+    setQuoteNote("");
   };
 
-  const handleEdit = (rfq) => {
-    const newProduct = prompt("Edit product name:", rfq.product);
-    if (newProduct !== null && newProduct.trim() !== "") {
-      setRfqs((prev) =>
-        prev.map((item) =>
-          item.id === rfq.id ? { ...item, product: newProduct } : item
-        )
-      );
-    }
+  const handleQuoteSubmit = (e) => {
+    e.preventDefault();
+    setIsDialogOpen(false);
   };
 
-  const filteredRfqs = rfqs.filter((rfq) =>
-    rfq.product.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const statusOptions = ["All", "Pending", "Quoted", "Closed"];
+
+  const filteredRfqs = rfqs.filter((rfq) => {
+    const matchesSearch = rfq.product
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || rfq.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="p-6  min-h-screen">
+    <div className="p-6 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-[#C9AF2F]">📋 My RFQs</h1>
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {statusOptions.map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`px-4 py-2 rounded-full border text-sm font-semibold transition
+              ${
+                statusFilter === status
+                  ? "bg-[#C9AF2F] text-white border-[#C9AF2F]"
+                  : "bg-white text-[#C9AF2F] border-[#C9AF2F] hover:bg-[#f7f3e3]"
+              }
+            `}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
 
       <div className="mb-6 flex items-center gap-2">
         <input
@@ -107,12 +136,23 @@ export default function MyRFQPage() {
           </thead>
           <tbody>
             {filteredRfqs.map((rfq) => (
-              <tr key={rfq.id} className="border-t hover:bg-blue-50 transition-all">
-                <td className="px-6 py-4 font-semibold text-gray-800">{rfq.product}</td>
+              <tr
+                key={rfq.id}
+                className="border-t hover:bg-blue-50 transition-all"
+              >
+                <td className="px-6 py-4 font-semibold text-gray-800">
+                  {rfq.product}
+                </td>
                 <td className="px-6 py-4 text-gray-700">{rfq.quantity}</td>
                 <td className="px-6 py-4 text-gray-600">{rfq.date}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor[rfq.status]}`}>{rfq.status}</span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      statusColor[rfq.status]
+                    }`}
+                  >
+                    {rfq.status}
+                  </span>
                 </td>
                 <td className="px-6 py-4 flex gap-3 text-lg">
                   <button
@@ -120,18 +160,6 @@ export default function MyRFQPage() {
                     onClick={() => handleView(rfq)}
                   >
                     <FiEye />
-                  </button>
-                  <button
-                    className="text-green-500 hover:text-green-700 transition-transform hover:scale-110"
-                    onClick={() => handleEdit(rfq)}
-                  >
-                    <FiEdit2 />
-                  </button>
-                  <button
-                    className="text-red-500 hover:text-red-700 transition-transform hover:scale-110"
-                    onClick={() => handleDelete(rfq.id)}
-                  >
-                    <FiTrash2 />
                   </button>
                 </td>
               </tr>
@@ -146,6 +174,87 @@ export default function MyRFQPage() {
           </tbody>
         </table>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>RFQ Details</DialogTitle>
+          </DialogHeader>
+          {selectedRFQ && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700">Product:</span>
+                  <span>{selectedRFQ.product}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700">Quantity:</span>
+                  <span>{selectedRFQ.quantity}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700">Date:</span>
+                  <span>{selectedRFQ.date}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700">Status:</span>
+                  <span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        statusColor[selectedRFQ.status]
+                      }`}
+                    >
+                      {selectedRFQ.status}
+                    </span>
+                  </span>
+                </div>
+              </div>
+              {selectedRFQ.status === "Pending" && (
+                <form onSubmit={handleQuoteSubmit} className="space-y-4">
+                  <div>
+                    <label className="block font-medium mb-1">
+                      Quote Amount
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      required
+                      value={quote}
+                      onChange={(e) => setQuote(e.target.value)}
+                      placeholder="Enter your quote amount"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">
+                      Message/Note (optional)
+                    </label>
+                    <Textarea
+                      value={quoteNote}
+                      onChange={(e) => setQuoteNote(e.target.value)}
+                      placeholder="Add a note for the buyer..."
+                      rows={3}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      className="bg-[#C9AF2F] text-white hover:bg-[#b89d2c]"
+                    >
+                      Send Quote
+                    </Button>
+                  </DialogFooter>
+                </form>
+              )}
+              {selectedRFQ.status !== "Pending" && (
+                <div className="text-center text-green-700 font-semibold py-4">
+                  {selectedRFQ.status === "Quoted"
+                    ? "You have already sent a quote for this RFQ."
+                    : "This RFQ is closed."}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
