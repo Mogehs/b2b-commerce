@@ -27,7 +27,7 @@ const Page = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "Home":
-        return <Home />;
+        return <Home activeTab={setActiveTab} />;
       case "Profile":
         return <Profile />;
       case "Message":

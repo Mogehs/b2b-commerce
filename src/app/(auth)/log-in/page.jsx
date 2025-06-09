@@ -17,14 +17,31 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false);
   const [fbLoading, setFbLoading] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({
+    email: false,
+    password: false,
+  });
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
+    mode: "onChange",
   });
+
+  // Watch input values for real-time validation
+  const watchedFields = watch();
+
+  // Handle field touch state
+  const handleFieldBlur = (fieldName) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+  };
 
   // Redirect if already authenticated
   // useEffect(() => {
@@ -114,18 +131,26 @@ export default function LoginPage() {
                   type="email"
                   id="email"
                   {...register("email")}
+                  onBlur={() => handleFieldBlur("email")}
                   placeholder="Enter your Email"
                   className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
-                    errors.email
+                    touchedFields.email && errors.email
                       ? "border-red-500 focus:ring-red-500"
+                      : touchedFields.email && !errors.email
+                      ? "border-green-500 focus:ring-green-500"
                       : "border-[#ACAAAA] focus:ring-yellow-500"
                   }`}
                 />
-                {errors.email && (
+                {touchedFields.email && errors.email && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.email.message}
                   </p>
                 )}
+                {touchedFields.email &&
+                  !errors.email &&
+                  watchedFields.email && (
+                    <p className="text-green-500 text-sm mt-1">Valid email</p>
+                  )}
               </div>
             </div>
 
@@ -147,18 +172,28 @@ export default function LoginPage() {
                   type="password"
                   id="password"
                   {...register("password")}
+                  onBlur={() => handleFieldBlur("password")}
                   placeholder="Enter your Password"
                   className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
-                    errors.password
+                    touchedFields.password && errors.password
                       ? "border-red-500 focus:ring-red-500"
+                      : touchedFields.password && !errors.password
+                      ? "border-green-500 focus:ring-green-500"
                       : "border-[#ACAAAA] focus:ring-yellow-500"
                   }`}
                 />
-                {errors.password && (
+                {touchedFields.password && errors.password && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.password.message}
                   </p>
                 )}
+                {touchedFields.password &&
+                  !errors.password &&
+                  watchedFields.password && (
+                    <p className="text-green-500 text-sm mt-1">
+                      Valid password
+                    </p>
+                  )}
               </div>
             </div>
 

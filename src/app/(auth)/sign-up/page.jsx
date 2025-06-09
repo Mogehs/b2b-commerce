@@ -12,15 +12,33 @@ import { registerSchema } from "@/lib/validations";
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [touchedFields, setTouchedFields] = useState({
+    name: false,
+    email: false,
+    password: false,
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     resolver: zodResolver(registerSchema),
+    mode: "onChange", // This enables onChange validation
   });
+
+  // Watch all fields for real-time validation
+  const watchedFields = watch();
+
+  // Handle field touch state
+  const handleFieldBlur = (fieldName) => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -39,11 +57,29 @@ export default function RegisterPage() {
         reset();
         router.push("/log-in");
       } else {
-        toast.error(responseData.error || "Failed to create account.");
+        // Enhanced error handling with specific messages
+        if (responseData.message) {
+          // Show the specific error message from the server
+          toast.error(responseData.message);
+        } else if (res.status === 409) {
+          toast.error("Email already in use. Please try another email address.");
+        } else if (res.status === 400) {
+          toast.error("Please provide all required information.");
+        } else {
+          toast.error("Failed to create account. Please try again.");
+        }
+
+        // Highlight the field with error if it's related to a specific field
+        if (responseData.field) {
+          setTouchedFields((prev) => ({
+            ...prev,
+            [responseData.field]: true,
+          }));
+        }
       }
     } catch (error) {
       console.error("Error registering:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Connection error. Please check your internet and try again.");
     } finally {
       setLoading(false);
     }
@@ -74,16 +110,22 @@ export default function RegisterPage() {
                   id="name"
                   {...register("name")}
                   placeholder="Enter your Name"
+                  onBlur={() => handleFieldBlur("name")}
                   className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
-                    errors.name
+                    touchedFields.name && errors.name
                       ? "border-red-500 focus:ring-red-500"
+                      : touchedFields.name && !errors.name && watchedFields.name
+                      ? "border-green-500 focus:ring-green-500"
                       : "border-[#ACAAAA] focus:ring-yellow-500"
                   }`}
                 />
-                {errors.name && (
+                {touchedFields.name && errors.name && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.name.message}
                   </p>
+                )}
+                {touchedFields.name && !errors.name && watchedFields.name && (
+                  <p className="text-green-500 text-sm mt-1">Valid name</p>
                 )}
               </div>
             </div>
@@ -102,17 +144,27 @@ export default function RegisterPage() {
                   id="email"
                   {...register("email")}
                   placeholder="Enter your Email"
+                  onBlur={() => handleFieldBlur("email")}
                   className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
-                    errors.email
+                    touchedFields.email && errors.email
                       ? "border-red-500 focus:ring-red-500"
+                      : touchedFields.email &&
+                        !errors.email &&
+                        watchedFields.email
+                      ? "border-green-500 focus:ring-green-500"
                       : "border-[#ACAAAA] focus:ring-yellow-500"
                   }`}
                 />
-                {errors.email && (
+                {touchedFields.email && errors.email && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.email.message}
                   </p>
                 )}
+                {touchedFields.email &&
+                  !errors.email &&
+                  watchedFields.email && (
+                    <p className="text-green-500 text-sm mt-1">Valid email</p>
+                  )}
               </div>
             </div>
 
@@ -130,17 +182,29 @@ export default function RegisterPage() {
                   id="password"
                   {...register("password")}
                   placeholder="Enter your Password"
+                  onBlur={() => handleFieldBlur("password")}
                   className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
-                    errors.password
+                    touchedFields.password && errors.password
                       ? "border-red-500 focus:ring-red-500"
+                      : touchedFields.password &&
+                        !errors.password &&
+                        watchedFields.password
+                      ? "border-green-500 focus:ring-green-500"
                       : "border-[#ACAAAA] focus:ring-yellow-500"
                   }`}
                 />
-                {errors.password && (
+                {touchedFields.password && errors.password && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.password.message}
                   </p>
                 )}
+                {touchedFields.password &&
+                  !errors.password &&
+                  watchedFields.password && (
+                    <p className="text-green-500 text-sm mt-1">
+                      Strong password
+                    </p>
+                  )}
                 <p className="text-xs text-gray-500 mt-1">
                   Password must contain at least 8 characters with uppercase,
                   lowercase, and number
@@ -153,7 +217,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 className="w-full sm:w-1/3 bg-[#C9AF2F] hover:bg-yellow-700 text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={loading}
+                disabled={loading || Object.keys(errors).length > 0}
               >
                 {loading ? "Creating account..." : "Create account"}
               </button>

@@ -14,25 +14,34 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials.email || !credentials.password) return null;
+        try {
+          await connectMongo();
 
-        await connectMongo();
-        const user = await User.findOne({ email: credentials.email });
+          // Find user
+          const user = await User.findOne({ email: credentials.email });
 
-        if (!user || !user.password) return null;
+          // If no user found or password doesn't match
+          if (
+            !user ||
+            !(await bcrypt.compare(credentials.password, user.password))
+          ) {
+            return null;
+          }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) return null;
-
-        return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-        };
+          // Return user data
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            provider: user.provider,
+            profile: user.profile,
+            createdAt: user.createdAt,
+          };
+        } catch (error) {
+          console.error("Authentication error:", error);
+          return null;
+        }
       },
     }),
 
@@ -70,7 +79,24 @@ export const authOptions = {
               email: user.email,
               image: user.image,
               provider: account.provider,
+              role: "buyer",
+              profile: {
+                phone: "",
+                company: "",
+                whatsapp: "",
+                address: "",
+                country: "",
+                website: "",
+                description: "",
+              },
+              favProducts: [],
+              favSellers: [],
+              reviews: [],
+              rfqs: [],
+              purchaseHistory: [],
+              conversations: [],
             });
+            console.log(`Created new ${account.provider} user: ${user.email}`);
           } else {
             return false;
           }
@@ -83,20 +109,32 @@ export const authOptions = {
       }
     },
 
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
+        token.sub = user.id || user._id?.toString();
+        token.role = user.role;
+        token.provider = account?.provider || user.provider || "credentials";
+        token.profile = user.profile;
+        token.createdAt = user.createdAt;
+
+        if (user.conversations) {
+          token.conversations = user.conversations;
+        }
       }
       return token;
     },
 
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id;
-        session.user.name = token.name;
-        session.user.email = token.email;
+      if (session?.user) {
+        session.user.id = token.sub;
+        session.user.role = token.role;
+        session.user.provider = token.provider;
+        session.user.profile = token.profile;
+        session.user.createdAt = token.createdAt;
+
+        if (token.conversations) {
+          session.user.conversations = token.conversations;
+        }
       }
       return session;
     },
