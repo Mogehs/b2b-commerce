@@ -55,10 +55,24 @@ export async function POST(request) {
       }
     }
 
+    console.log("Processing seller application for user:", userId);
     const formData = await request.formData();
+    const businessName = formData.get("name"); // Parse location JSON string into an object
+    let location;
+    try {
+      location = JSON.parse(formData.get("location"));
+    } catch (error) {
+      console.error("Error parsing location data:", error);
+      return NextResponse.json(
+        {
+          message: "Invalid location data format",
+        },
+        { status: 400 }
+      );
+    }
 
-    const businessName = formData.get("name");
-    const location = formData.get("location");
+    // Get service radius
+    const serviceRadius = parseInt(formData.get("serviceRadius"), 10) || 10;
     const businessType = formData.get("business");
     const businessDescription = formData.get("description");
     const businessAddress = formData.get("address");
@@ -178,10 +192,10 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
     const applicationData = {
       businessName,
       location,
+      serviceRadius, // Add the service radius to application data
       businessType,
       businessDescription,
       businessAddress,
