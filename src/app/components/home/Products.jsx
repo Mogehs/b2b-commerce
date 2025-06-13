@@ -1,6 +1,6 @@
-import React from 'react'
+import React from 'react';
 
-const products = Array.from({ length: 25 }, () => ({
+const allProducts = Array.from({ length: 25 }, () => ({
     img: "/home-page/product.jpg",
     title: "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.....",
     price: "PKR - 1500",
@@ -10,10 +10,61 @@ const products = Array.from({ length: 25 }, () => ({
     btn2: "Contact Seller"
 }));
 
-const Products = () => {
+// Sample category arrays (same format as allProducts, using different lengths)
+const industrialMachinery = Array.from({ length: 10 }, () => ({
+    img: "/home-page/product.jpg",
+    title: "Industrial Machinery Sample Product",
+    price: "PKR - 25,000",
+    qty: "Min Qty - 10 Units",
+    location: "Heavy Tools Co - Karachi",
+    btn1: "View Number",
+    btn2: "Contact Seller"
+}));
+
+const safetyEquipment = Array.from({ length: 8 }, () => ({
+    img: "/home-page/product.jpg",
+    title: "Safety Helmet - High Quality",
+    price: "PKR - 1,200",
+    qty: "Min Qty - 50 Units",
+    location: "Safety First Supplies - Faisalabad",
+    btn1: "View Number",
+    btn2: "Contact Seller"
+}));
+
+const officeSupplies = Array.from({ length: 12 }, () => ({
+    img: "/home-page/product.jpg",
+    title: "Bulk Office Notebooks",
+    price: "PKR - 200",
+    qty: "Min Qty - 500 Pcs",
+    location: "OfficeMart - Islamabad",
+    btn1: "View Number",
+    btn2: "Contact Seller"
+}));
+
+// Add more arrays as needed per category...
+
+const Products = ({ selectedCategory }) => {
+    let displayedProducts = [];
+
+    switch (selectedCategory) {
+        case "Industrial Machinery":
+            displayedProducts = industrialMachinery;
+            break;
+        case "Safety Equipment":
+            displayedProducts = safetyEquipment;
+            break;
+        case "Office Supplies":
+            displayedProducts = officeSupplies;
+            break;
+        // Add more cases for other categories
+        case "All Products":
+        default:
+            displayedProducts = allProducts;
+    }
+
     return (
         <div className='grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-8 my-8'>
-            {products.map((product, index) => (
+            {displayedProducts.map((product, index) => (
                 <div key={index} className='flex overflow-hidden flex-col w-full gap-4'>
                     <div className='w-full'>
                         <img className='rounded-t-xl object-cover w-full' src={product.img} alt={product.title} />
@@ -31,7 +82,7 @@ const Products = () => {
                 </div>
             ))}
         </div>
-    )
-}
+    );
+};
 
-export default Products
+export default Products;
