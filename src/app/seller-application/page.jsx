@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -8,20 +8,39 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import Navbar from "../components/common/Navbar";
-import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import { sellerApplicationSchema } from "@/lib/validations";
 import Link from "next/link";
+import Map, { Marker, NavigationControl, GeolocateControl } from "react-map-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { MapPin } from "lucide-react";
 
-const libraries = ["places"];
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+// Log the token availability to help with debugging - only first few chars to protect key
+console.log(
+  "MAPBOX_TOKEN available:",
+  !!MAPBOX_TOKEN,
+  MAPBOX_TOKEN
+    ? `Token starts with: ${MAPBOX_TOKEN.substring(0, 4)}...`
+    : "No token"
+);
 
 const SellerProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [map, setMap] = useState(null);
+  const [mapView, setMapView] = useState({
+    longitude: 67.0011,
+    latitude: 24.8607,
+    zoom: 10,
+    bearing: 0,
+    pitch: 0,
+  });
   const [serviceRadius, setServiceRadius] = useState(10);
   const [existingApplication, setExistingApplication] = useState(null);
   const [checkingApplication, setCheckingApplication] = useState(true);
-  const placeAutocompleteRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [mapError, setMapError] = useState(false);
+  const searchTimeout = useRef(null);
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -35,14 +54,8 @@ const SellerProfile = () => {
     watch,
   } = useForm({
     resolver: zodResolver(sellerApplicationSchema),
-    mode: "onChange", // Enable real-time validation
+    mode: "onChange",
     reValidateMode: "onChange",
-  });
-
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-    libraries,
   });
 
   // Redirect if not authenticated
@@ -54,7 +67,6 @@ const SellerProfile = () => {
     }
   }, [session, status, router]);
 
-  // Check for existing application on mountx
   useEffect(() => {
     if (!session?.user?.id) return;
     setCheckingApplication(true);
@@ -71,109 +83,123 @@ const SellerProfile = () => {
       .finally(() => setCheckingApplication(false));
   }, [session?.user?.id]);
 
-  const handlePlaceSelect = useCallback((place) => {
-    if (place.geometry && place.geometry.location) {
-      const location = {
-        address: place.displayName || place.formattedAddress || "",
-        coordinates: {
-          type: "Point",
-          coordinates: [
-            place.geometry.location.lng(),
-            place.geometry.location.lat(),
-          ],
-        },
-        placeId: place.place_id || place.id,
-        formattedAddress: place.formattedAddress || place.displayName,
-        addressComponents: {},
-        viewport: place.geometry.viewport
-          ? {
-              northeast: {
-                lat: place.geometry.viewport.getNorthEast().lat(),
-                lng: place.geometry.viewport.getNorthEast().lng(),
-              },
-              southwest: {
-                lat: place.geometry.viewport.getSouthWest().lat(),
-                lng: place.geometry.viewport.getSouthWest().lng(),
-              },
-            }
-          : null,
-      };
-
-      // Parse address components if available
-      if (place.addressComponents) {
-        place.addressComponents.forEach((component) => {
-          const types = component.types;
-          if (types.includes("street_number")) {
-            location.addressComponents.streetNumber = component.longText;
-          }
-          if (types.includes("route")) {
-            location.addressComponents.route = component.longText;
-          }
-          if (types.includes("locality")) {
-            location.addressComponents.locality = component.longText;
-          }
-          if (types.includes("sublocality")) {
-            location.addressComponents.sublocality = component.longText;
-          }
-          if (types.includes("administrative_area_level_1")) {
-            location.addressComponents.administrativeAreaLevel1 =
-              component.longText;
-          }
-          if (types.includes("administrative_area_level_2")) {
-            location.addressComponents.administrativeAreaLevel2 =
-              component.longText;
-          }
-          if (types.includes("country")) {
-            location.addressComponents.country = component.longText;
-          }
-          if (types.includes("postal_code")) {
-            location.addressComponents.postalCode = component.longText;
-          }
-        });
-      }
-
-      setSelectedLocation(location);
-      toast.success("Location selected successfully!");
-    }
-  }, []);
-
+  // Mapbox geocoding for place search
   useEffect(() => {
-    if (isLoaded && window.google && window.google.maps.places) {
-      const placeAutocompleteElement = document.createElement(
-        "gmp-place-autocomplete"
-      );
-
-      // Configure the element
-      placeAutocompleteElement.setAttribute(
-        "placeholder",
-        "Search for your business location..."
-      );
-      placeAutocompleteElement.setAttribute("country-restriction", "pk"); // Adjust for your country
-      placeAutocompleteElement.setAttribute("type", "establishment");
-
-      // Style the element
-      placeAutocompleteElement.style.width = "100%";
-      placeAutocompleteElement.style.padding = "8px";
-      placeAutocompleteElement.style.border = "1px solid #ACAAAA";
-      placeAutocompleteElement.style.borderRadius = "6px";
-      placeAutocompleteElement.style.fontSize = "14px";
-      placeAutocompleteElement.style.outline = "none";
-
-      // Add event listener for place selection
-      placeAutocompleteElement.addEventListener("gmp-placeselect", (event) => {
-        const place = event.detail.place;
-        handlePlaceSelect(place);
-      });
-
-      // Replace the input with the new element
-      const container = document.getElementById("place-autocomplete-container");
-      if (container) {
-        container.innerHTML = "";
-        container.appendChild(placeAutocompleteElement);
-        placeAutocompleteRef.current = placeAutocompleteElement;
-      }
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
     }
-  }, [isLoaded, handlePlaceSelect]);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const res = await axios.get(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+            searchQuery
+          )}.json?access_token=${MAPBOX_TOKEN}&country=PK`
+        );
+        setSearchResults(res.data.features || []);
+      } catch {
+        setSearchResults([]);
+      }
+    }, 400);
+  }, [searchQuery]);
+
+  const handleSelectPlace = (feature) => {
+    setSelectedLocation({
+      address: feature.place_name,
+      coordinates: {
+        type: "Point",
+        coordinates: feature.center,
+      },
+      placeId: feature.id,
+      formattedAddress: feature.place_name,
+      addressComponents: {},
+      viewport: feature.bbox
+        ? {
+            northeast: {
+              lat: feature.bbox[3],
+              lng: feature.bbox[2],
+            },
+            southwest: {
+              lat: feature.bbox[1],
+              lng: feature.bbox[0],
+            },
+          }
+        : null,
+    });
+    setMapView({
+      longitude: feature.center[0],
+      latitude: feature.center[1],
+      zoom: 15,
+      bearing: 0,
+      pitch: 0,
+    });
+    setSearchResults([]);
+    setSearchQuery(feature.place_name);
+    toast.success("Location selected successfully!");
+  };
+
+  const handleLocationInputChange = (e) => {
+    setSearchQuery(e.target.value);
+    setSelectedLocation(null);
+  };
+
+  const handleMapClick = async (evt) => {
+    const { lngLat } = evt;
+    const longitude = lngLat.lng;
+    const latitude = lngLat.lat;
+
+    try {
+      // Use reverse geocoding to get address details from coordinates
+      const res = await axios.get(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&country=PK`
+      );
+
+      const features = res.data.features || [];
+      if (features.length > 0) {
+        const feature = features[0];
+        setSelectedLocation({
+          address: feature.place_name,
+          coordinates: {
+            type: "Point",
+            coordinates: [longitude, latitude],
+          },
+          placeId: feature.id,
+          formattedAddress: feature.place_name,
+          addressComponents: {},
+          viewport: feature.bbox
+            ? {
+                northeast: {
+                  lat: feature.bbox[3],
+                  lng: feature.bbox[2],
+                },
+                southwest: {
+                  lat: feature.bbox[1],
+                  lng: feature.bbox[0],
+                },
+              }
+            : null,
+        });
+
+        setMapView({
+          longitude,
+          latitude,
+          zoom: 15,
+          bearing: 0,
+          pitch: 0,
+        });
+
+        // Update the search query with the selected address
+        setSearchQuery(feature.place_name);
+        toast.success("Location selected from map!");
+      } else {
+        toast.error("Could not find address for this location");
+      }
+    } catch (error) {
+      console.error("Error reverse geocoding:", error);
+      toast.error("Failed to get address for this location");
+    }
+  };
 
   const onSubmit = async (data) => {
     if (!session) {
@@ -426,21 +452,65 @@ const SellerProfile = () => {
               Location Information
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="flex flex-col">
+              <div className="flex flex-col relative">
                 <label className="text-gray-700 font-medium mb-1">
                   Business Location *
                 </label>
-                <div id="place-autocomplete-container" className="w-full" />
-                <p className="text-sm text-gray-500 mt-1">
-                  Start typing to see location suggestions
-                </p>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Search for your business location..."
+                    value={searchQuery}
+                    onChange={handleLocationInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md mb-2"
+                    autoComplete="off"
+                    spellCheck={false}
+                    // Prevent manual editing after selection
+                    readOnly={!!selectedLocation}
+                    onFocus={() => {
+                      if (selectedLocation) {
+                        setSearchQuery("");
+                        setSelectedLocation(null);
+                      }
+                    }}
+                  />
+                  {selectedLocation && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedLocation(null);
+                        setSearchQuery("");
+                      }}
+                      className="ml-2 px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 mb-2"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {searchResults.length > 0 && (
+                  <div className="bg-white border rounded shadow max-h-60 overflow-y-auto z-20 absolute mt-12 w-full">
+                    {searchResults.map((feature) => (
+                      <div
+                        key={feature.id}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleSelectPlace(feature)}
+                      >
+                        {feature.place_name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <p className="text-sm text-gray-500">
+                    Search for a location or click directly on the map below
+                  </p>
+                </div>
                 {!selectedLocation && (
                   <p className="text-red-500 text-sm mt-1">
                     Please select a location to continue
                   </p>
                 )}
               </div>
-
               {selectedLocation && (
                 <div>
                   <p className="text-sm text-gray-600 mb-2">
@@ -477,27 +547,67 @@ const SellerProfile = () => {
               )}
             </div>
 
-            {selectedLocation && (
-              <div className="mt-6 h-64 rounded-lg overflow-hidden border-2 border-[#C9AF2F]">
-                <GoogleMap
-                  mapContainerStyle={{ width: "100%", height: "100%" }}
-                  center={{
-                    lat: selectedLocation.coordinates.coordinates[1],
-                    lng: selectedLocation.coordinates.coordinates[0],
-                  }}
-                  zoom={15}
-                  onLoad={setMap}
-                >
-                  <Marker
-                    position={{
-                      lat: selectedLocation.coordinates.coordinates[1],
-                      lng: selectedLocation.coordinates.coordinates[0],
-                    }}
-                    animation={window.google?.maps?.Animation?.BOUNCE}
-                  />
-                </GoogleMap>
-              </div>
-            )}
+            <div className="mt-6 h-64 rounded-lg overflow-hidden border-2 border-[#C9AF2F] relative">
+              {mapError ? (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center flex-col">
+                  <p className="text-red-500 mb-2">Failed to load map</p>
+                  <button
+                    type="button"
+                    onClick={() => setMapError(false)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (
+                ""
+                // <Map
+                //   initialViewState={{
+                //     longitude:
+                //       selectedLocation?.coordinates?.coordinates[0] || 67.0011,
+                //     latitude:
+                //       selectedLocation?.coordinates?.coordinates[1] || 24.8607,
+                //     zoom: selectedLocation ? 13 : 10,
+                //   }}
+                //   style={{ width: "100%", height: "100%" }}
+                //   mapStyle="mapbox://styles/mapbox/streets-v11"
+                //   mapboxAccessToken={MAPBOX_TOKEN}
+                //   onMove={(evt) => setMapView(evt.viewState)}
+                //   onClick={(evt) => handleMapClick(evt)}
+                //   attributionControl={false}
+                //   onError={() => {
+                //     console.error("Map failed to load");
+                //     setMapError(true);
+                //   }}
+                // >
+                //   <NavigationControl position="top-right" />
+                //   <GeolocateControl
+                //     position="top-right"
+                //     positionOptions={{ enableHighAccuracy: true }}
+                //     trackUserLocation={true}
+                //     auto={false}
+                //   />
+
+                //   {selectedLocation && (
+                //     <Marker
+                //       longitude={selectedLocation.coordinates.coordinates[0]}
+                //       latitude={selectedLocation.coordinates.coordinates[1]}
+                //       anchor="bottom"
+                //     >
+                //       <MapPin size={36} className="text-[#F7455D]" />
+                //     </Marker>
+                //   )}
+                // </Map>
+              )}
+
+              {!selectedLocation && !mapError && (
+                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center pointer-events-none">
+                  <div className="bg-white bg-opacity-90 px-6 py-3 rounded-lg text-center">
+                    <p>Click on the map to select your location</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </section>
 
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">

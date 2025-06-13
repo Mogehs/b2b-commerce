@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.0",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-separator": "^1.1.7",
@@ -23,6 +24,7 @@
     "cloudinary": "^1.41.3",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
+    "mapbox-gl": "^2.15.0",
     "mongoose": "^8.15.1",
     "multer": "^2.0.1",
     "multer-storage-cloudinary": "^4.0.0",
@@ -33,6 +35,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.57.0",
     "react-icons": "^5.5.0",
+    "react-map-gl": "^6.1.21",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.25.56"
@@ -41,6 +44,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/google.maps": "^3.58.1",
     "tailwindcss": "^4",
-    "tw-animate-css": "^1.3.2"
+    "tw-animate-css": "^1.3.2",
+    "worker-loader": "^3.0.8"
   }
 }
