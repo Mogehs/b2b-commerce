@@ -12,6 +12,11 @@ const storeSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     businessType: { type: String, required: true },
+    businessLegalStatus: { type: String, default: "Sole Proprietor" },
+    yearEstablished: { type: String },
+    typeOfProducts: { type: String },
+    mainMarkets: [{ type: String }],
+    yearlyRevenue: { type: String },
 
     location: {
       address: String,
@@ -56,12 +61,36 @@ const storeSchema = new mongoose.Schema(
       format: String,
       bytes: Number,
     },
-
     socialLinks: {
       facebook: String,
       instagram: String,
       twitter: String,
       linkedin: String,
+    },
+    certifications: {
+      nationalTaxNumber: {
+        certType: String,
+        year: String,
+      },
+      professionalTax: {
+        certType: String,
+        year: String,
+      },
+      iso9001: {
+        certType: String,
+        year: String,
+      },
+      chamberOfCommerce: {
+        certType: String,
+        year: String,
+      },
+      otherCertifications: [
+        {
+          name: String,
+          year: String,
+          documentUrl: String,
+        },
+      ],
     },
 
     isActive: {

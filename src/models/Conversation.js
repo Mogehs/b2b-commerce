@@ -9,6 +9,23 @@ const conversationSchema = new mongoose.Schema(
         required: true,
       },
     ],
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+    type: {
+      type: String,
+      enum: ["general", "rfq"],
+      default: "general",
+    },
+    rfq: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RFQ",
+    },
+    lastMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
   },
   {
     timestamps: true,

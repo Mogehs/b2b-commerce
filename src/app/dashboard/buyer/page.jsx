@@ -1,77 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Home from "@/app/components/buyer-dashboard/Home";
-import Profile from "@/app/components/buyer-dashboard/Profile";
-import ChatBox from "@/app/components/buyer-dashboard/ChatBox";
+import { useRouter } from "next/navigation";
 
-import Navbar from "@/app/components/common/Navbar";
-import Fav from "@/app/components/buyer-dashboard/Fav";
-import Reviews from "@/app/components/buyer-dashboard/Reviews";
-import RFQ from "@/app/components/buyer-dashboard/RFQ";
-import History from "@/app/components/buyer-dashboard/History";
+export default function Page() {
+  const router = useRouter();
 
-const Page = () => {
-  const [activeTab, setActiveTab] = useState("Home");
-
-  const tabs = [
-    "Home",
-    "Profile",
-    "Message",
-    "Favourite",
-    "Reviews",
-    "My RFQ",
-    "History",
-  ];
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "Home":
-        return <Home activeTab={setActiveTab} />;
+  // Handle navigation from home page cards
+  const handleNavigate = (tab) => {
+    switch (tab) {
       case "Profile":
-        return <Profile />;
+        router.push("/dashboard/buyer/profile");
+        break;
       case "Message":
-        return <ChatBox />;
+        router.push("/dashboard/buyer/chat");
+        break;
       case "Favourite":
-        return <Fav />;
+        router.push("/dashboard/buyer/favourite");
+        break;
       case "Reviews":
-        return <Reviews />;
+        router.push("/dashboard/buyer/reviews");
+        break;
       case "My RFQ":
-        return <RFQ />;
+        router.push("/dashboard/buyer/my-rfq");
+        break;
       case "History":
-        return <History />;
+        router.push("/dashboard/buyer/history");
+        break;
       default:
-        return null;
+        break;
     }
   };
 
-  return (
-    <>
-      <Navbar />
-      <div>
-        <div className="w-full bg-[#ebebeb] py-7 flex justify-center">
-          <div className="flex flex-wrap gap-5 justify-center px-4">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`w-35 py-2 rounded border-2 border-[#ACAAAA] max-lg:text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                  activeTab === tab
-                    ? "bg-[#C9AF2F4D] text-black"
-                    : "bg-white text-black hover:bg-gray-200"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Render selected tab content */}
-        <div>{renderTabContent()}</div>
-      </div>
-    </>
-  );
-};
-
-export default Page;
+  return <Home activeTab={handleNavigate} />;
+}

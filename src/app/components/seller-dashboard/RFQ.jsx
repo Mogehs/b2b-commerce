@@ -72,10 +72,42 @@ export default function MyRFQPage() {
     setQuote("");
     setQuoteNote("");
   };
-
-  const handleQuoteSubmit = (e) => {
+  const handleQuoteSubmit = async (e) => {
     e.preventDefault();
-    setIsDialogOpen(false);
+
+    if (!quote) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/rfq/${selectedRFQ.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "Quoted",
+          price: quote,
+          note: quoteNote,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit quote");
+      }
+
+      // Update the local state
+      setRfqs(
+        rfqs.map((r) =>
+          r.id === selectedRFQ.id ? { ...r, status: "Quoted" } : r
+        )
+      );
+
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to submit quote:", error);
+      // Show error notification
+    }
   };
 
   const statusOptions = ["All", "Pending", "Quoted", "Closed"];
@@ -243,12 +275,28 @@ export default function MyRFQPage() {
                     </Button>
                   </DialogFooter>
                 </form>
-              )}
+              )}{" "}
               {selectedRFQ.status !== "Pending" && (
-                <div className="text-center text-green-700 font-semibold py-4">
-                  {selectedRFQ.status === "Quoted"
-                    ? "You have already sent a quote for this RFQ."
-                    : "This RFQ is closed."}
+                <div className="text-center py-4">
+                  {selectedRFQ.status === "Quoted" ? (
+                    <>
+                      <p className="text-green-700 font-semibold mb-4">
+                        You have already sent a quote for this RFQ.
+                      </p>
+                      <Button
+                        onClick={() =>
+                          (window.location.href = `/dashboard/seller/chat?rfq=${selectedRFQ.id}`)
+                        }
+                        className="bg-[#C9AF2F] text-white hover:bg-[#b89d2c]"
+                      >
+                        View Conversation
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-gray-700 font-semibold">
+                      This RFQ is closed.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
