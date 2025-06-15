@@ -1,5 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import axios from "axios";
 
 import Navbar from "@/app/components/common/Navbar";
 import RelatedProducts from "@/app/components/detail-page/RelatedProducts";
@@ -22,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import InfoCertificates from "@/app/components/common/information-certificates/InfoCertificates";
+
 const relatedProducts = [
   {
     title:
@@ -78,10 +83,86 @@ const thumbnails = [
   "/detail-page/related-product-detail-2.png",
   "/detail-page/related-product-detail-3.png",
 ];
-const ProductDetailPage = () => {
+
+const Page = ({ params }) => {
+  const { id } = React.use(params);
+  const router = useRouter();
+  const { data: session } = useSession();
+
   const [selectedImage, setSelectedImage] = useState(
     "/detail-page/product-image.png"
   );
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Fetch product details using axios
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/products/${id}`);
+        setProduct(response.data.product);
+
+        // Set the first image as selected image if product has images
+        if (
+          response.data.product.images &&
+          response.data.product.images.length > 0
+        ) {
+          setSelectedImage(response.data.product.images[0].url);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        toast.error("Failed to load product details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  // Handle RFQ submission with axios
+  const handleSubmitRFQ = async (e) => {
+    e.preventDefault();
+
+    if (!session?.user) {
+      toast.error("Please log in to request a quote");
+      router.push("/log-in");
+      return;
+    }
+
+    if (!quantity || parseInt(quantity) < (product?.minOrderQuantity || 1)) {
+      toast.error(`Minimum order quantity is ${product.minOrderQuantity}`);
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await axios.post("/api/rfq", {
+        productId: id,
+        sellerId: product.seller._id,
+        quantity: quantity,
+        message: message,
+      });
+
+      toast.success("Quote requested successfully!");
+
+      // Redirect to the chat with this conversation
+      router.push(
+        `/dashboard/buyer/chat?conversationId=${response.data.conversationId}`
+      );
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -89,60 +170,137 @@ const ProductDetailPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 font-sans text-sm text-gray-800">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="mb-4 text-gray-500 text-sm">
-            Home &gt; Shop &gt; Men &gt;{" "}
-            <span className="text-black">T-shirts</span>
+            Home &gt; Shop &gt;{" "}
+            {loading ? "..." : product?.category || "Products"} &gt;{" "}
+            <span className="text-black">
+              {loading ? "..." : product?.name || "Product Details"}
+            </span>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="bg-gray-100 rounded-lg p-4 flex items-center justify-center">
-                <img
-                  src={selectedImage}
-                  alt="Product"
-                  className="h-[400px] object-contain"
-                />
+                {loading ? (
+                  <div className="h-[400px] w-full bg-gray-200 animate-pulse rounded"></div>
+                ) : product?.images && product.images.length > 0 ? (
+                  <img
+                    src={selectedImage}
+                    alt={product.name}
+                    className="h-[400px] object-contain"
+                  />
+                ) : (
+                  <img
+                    src="/detail-page/product-image.png"
+                    alt="Product placeholder"
+                    className="h-[400px] object-contain"
+                  />
+                )}
               </div>
 
               {/* Thumbnails */}
               <div className="flex mt-4 gap-2 justify-center">
-                {thumbnails.map((src, i) => (
-                  <img
-                    key={i}
-                    src={src}
-                    alt={`Thumbnail ${i + 1}`}
-                    onClick={() => setSelectedImage(src)}
-                    className={`w-16 h-16 object-contain bg-gray-100 p-2 rounded cursor-pointer border transition ${
-                      selectedImage === src
-                        ? "border-[#C9AF2F]"
-                        : "border-transparent"
-                    }`}
-                  />
-                ))}
+                {loading
+                  ? Array(4)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-16 h-16 bg-gray-200 animate-pulse rounded"
+                        ></div>
+                      ))
+                  : product?.images && product.images.length > 0
+                  ? product.images.map((image, i) => (
+                      <img
+                        key={i}
+                        src={image.url}
+                        alt={`${product.name} image ${i + 1}`}
+                        onClick={() => setSelectedImage(image.url)}
+                        className={`w-16 h-16 object-contain bg-gray-100 p-2 rounded cursor-pointer border transition ${
+                          selectedImage === image.url
+                            ? "border-[#C9AF2F]"
+                            : "border-transparent"
+                        }`}
+                      />
+                    ))
+                  : thumbnails.map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`Thumbnail ${i + 1}`}
+                        onClick={() => setSelectedImage(src)}
+                        className={`w-16 h-16 object-contain bg-gray-100 p-2 rounded cursor-pointer border transition ${
+                          selectedImage === src
+                            ? "border-[#C9AF2F]"
+                            : "border-transparent"
+                        }`}
+                      />
+                    ))}
               </div>
             </div>
 
             <div className="space-y-4">
-              <p className="text-gray-600 text-sm">
-                Men’s t shirts online shopping in Pakistan. Explore huge variety
-                of premium quality t-shirts. All sizes and colors are
-                available.....
-              </p>
+              {loading ? (
+                <div className="animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              ) : product ? (
+                <>
+                  <h1 className="text-2xl font-bold">{product.name}</h1>
+                  <p className="text-gray-600 text-sm">{product.description}</p>
+
+                  <div className="space-y-2 my-4">
+                    <div className="flex gap-2">
+                      <span className="text-gray-600">Brand:</span>
+                      <span className="font-medium">{product.brandName}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-gray-600">Model:</span>
+                      <span className="font-medium">{product.model}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-gray-600">Origin:</span>
+                      <span className="font-medium">
+                        {product.placeOfOrigin}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-gray-600">Seller:</span>
+                      <span className="font-medium">
+                        {product.seller?.name}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-red-500">Product not found</p>
+              )}
 
               <div className="bg-white border rounded p-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold">PKR-1500</h2>
+                  <h2 className="text-2xl font-semibold">
+                    {loading ? (
+                      <div className="h-8 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    ) : product ? (
+                      `PKR ${product.price?.toLocaleString() || "N/A"}`
+                    ) : (
+                      "Price unavailable"
+                    )}
+                  </h2>
                   <p className="text-sm text-gray-500">
-                    Minimum Order Quantity - 100 Pcs
+                    Minimum Order Quantity -{" "}
+                    {loading ? "..." : product?.minOrderQuantity || "N/A"} Pcs
                   </p>
                 </div>
 
                 <Dialog>
-                  <form>
+                  <form onSubmit={handleSubmitRFQ}>
                     <DialogTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
-                        className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition"
-                        a
+                        disabled={loading || !product}
+                        className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Get Bulk Price
                       </Button>
@@ -157,34 +315,48 @@ const ProductDetailPage = () => {
                       </DialogHeader>
 
                       <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="name">Your Name</Label>
-                          <Input id="name" placeholder="John Doe" />
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            placeholder="you@example.com"
-                          />
-                        </div>
+                        {!session?.user && (
+                          <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
+                            <p className="text-yellow-700 text-sm">
+                              Please{" "}
+                              <a
+                                href="/log-in"
+                                className="text-blue-600 underline"
+                              >
+                                log in
+                              </a>{" "}
+                              to request a quote.
+                            </p>
+                          </div>
+                        )}
 
                         <div className="grid gap-2">
                           <Label htmlFor="quantity">Required Quantity</Label>
                           <Input
                             id="quantity"
                             type="number"
-                            placeholder="e.g. 500"
+                            min={product?.minOrderQuantity}
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            placeholder={`Minimum ${
+                              product?.minOrderQuantity || 1
+                            }`}
+                            disabled={submitting}
+                            required
                           />
+                          <p className="text-xs text-gray-500">
+                            Minimum quantity: {product?.minOrderQuantity || 1}
+                          </p>
                         </div>
 
                         <div className="grid gap-2">
                           <Label htmlFor="message">Message (Optional)</Label>
                           <Textarea
                             id="message"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
                             placeholder="Write any specific details..."
+                            disabled={submitting}
                           />
                         </div>
                       </div>
@@ -192,8 +364,10 @@ const ProductDetailPage = () => {
                       <DialogFooter>
                         <DialogClose asChild>
                           <Button
+                            type="button"
                             variant="outline"
-                            className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition"
+                            className="bg-gray-200 text-gray-800 px-4 py-2 font-medium text-sm rounded cursor-pointer hover:bg-gray-300 transition"
+                            disabled={submitting}
                           >
                             Cancel
                           </Button>
@@ -201,8 +375,9 @@ const ProductDetailPage = () => {
                         <Button
                           type="submit"
                           className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition"
+                          disabled={submitting || !session?.user}
                         >
-                          Request Quote
+                          {submitting ? "Submitting..." : "Submit Request"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -210,109 +385,69 @@ const ProductDetailPage = () => {
                 </Dialog>
               </div>
 
-              {/* Seller Info Box */}
-              <div className="bg-white border rounded p-4 space-y-2 relative">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">Madina Traders</h3>
-                    <p className="text-sm text-gray-500">
-                      Lahore, Punjab, Pakistan
-                    </p>
+              <div className="flex justify-between mt-6">
+                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F]">
+                  <AiOutlineHeart size={18} />
+                  <span>Add to Wishlist</span>
+                </button>
+                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F]">
+                  <AiOutlineShareAlt size={18} />
+                  <span>Share</span>
+                </button>
+              </div>
+
+              <div className="border-t border-gray-200 pt-4 mt-6">
+                <h3 className="text-lg font-semibold mb-2">Shipping</h3>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <div className="flex items-center gap-2">
+                    <span>Delivery:</span>
+                    <span>3-5 Business Days</span>
                   </div>
-                  <div className="flex items-center gap-3 text-xl text-gray-700 mt-5">
-                    <AiOutlineHeart className="cursor-pointer" />
-                    <AiOutlineShareAlt className="cursor-pointer" />
+                  <div className="flex items-center gap-2">
+                    <span>Shipping Method:</span>
+                    <span>By air, By sea, Express</span>
                   </div>
-                </div>
-
-                <div className="mt-2 space-y-1 text-sm">
-                  <p>
-                    <span className="font-medium">Manufacture</span>, Online
-                    Seller, Exporter
-                  </p>
-                  <p>
-                    <span className="font-medium">Main Categories:</span>
-                    Garments, Industrial Machinery
-                  </p>
-                  <p>
-                    <span className="font-medium">We Offered:</span> OEM,
-                    Customization, Private labeling
-                  </p>
-                </div>
-
-                <div className="mt-4 flex gap-3">
-                  <button className="border border-gray-400 px-4 py-2 rounded text-sm hover:bg-gray-100">
-                    View Number
-                  </button>
-                  <button className="border border-gray-400 px-4 py-2 rounded text-sm hover:bg-gray-100">
-                    Contact Seller
-                  </button>
-                </div>
-
-                {/* Bottom right: See All Products */}
-                <div className="absolute top-4 right-4 text-xs text-gray-600 underline cursor-pointer">
-                  See all Products
                 </div>
               </div>
 
-              {/* Rating & Reviews Placeholder */}
-              <div className="text-sm text-gray-500">
-                Rating & Reviews <p>5/5</p>
+              <div className="border-t border-gray-200 pt-4 mt-6">
+                <h3 className="text-lg font-semibold mb-2">Payment</h3>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <div className="flex items-center gap-2">
+                    <span>Payment Method:</span>
+                    <span>Bank Transfer, Credit Card, Online Payment</span>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>{" "}
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold mb-4 text-[#C9AF2F]">
+              Related Products
+            </h2>
+            {product && (
+              <RelatedProducts
+                category={product.category}
+                currentProductId={id}
+              />
+            )}
           </div>
-        </div>
-
-        {/* Product Overview Table */}
-        <div className="mt-5 bg-white rounded-lg max-w-6xl mx-auto shadow-sm p-6">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-            Product Overview
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-10">
-            {[
-              ["Product name", "T-Shirt"],
-              ["Brand name", "Uzi"],
-              ["Model", "N/A"],
-              ["Place of Origin", "Pakistan"],
-              ["Product Price", "1500"],
-              ["Minimum Order Quantity", "100 Pcs"],
-            ].map(([label, value], i) => (
-              <div key={i} className="flex flex-col">
-                <span className="text-gray-500 text-sm">{label}</span>
-                <span className="text-gray-900 font-medium">{value}</span>
-              </div>
-            ))}
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold mb-4 text-[#C9AF2F]">
+              More From This Seller
+            </h2>
+            {product?.seller?._id && (
+              <MoreFromSeller
+                sellerId={product.seller._id}
+                currentProductId={id}
+              />
+            )}
           </div>
-        </div>
-        {/* Description */}
-        <div className="mt-10 md:px-5">
-          <h1 className="text-xl font-medium pb-3">Description</h1>
-          <p className="">
-            Elevate your casual style with our sleek black t-shirt, perfect for
-            any occasion. Crafted from high-quality, breathable fabric, this
-            t-shirt ensures comfort while making a bold statement. The classic
-            fit flatters all body types, while the stylish design pairs
-            effortlessly with your favorite jeans or shorts. Complete your look
-            with a pair of trendy sunglasses for that effortlessly cool vibe.
-            Make this essential piece a staple in your wardrobe today.
-          </p>
-          <div className="flex items-center justify-center max-sm:flex-col  py-5 gap-3">
-            {[1, 2, 3].map((item, i) => (
-              <div key={i}>
-                <img
-                  key={i}
-                  src={`/detail-page/related-product-detail-${item}.png`}
-                  alt={`Thumbnail ${i + 1}`}
-                  className="object-cover w-96 h-80 rounded-lg"
-                />
-              </div>
-            ))}
+          <div className="mt-12">
+            {product?.seller?._id && (
+              <InfoCertificates sellerId={product.seller._id} />
+            )}
           </div>
-          <div>
-            <MoreFromSeller relatedProducts={relatedProducts} />
-            <RelatedProducts relatedProducts={relatedProducts} />
-          </div>
-          <InfoCertificates />
         </div>
       </div>
       <Footer />
@@ -320,4 +455,4 @@ const ProductDetailPage = () => {
   );
 };
 
-export default ProductDetailPage;
+export default Page;

@@ -1,24 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# E-Commerce Platform with RFQ & Chat System
+
+This is a Next.js e-commerce platform with real-time chat and Request for Quote (RFQ) functionality built using Socket.io.
+
+## Features
+
+- **Real-time Chat System**: Integrated Socket.io for real-time communication between buyers and sellers
+- **RFQ System**: Buyers can request quotes for products, and sellers can respond with pricing
+- **Quote Management**: Track quote requests and their statuses
+- **Conversation Management**: Organized conversations by product and request type
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env.local` file with the following variables:
+
+```
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3000
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### RFQ Flow
+
+1. Buyer views a product and requests a quote by specifying quantity
+2. System creates an RFQ and a conversation between buyer and seller
+3. Seller receives the RFQ notification and can view it in their dashboard
+4. Seller submits a quote which gets sent as a message in the conversation
+5. Buyer receives the quote and can continue the conversation
 
 ## Learn More
 

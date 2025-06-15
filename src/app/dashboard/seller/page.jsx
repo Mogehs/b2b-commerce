@@ -25,7 +25,7 @@ const SellerDashboard = () => {
     "RFQ",
     "History",
     "Store Profile",
-    "Add Products",
+    "Products",
   ];
 
   const renderTabContent = () => {
@@ -46,7 +46,7 @@ const SellerDashboard = () => {
         return <History />;
       case "Store Profile":
         return <StoreProfile />;
-      case "Add Products":
+      case "Products":
         return <AddProducts />;
       default:
         return null;

@@ -23,11 +23,9 @@ export async function POST(request) {
     await connectMongo();
 
     // Check if user already exists
-    console.log("Checking if user exists:", email);
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      console.log("User already exists with this email");
       return NextResponse.json(
         {
           success: false,
@@ -40,7 +38,6 @@ export async function POST(request) {
     }
 
     // Hash password
-    console.log("Hashing password...");
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -68,18 +65,11 @@ export async function POST(request) {
       conversations: [],
     };
 
-    console.log("Creating new user with data:", {
-      name,
-      email,
-      provider: "credentials",
-    });
-
     // Create new user
     const newUser = new User(userData);
 
     // Save user to database
     const savedUser = await newUser.save();
-    console.log("User created successfully:", savedUser._id);
 
     // Return success without sensitive info
     return NextResponse.json(

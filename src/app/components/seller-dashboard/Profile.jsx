@@ -36,13 +36,6 @@ export default function Profile() {
         // If profile data isn't in session, fetch it from API
         fetchUserProfile();
       }
-
-      console.log("Session loaded:", {
-        name: session.user.name,
-        email: session.user.email,
-        provider: session.user.provider,
-        profile: session.user.profile,
-      });
     }
   }, [session]);
 

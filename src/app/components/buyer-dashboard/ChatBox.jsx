@@ -1,42 +1,384 @@
-'use client';
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useSocket } from "@/app/context/SocketContext";
+import { useConversation } from "@/hooks/use-conversation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function ChatBox() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const conversationId = searchParams.get("conversationId");
+  const rfqId = searchParams.get("rfq");
+
+  const { data: session } = useSession();
+  const { connected } = useSocket();
+
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [messageInput, setMessageInput] = useState("");
+  const [selectedConversation, setSelectedConversation] = useState(null);
+
+  const messagesEndRef = useRef(null);
+
+  // Get conversation data if ID is provided
+  const {
+    loading: loadingCurrentConversation,
+    conversation: currentConversation,
+    messages,
+    sendMessage,
+  } = useConversation(conversationId);
+  // Fetch conversations list
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const fetchConversations = async () => {
+      try {
+        const response = await fetch("/api/conversations");
+        if (!response.ok) throw new Error("Failed to fetch conversations");
+
+        const data = await response.json();
+        setConversations(data.conversations);
+
+        // If no conversationId is provided but we have conversations, select the first one
+        if (
+          !conversationId &&
+          data.conversations &&
+          data.conversations.length > 0
+        ) {
+          const firstConversation = data.conversations[0];
+          router.push(
+            `/dashboard/buyer/chat?conversationId=${firstConversation._id}`
+          );
+        }
+      } catch (error) {
+        toast.error("Failed to load conversations");
+      } finally {
+        setLoadingConversations(false);
+      }
+    };
+
+    fetchConversations();
+  }, [session, conversationId, router]);
+
+  // Set selected conversation when conversation ID changes
+  useEffect(() => {
+    if (conversationId && conversations.length > 0) {
+      const conv = conversations.find((c) => c._id === conversationId);
+      if (conv) setSelectedConversation(conv);
+    }
+  }, [conversationId, conversations]);
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+
+    if (!messageInput.trim() || !conversationId) return;
+
+    sendMessage(messageInput);
+    setMessageInput("");
+  };
+
+  const handleSelectConversation = (conv) => {
+    router.push(`/dashboard/buyer/chat?conversationId=${conv._id}`);
+  };
+
+  // Format message timestamp
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // Check if message is from current user
+  const isMyMessage = (senderId) => {
+    return senderId === session?.user?.id;
+  };
+
+  // Render message content based on type
+  const renderMessageContent = (message) => {
+    switch (message.messageType) {
+      case "rfq":
+        try {
+          const rfqData = JSON.parse(message.content);
+          return (
+            <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
+              <p className="font-medium text-blue-800">Quote Request</p>
+              <p className="text-sm text-gray-700">
+                Product: {rfqData.productName}
+              </p>
+              <p className="text-sm text-gray-700">
+                Quantity: {rfqData.quantity}
+              </p>
+            </div>
+          );
+        } catch (error) {
+          return <p>{message.content}</p>;
+        }
+      case "quote":
+        try {
+          const quoteData = JSON.parse(message.content);
+          return (
+            <div className="bg-green-50 p-3 rounded-md border border-green-100">
+              <p className="font-medium text-green-800">Quote Offered</p>
+              <p className="text-sm text-gray-700">
+                Price: PKR {quoteData.price}
+              </p>
+              <p className="text-sm text-gray-700">
+                Quantity: {quoteData.quantity}
+              </p>
+              {quoteData.note && (
+                <p className="text-sm text-gray-700 mt-2 italic">
+                  {quoteData.note}
+                </p>
+              )}
+              <div className="mt-3">
+                <Button className="bg-[#C9AF2F] hover:bg-[#b89d2c] text-white text-xs">
+                  Accept Quote
+                </Button>
+              </div>
+            </div>
+          );
+        } catch (error) {
+          return <p>{message.content}</p>;
+        }
+      default:
+        return <p>{message.content}</p>;
+    }
+  };
+
   return (
     <div className="md:min-h-screen bg-gray-100 text-gray-800 p-4">
-      <div className="flex flex-col md:flex-row md:h-[90vh] overflow-hidden">
+      <h1 className="text-3xl font-bold mb-6 text-[#C9AF2F]">
+        💬 Conversations
+      </h1>
+
+      <div className="flex flex-col md:flex-row md:h-[80vh] overflow-hidden bg-white shadow-lg rounded-lg">
         {/* Sidebar */}
-        <div className="w-full md:w-[25%] border border-[#ACAAAA] overflow-y-auto mr-2 space-y-2 max-md:py-2">
-          {Array(7).fill(0).map((_, index) => (
-            <div
-              key={index}
-              className="bg-white text-black border-b text-center px-4 py-4 text-sm font-medium hover:bg-gray-100 cursor-pointer"
-            >
-              Madina Traders
+        <div className="w-full md:w-[30%] border-r border-gray-200 overflow-y-auto">
+          <div className="p-4 bg-gray-50 border-b border-gray-200">
+            <h2 className="font-semibold text-gray-800">My Quote Requests</h2>
+          </div>
+
+          {loadingConversations ? (
+            <div className="p-4 space-y-4">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="flex items-center space-x-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[200px]" />
+                    <Skeleton className="h-4 w-[160px]" />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : conversations.length > 0 ? (
+            conversations.map((conv) => {
+              const otherParticipant = conv.participants[0] || {
+                name: "Unknown",
+              };
+
+              return (
+                <div
+                  key={conv._id}
+                  onClick={() => handleSelectConversation(conv)}
+                  className={`border-b border-gray-200 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    selectedConversation?._id === conv._id ? "bg-[#f7f3e3]" : ""
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {otherParticipant.name}
+                      </p>
+                      {conv.product && (
+                        <p className="text-xs text-gray-500">
+                          Product: {conv.product.name}
+                        </p>
+                      )}
+                    </div>
+                    {conv.rfq && (
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          conv.rfq.status === "Quoted"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {conv.rfq.status === "Quoted"
+                          ? "Quote Received"
+                          : "No Quote"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="p-4 text-center text-gray-500">
+              {" "}
+              <p>No quote requests yet</p>
+              <p className="text-sm mt-2">
+                Browse products and request quotes to start conversations
+              </p>
+              <button
+                onClick={() => router.push("/dashboard/buyer/my-rfq")}
+                className="mt-4 bg-[#C9AF2F] text-white px-4 py-2 rounded-lg hover:bg-[#b89d2c] transition"
+              >
+                Create a Quote Request
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Conversation Box */}
-        <div className="md:w-full flex flex-col justify-between bg-white">
-          <div className="flex flex-col h-[60vh] md:h-full">
-            <div className="flex-1 flex items-center justify-center text-sm text-center p-4 border border-[#ACAAAA]">
-              <p className="font-semibold text-black">
-                Conversation Box with date time stamp
-              </p>
-            </div>
+        <div className="md:w-[70%] flex flex-col">
+          {conversationId ? (
+            <>
+              {/* Conversation Header */}
+              <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                {loadingCurrentConversation ? (
+                  <div className="flex items-center space-x-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-4 w-[200px]" />
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <h3 className="font-medium">
+                        {currentConversation?.participants?.[0]?.name ||
+                          "Conversation"}
+                      </h3>
+                      {currentConversation?.product && (
+                        <p className="text-xs text-gray-500">
+                          Product: {currentConversation.product.name}
+                        </p>
+                      )}
+                    </div>
+                    {currentConversation?.rfq && (
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          currentConversation.rfq.status === "Quoted"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {currentConversation.rfq.status === "Quoted"
+                          ? "Quote Received"
+                          : "No Quote"}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
 
-            {/* Message Input */}
-            <div className="flex border border-[#ACAAAA] w-full mt-3">
-              <button className="bg-[#C9AF2F] hover:bg-yellow-700 px-8 py-2 text-sm font-semibold cursor-pointer text-black">
-                Send
-              </button>
-              <input
-                type="text"
-                placeholder="Type your message..."
-                className="flex-1 p-2 border-l border-gray-300 bg-white text-sm outline-none"
-              />
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {loadingCurrentConversation ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((item) => (
+                      <div key={item} className="flex flex-col space-y-2">
+                        <Skeleton className="h-4 w-[100px] self-start" />
+                        <Skeleton className="h-24 w-[80%] self-start rounded-md" />
+                      </div>
+                    ))}
+                  </div>
+                ) : messages.length > 0 ? (
+                  messages.map((message) => {
+                    const isMine = isMyMessage(message.sender._id);
+
+                    return (
+                      <div
+                        key={message._id}
+                        className={`flex flex-col ${
+                          isMine ? "items-end" : "items-start"
+                        }`}
+                      >
+                        <div className="flex items-center mb-1 text-xs text-gray-500">
+                          {!isMine && (
+                            <span className="mr-1">{message.sender.name}</span>
+                          )}
+                          <span>{formatTime(message.createdAt)}</span>
+                        </div>
+                        <div
+                          className={`max-w-[80%] p-3 rounded-lg ${
+                            isMine
+                              ? "bg-[#C9AF2F] bg-opacity-20 text-gray-800"
+                              : "bg-white border border-gray-200"
+                          }`}
+                        >
+                          {renderMessageContent(message)}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-gray-500 text-center">No messages yet</p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Message Input */}
+              <form
+                onSubmit={handleSendMessage}
+                className="border-t border-gray-200 p-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1 p-2 border border-gray-300 rounded-md bg-white text-sm outline-none focus:ring-1 focus:ring-[#C9AF2F] focus:border-[#C9AF2F]"
+                    disabled={!connected || loadingCurrentConversation}
+                  />
+                  <Button
+                    type="submit"
+                    className="bg-[#C9AF2F] hover:bg-[#b89d2c] text-white"
+                    disabled={
+                      !connected ||
+                      !messageInput.trim() ||
+                      loadingCurrentConversation
+                    }
+                  >
+                    Send
+                  </Button>
+                </div>
+              </form>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center">
+                <p className="text-xl font-semibold text-gray-400 mb-4">
+                  Welcome to your Conversations
+                </p>{" "}
+                <p className="text-gray-400 max-w-md">
+                  {conversations.length > 0
+                    ? "Choose a conversation from the sidebar to view messages"
+                    : "You don't have any conversations yet. Create an RFQ to start chatting with sellers"}
+                </p>{" "}
+                {conversations.length === 0 && (
+                  <button
+                    onClick={() => router.push("/dashboard/buyer/my-rfq")}
+                    className="mt-6 bg-[#C9AF2F] text-white px-4 py-2 rounded-lg hover:bg-[#b89d2c] transition"
+                  >
+                    Create New RFQ
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

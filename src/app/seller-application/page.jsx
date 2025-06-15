@@ -15,14 +15,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin } from "lucide-react";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-// Log the token availability to help with debugging - only first few chars to protect key
-console.log(
-  "MAPBOX_TOKEN available:",
-  !!MAPBOX_TOKEN,
-  MAPBOX_TOKEN
-    ? `Token starts with: ${MAPBOX_TOKEN.substring(0, 4)}...`
-    : "No token"
-);
 
 const SellerProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);

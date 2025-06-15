@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { authOptions } from "@/auth";
 import { SessionProviderWrapper } from "./lib/SessionProviderWrapper";
 import { getServerSession } from "next-auth";
+import { SocketProvider } from "./context/SocketContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,7 @@ export default async function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProviderWrapper session={session}>
-          {children}
+          <SocketProvider>{children}</SocketProvider>
         </SessionProviderWrapper>
         <Toaster />
       </body>
