@@ -34,12 +34,12 @@ export default function AddProducts() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl ">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-3 md:px-7">
         <h1 className="text-2xl font-bold">Product Management</h1>
         <button
           onClick={handleAddProduct}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer text-nowrap"
         >
           Add New Product
         </button>
