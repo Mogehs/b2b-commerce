@@ -4,18 +4,21 @@ export default function ProductCard({ product, onEdit, onDelete }) {
     return (
         <div className="  overflow-hidden  max-w-[300px] rounded-t-xl mx-auto w-full">
             <div className="h-48  bg-gray-100 relative">
-                {product.images.length > 0 ? (
-                    <Image
-                        src={typeof product.images[0] === 'string' ? product.images[0] : URL.createObjectURL(product.images[0])}
-                        alt={product.name}
-                        layout="fill"
-                        objectFit="cover"
-                    />
-                ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                        No Image
-                    </div>
-                )}
+{product.images?.length > 0 && product.images[0]?.url ? (
+  <Image
+    src={typeof product.images[0].url === 'string'
+      ? product.images[0].url
+      : URL.createObjectURL(product.images[0].url)}
+    alt={product.name}
+    layout="fill"
+    objectFit="cover"
+  />
+) : (
+  <div className="flex items-center justify-center h-full text-gray-500">
+    No Image
+  </div>
+)}
+
             </div>
 
             <div className="px-4 py-1.5 bg-[#F1F1F1] rounded-b-xl">
@@ -34,7 +37,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
                         <span className="font-medium">Price:</span> ${product.price}
                     </div>
                     <div>
-                        <span className="font-medium">Min Order:</span> {product.minimumOrderQuantity}
+                        <span className="font-medium">Min Order:</span> {product.minOrderQuantity}
                     </div>
                 </div>
             </div>

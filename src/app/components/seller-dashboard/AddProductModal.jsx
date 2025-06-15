@@ -4,6 +4,7 @@ export default function AddProductModal({
     isOpen,
     onClose,
     onSubmit,
+    loading,
     product = null
 }) {
     const initialFormState = {
@@ -15,25 +16,36 @@ export default function AddProductModal({
         category: '',
         placeOfOrigin: '',
         price: '',
-        minimumOrderQuantity: '',
+        minOrderQuantity: '',
         images: []
     };
 
     const [formData, setFormData] = useState(initialFormState);
     const [imagePreviews, setImagePreviews] = useState([]);
 
-    useEffect(() => {
-        if (product) {
-            setFormData(product);
-            setImagePreviews(
-                product.images.map(img =>
-                    typeof img === 'string' ? img : URL.createObjectURL(img)
-                )
-            );
-        } else {
-            resetForm();
-        }
-    }, [product]);
+useEffect(() => {
+    if (isOpen && product) {
+        setFormData({
+            ...initialFormState,
+            ...product,
+            images: product.images || [],
+        });
+
+        const previews = (product.images || []).map(img => {
+            if (typeof img === 'string') return img;
+            if (img instanceof File) return URL.createObjectURL(img);
+            return null;
+        }).filter(Boolean);
+
+        setImagePreviews(previews);
+    }
+
+    if (isOpen && !product) {
+        resetForm(); 
+    }
+}, [product, isOpen]);
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -71,16 +83,33 @@ export default function AddProductModal({
         setImagePreviews([]);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const finalData = {
-            ...formData,
-            id: formData.id || Date.now()
-        };
-        onSubmit(finalData);
-        resetForm(); // <-- Clear form after submission
-        onClose();
-    };
+const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const form = new FormData();
+    form.append("name", formData.name);
+    form.append("description", formData.description);
+    form.append("brandName", formData.brandName);
+    form.append("model", formData.model);
+    form.append("category", formData.category);
+    form.append("placeOfOrigin", formData.placeOfOrigin);
+    form.append("price", formData.price);
+    form.append("minOrderQuantity", formData.minOrderQuantity);
+
+    // Append images (files only)
+    formData.images.forEach((img) => {
+        if (typeof img !== "string") {
+            form.append("images", img);
+        }
+    });
+
+    // Call parent handler with FormData and isEdit flag
+    onSubmit(form, !!product);
+
+    resetForm();
+    onClose();
+};
+
 
     if (!isOpen) return null;
 
@@ -100,7 +129,7 @@ export default function AddProductModal({
                             ['category', 'Category'],
                             ['placeOfOrigin', 'Place of Origin'],
                             ['price', 'Price', 'number'],
-                            ['minimumOrderQuantity', 'Minimum Order Quantity', 'number']
+                            ['minOrderQuantity', 'Minimum Order Quantity', 'number']
                         ].map(([field, label, type = 'text']) => (
                             <div key={field}>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -169,12 +198,18 @@ export default function AddProductModal({
                         >
                             Cancel
                         </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-                        >
-                            {product ? 'Update Product' : 'Add Product'}
-                        </button>
+<button
+  type="submit"
+  disabled={loading}
+  className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ${
+    loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+  }`}
+>
+  {loading
+    ? (product ? 'Updating...' : 'Adding...')
+    : (product ? 'Update Product' : 'Add Product')}
+</button>
+
                     </div>
                 </form>
             </div>
