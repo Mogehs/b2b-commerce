@@ -14,7 +14,6 @@ export async function GET() {
         { status: 401 }
       );
     }
-    console.log("Session:", session);
 
     if (session.user.role !== "admin") {
       return NextResponse.json(

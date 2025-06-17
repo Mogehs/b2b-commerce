@@ -22,10 +22,8 @@ export async function GET(req) {
       user: userId,
     }).lean();
     if (!application) {
-      console.log("No application found for user:", userId);
       return NextResponse.json({ success: true, application: null });
     }
-    console.log("Application found:", application);
 
     return NextResponse.json({ success: true, application });
   } catch (err) {

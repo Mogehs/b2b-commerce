@@ -19,8 +19,6 @@ export default function GetDealForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitted Data:", form);
-    // You can add API call or Toast here
   };
 
   return (

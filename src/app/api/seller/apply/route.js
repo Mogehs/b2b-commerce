@@ -55,7 +55,6 @@ export async function POST(request) {
       }
     }
 
-    console.log("Processing seller application for user:", userId);
     const formData = await request.formData();
     const businessName = formData.get("name"); // Parse location JSON string into an object
     let location;

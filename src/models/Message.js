@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    conversationId: {
+    conversation: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversation",
       required: true,
@@ -14,19 +14,15 @@ const messageSchema = new mongoose.Schema(
       required: true,
     },
 
-    receiver: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    text: {
+    content: {
       type: String,
       required: true,
     },
 
-    image: {
+    messageType: {
       type: String,
+      enum: ["text", "image", "quote"],
+      default: "text",
     },
 
     read: {
