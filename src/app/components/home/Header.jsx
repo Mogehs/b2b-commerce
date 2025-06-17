@@ -58,13 +58,17 @@ const Header = ({ onCategorySelect }) => {
     return (
         <div className="relative">
             <div
-                className='flex items-center gap-4 p-2 bg-white border border-b-[#ACAAAA] border-t-[#F1F1F1] my-2 font-semibold ps-6 md:ps-20 cursor-pointer hover:bg-gray-50 transition-colors duration-200'
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                className='flex items-center gap-4 p-2 bg-white border border-b-[#ACAAAA] border-t-[#F1F1F1] my-2 font-semibold ps-6 md:ps-20  group-hover:bg-gray-50 transition-colors duration-200'
             >
-                <RxHamburgerMenu />
-                <p>Explore By Categories</p>
-                <PiGreaterThanLight className={`transform transition-transform duration-200 ${isHovered ? 'rotate-90' : ''}`} />
+                <div
+                    className='flex items-center gap-3 cursor-pointer group:'
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <RxHamburgerMenu />
+                    <p>Explore By Categories</p>
+                    <PiGreaterThanLight className={`transform transition-transform duration-200 ${isHovered ? 'rotate-90' : ''}`} />
+                </div>
             </div>
 
             {/* Categories Dropdown */}
