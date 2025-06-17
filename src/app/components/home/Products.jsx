@@ -1,29 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { toast } from 'sonner';
+import React from 'react';
 
-const Products = ({ selectedCategory }) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+const Products = ({ selectedCategory, products, loading }) => {
 
-  // Fetch all products from backend
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get('/api/products');
-        console.log("Response is..", res.data.products);
-        setProducts(res.data.products);
-      } catch (error) {
-        toast.error('Failed to fetch products.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   // Optional: Filter by category if your backend doesn't support it
   const filteredProducts = selectedCategory && selectedCategory !== 'All Products'
