@@ -1,4 +1,3 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -10,13 +9,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "your-other-domains.com",
       },
-       {
+      {
         protocol: "https",
-        hostname: "res.cloudinary.com", // ✅ ADD THIS LINE
+        hostname: "res.cloudinary.com",
       },
     ],
   },
-  // Required for Socket.io integration
   webpack: (config) => {
     config.externals.push({
       bufferutil: "bufferutil",

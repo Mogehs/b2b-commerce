@@ -50,7 +50,6 @@ const SellerProfile = () => {
     reValidateMode: "onChange",
   });
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -75,7 +74,6 @@ const SellerProfile = () => {
       .finally(() => setCheckingApplication(false));
   }, [session?.user?.id]);
 
-  // Mapbox geocoding for place search
   useEffect(() => {
     if (!searchQuery) {
       setSearchResults([]);
@@ -142,7 +140,6 @@ const SellerProfile = () => {
     const latitude = lngLat.lat;
 
     try {
-      // Use reverse geocoding to get address details from coordinates
       const res = await axios.get(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&country=PK`
       );
@@ -181,7 +178,6 @@ const SellerProfile = () => {
           pitch: 0,
         });
 
-        // Update the search query with the selected address
         setSearchQuery(feature.place_name);
         toast.success("Location selected from map!");
       } else {
@@ -208,12 +204,8 @@ const SellerProfile = () => {
 
     try {
       const formData = new FormData();
-
-      // Add location data
       formData.append("location", JSON.stringify(selectedLocation));
       formData.append("serviceRadius", serviceRadius.toString());
-
-      // Add all other form fields
       Object.keys(data).forEach((key) => {
         if (key === "image" && data[key]?.[0]) {
           formData.append("image", data[key][0]);
@@ -221,7 +213,6 @@ const SellerProfile = () => {
           formData.append(key, data[key]);
         }
       });
-
       const response = await axios.post("/api/seller/apply", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -267,7 +258,6 @@ const SellerProfile = () => {
     }
   };
 
-  // Show loading while checking authentication or application
   if (status === "loading" || checkingApplication) {
     return (
       <>
@@ -281,7 +271,6 @@ const SellerProfile = () => {
     );
   }
 
-  // Show application status if exists
   if (existingApplication) {
     const { status, adminNotes, reason } = existingApplication;
     return (
@@ -457,7 +446,6 @@ const SellerProfile = () => {
                     className="w-full p-2 border border-gray-300 rounded-md mb-2"
                     autoComplete="off"
                     spellCheck={false}
-                    // Prevent manual editing after selection
                     readOnly={!!selectedLocation}
                     onFocus={() => {
                       if (selectedLocation) {

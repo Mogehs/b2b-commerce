@@ -42,17 +42,13 @@ const storeSchema = new mongoose.Schema(
     },
     address: { type: String, required: true },
     landmark: { type: String, required: true },
-
-    // Contact information
     email: { type: String, required: true },
     phone: { type: String, required: true },
     secondaryPhones: [String],
     whatsappNumbers: [String],
     website: { type: String },
-
     productCategories: [{ type: String }],
     offers: { type: String },
-
     bannerImage: {
       url: { type: String },
       publicId: String,
@@ -115,7 +111,8 @@ const storeSchema = new mongoose.Schema(
 );
 
 storeSchema.index({ "location.coordinates": "2dsphere" });
-storeSchema.index({ isActive: 1 });
-storeSchema.index({ productCategories: 1 });
+storeSchema.index({ owner: 1 });
+storeSchema.index({ name: 1 });
+storeSchema.index({ createdAt: -1 });
 
 export default mongoose.models.Store || mongoose.model("Store", storeSchema);

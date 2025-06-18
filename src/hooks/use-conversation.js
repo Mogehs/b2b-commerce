@@ -13,7 +13,6 @@ export const useConversation = (conversationId) => {
   const { socket, connected, joinConversation, sendMessage } = useSocket();
   const { data: session } = useSession();
 
-  // Fetch conversation and messages
   useEffect(() => {
     if (!conversationId || !session?.user) return;
 
@@ -36,14 +35,12 @@ export const useConversation = (conversationId) => {
     fetchConversation();
   }, [conversationId, session?.user]);
 
-  // Join the conversation socket room
   useEffect(() => {
     if (!connected || !conversationId) return;
 
     joinConversation(conversationId);
   }, [connected, conversationId, joinConversation]);
 
-  // Listen for new messages
   useEffect(() => {
     if (!socket) return;
 
@@ -58,7 +55,6 @@ export const useConversation = (conversationId) => {
     };
   }, [socket]);
 
-  // Send a message
   const sendNewMessage = useCallback(
     (content, messageType = "text") => {
       if (!conversationId) return;
@@ -84,7 +80,6 @@ export const useRfq = (rfqId) => {
   const { socket } = useSocket();
   const { data: session } = useSession();
 
-  // Fetch RFQ details
   useEffect(() => {
     if (!rfqId || !session?.user) return;
 
@@ -104,7 +99,6 @@ export const useRfq = (rfqId) => {
     fetchRfq();
   }, [rfqId, session?.user]);
 
-  // Listen for RFQ status updates
   useEffect(() => {
     if (!socket || !rfq) return;
 
@@ -121,7 +115,6 @@ export const useRfq = (rfqId) => {
     };
   }, [socket, rfqId, rfq]);
 
-  // Submit a quote
   const submitQuote = async (price, note) => {
     if (!rfqId || !session?.user) return;
 
