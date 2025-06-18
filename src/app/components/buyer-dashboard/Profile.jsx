@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import axios from "axios";
 
 export default function Profile() {
   const { data: session, status, update } = useSession();
@@ -42,9 +43,9 @@ export default function Profile() {
   // Fetch user profile if not available in session
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch("/api/user/profile");
-      if (response.ok) {
-        const userData = await response.json();
+      const response = await axios.get("/api/user/profile");
+      if (response.status === 200) {
+        const userData = response.data;
         if (userData.user?.profile) {
           setWhatsapp(userData.user.profile.whatsapp || "");
           setMobile(userData.user.profile.phone || "");
@@ -58,23 +59,15 @@ export default function Profile() {
   const handleContactSubmit = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/user/update-profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await axios.put("/api/user/update-profile", {
+        name: fullName,
+        profile: {
+          whatsapp,
+          phone: mobile,
         },
-        body: JSON.stringify({
-          name: fullName,
-          profile: {
-            whatsapp,
-            phone: mobile,
-          },
-        }),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const data = response.data;
+      if (response.status === 200) {
         toast.success("Profile updated successfully");
         // Update the session to reflect the changes
         await update({ name: fullName });
@@ -107,20 +100,12 @@ export default function Profile() {
 
     try {
       setPasswordLoading(true);
-      const response = await fetch("/api/user/update-password", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          oldPassword,
-          newPassword,
-        }),
+      const response = await axios.put("/api/user/update-password", {
+        oldPassword,
+        newPassword,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const data = response.data;
+      if (response.status === 200) {
         toast.success("Password updated successfully");
         // Clear form
         setOldPassword("");
@@ -130,7 +115,6 @@ export default function Profile() {
         setPasswordError(data.message || "Failed to update password");
       }
     } catch (error) {
-      console.error("Error updating password:", error);
       setPasswordError("An unexpected error occurred");
     } finally {
       setPasswordLoading(false);

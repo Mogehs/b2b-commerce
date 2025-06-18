@@ -28,7 +28,6 @@ export function initSocketServer(server) {
       try {
         const { conversationId, senderId, content, messageType } = messageData;
 
-        // Use ESM absolute import for Message model
         const MessageModel = (
           await import(new URL("../models/Message.js", import.meta.url))
         ).default;
@@ -52,7 +51,6 @@ export function initSocketServer(server) {
           quoteData;
         const quoteContent = { productId, quantity, price, note };
 
-        // Use ESM absolute import for Message and RFQ models
         const MessageModel = (
           await import(new URL("../models/Message.js", import.meta.url))
         ).default;
@@ -60,31 +58,17 @@ export function initSocketServer(server) {
           await import(new URL("../models/RFQ.js", import.meta.url))
         ).default;
 
-        const newQuote = await MessageModel.create({
+        const newQuote = await RFQModel.create({
           conversation: conversationId,
           sender: senderId,
-          content: JSON.stringify(quoteContent),
-          messageType: "quote",
+          ...quoteContent,
         });
 
-        await RFQModel.findOneAndUpdate(
-          { conversation: conversationId },
-          { status: "Quoted" }
-        );
-
-        io.to(conversationId).emit("receive-message", newQuote);
-        io.to(conversationId).emit("quote-updated", {
-          conversationId,
-          status: "Quoted",
-        });
+        io.to(conversationId).emit("receive-quote", newQuote);
       } catch (error) {
         console.error("Error sending quote:", error);
         socket.emit("error", { message: "Error sending quote" });
       }
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
     });
   });
 

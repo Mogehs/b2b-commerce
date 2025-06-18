@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSocket } from "@/app/context/SocketContext";
 import { useSession } from "next-auth/react";
+import axios from "axios";
 
 export const useConversation = (conversationId) => {
   const [loading, setLoading] = useState(true);
@@ -19,13 +20,10 @@ export const useConversation = (conversationId) => {
     const fetchConversation = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/conversations/${conversationId}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch conversation");
-        }
-
-        const data = await response.json();
+        const response = await axios.get(
+          `/api/conversations/${conversationId}`
+        );
+        const data = response.data;
         setConversation(data.conversation);
         setMessages(data.messages);
       } catch (err) {
@@ -93,13 +91,8 @@ export const useRfq = (rfqId) => {
     const fetchRfq = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/rfq/${rfqId}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch RFQ");
-        }
-
-        const data = await response.json();
+        const response = await axios.get(`/api/rfq/${rfqId}`);
+        const data = response.data;
         setRfq(data.rfq);
       } catch (err) {
         setError(err.message);

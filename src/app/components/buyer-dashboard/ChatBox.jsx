@@ -8,6 +8,7 @@ import { useConversation } from "@/hooks/use-conversation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function ChatBox() {
   const router = useRouter();
@@ -36,12 +37,9 @@ export default function ChatBox() {
 
     const fetchConversations = async () => {
       try {
-        const response = await fetch("/api/conversations");
-        if (!response.ok) throw new Error("Failed to fetch conversations");
-
-        const data = await response.json();
+        const response = await axios.get("/api/conversations");
+        const data = response.data;
         setConversations(data.conversations);
-
         if (
           !conversationId &&
           data.conversations &&

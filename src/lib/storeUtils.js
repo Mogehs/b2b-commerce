@@ -5,7 +5,6 @@ export async function createStoreFromApplication(application) {
   try {
     const { applicationData } = application;
 
-    // Create store from application data
     const storeData = {
       owner: application.user,
       name: applicationData.businessName,
@@ -36,7 +35,6 @@ export async function createStoreFromApplication(application) {
     const store = new Store(storeData);
     await store.save();
 
-    // Update user role to seller
     await User.findByIdAndUpdate(application.user, {
       role: "seller",
       store: store._id,

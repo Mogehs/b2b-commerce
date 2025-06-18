@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongoose";
 import Conversation from "@/models/Conversation";
 import Message from "@/models/Message";
 import User from "@/models/User";
+import RFQ from "@/models/RFQ";
 
 export async function GET(req) {
   try {
