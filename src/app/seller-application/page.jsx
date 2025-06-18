@@ -540,46 +540,44 @@ const SellerProfile = () => {
                   </button>
                 </div>
               ) : (
-                ""
-                // <Map
-                //   initialViewState={{
-                //     longitude:
-                //       selectedLocation?.coordinates?.coordinates[0] || 67.0011,
-                //     latitude:
-                //       selectedLocation?.coordinates?.coordinates[1] || 24.8607,
-                //     zoom: selectedLocation ? 13 : 10,
-                //   }}
-                //   style={{ width: "100%", height: "100%" }}
-                //   mapStyle="mapbox://styles/mapbox/streets-v11"
-                //   mapboxAccessToken={MAPBOX_TOKEN}
-                //   onMove={(evt) => setMapView(evt.viewState)}
-                //   onClick={(evt) => handleMapClick(evt)}
-                //   attributionControl={false}
-                //   onError={() => {
-                //     console.error("Map failed to load");
-                //     setMapError(true);
-                //   }}
-                // >
-                //   <NavigationControl position="top-right" />
-                //   <GeolocateControl
-                //     position="top-right"
-                //     positionOptions={{ enableHighAccuracy: true }}
-                //     trackUserLocation={true}
-                //     auto={false}
-                //   />
-
-                //   {selectedLocation && (
-                //     <Marker
-                //       longitude={selectedLocation.coordinates.coordinates[0]}
-                //       latitude={selectedLocation.coordinates.coordinates[1]}
-                //       anchor="bottom"
-                //     >
-                //       <MapPin size={36} className="text-[#F7455D]" />
-                //     </Marker>
-                //   )}
-                // </Map>
+                <Map
+                  initialViewState={{
+                    longitude:
+                      selectedLocation?.coordinates?.coordinates?.[0] ??
+                      67.0011,
+                    latitude:
+                      selectedLocation?.coordinates?.coordinates?.[1] ??
+                      24.8607,
+                    zoom: selectedLocation ? 13 : 10,
+                  }}
+                  style={{ width: "100%", height: "100%" }}
+                  mapStyle="mapbox://styles/mapbox/streets-v11"
+                  mapboxAccessToken={MAPBOX_TOKEN}
+                  onMove={(evt) => setMapView(evt.viewState)}
+                  onClick={handleMapClick}
+                  attributionControl={false}
+                  onError={() => {
+                    setMapError(true);
+                  }}
+                >
+                  <NavigationControl position="top-right" />
+                  <GeolocateControl
+                    position="top-right"
+                    positionOptions={{ enableHighAccuracy: true }}
+                    trackUserLocation={true}
+                    auto={false}
+                  />
+                  {selectedLocation && (
+                    <Marker
+                      longitude={selectedLocation.coordinates.coordinates[0]}
+                      latitude={selectedLocation.coordinates.coordinates[1]}
+                      anchor="bottom"
+                    >
+                      <MapPin size={36} className="text-[#F7455D]" />
+                    </Marker>
+                  )}
+                </Map>
               )}
-
               {!selectedLocation && !mapError && (
                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center pointer-events-none">
                   <div className="bg-white bg-opacity-90 px-6 py-3 rounded-lg text-center">
