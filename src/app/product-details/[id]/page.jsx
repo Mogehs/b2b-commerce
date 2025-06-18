@@ -97,6 +97,7 @@ const Page = ({ params }) => {
   const [quantity, setQuantity] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Fetch product details using axios
   useEffect(() => {
@@ -125,11 +126,8 @@ const Page = ({ params }) => {
       fetchProduct();
     }
   }, [id]);
-
   // Handle RFQ submission with axios
-  const handleSubmitRFQ = async (e) => {
-    e.preventDefault();
-
+  const handleSubmitRFQ = async () => {
     if (!session?.user) {
       toast.error("Please log in to request a quote");
       router.push("/log-in");
@@ -144,21 +142,35 @@ const Page = ({ params }) => {
     setSubmitting(true);
 
     try {
+      console.log(product);
       const response = await axios.post("/api/rfq", {
         productId: id,
         sellerId: product.seller._id,
         quantity: quantity,
         message: message,
       });
-
       toast.success("Quote requested successfully!");
 
-      // Redirect to the chat with this conversation
-      router.push(
-        `/dashboard/buyer/chat?conversationId=${response.data.conversationId}`
-      );
+      // Close dialog
+      setDialogOpen(false);
+
+      // Clear form fields
+      setQuantity("");
+      setMessage("");
+
+      // Redirect to the chat after a brief delay to allow dialog to close
+      setTimeout(() => {
+        router.push(
+          `/dashboard/buyer/chat?conversationId=${response.data.conversationId}`
+        );
+      }, 500);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      console.error("RFQ submission error:", error);
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Something went wrong"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -274,8 +286,7 @@ const Page = ({ params }) => {
                 </>
               ) : (
                 <p className="text-red-500">Product not found</p>
-              )}
-
+              )}{" "}
               <div className="bg-white border rounded p-4 flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-semibold">
@@ -293,98 +304,96 @@ const Page = ({ params }) => {
                   </p>
                 </div>
 
-                <Dialog>
-                  <form onSubmit={handleSubmitRFQ}>
-                    <DialogTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={loading || !product}
-                        className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Get Bulk Price
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
-                      <DialogHeader>
-                        <DialogTitle>Get Bulk Price Quote</DialogTitle>
-                        <DialogDescription>
-                          Fill in your details and required quantity. The seller
-                          will get back to you with the best bulk price.
-                        </DialogDescription>
-                      </DialogHeader>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={loading || !product}
+                      className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Get Bulk Price
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Get Bulk Price Quote</DialogTitle>
+                      <DialogDescription>
+                        Fill in your details and required quantity. The seller
+                        will get back to you with the best bulk price.
+                      </DialogDescription>
+                    </DialogHeader>
 
-                      <div className="grid gap-4 py-4">
-                        {!session?.user && (
-                          <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
-                            <p className="text-yellow-700 text-sm">
-                              Please{" "}
-                              <a
-                                href="/log-in"
-                                className="text-blue-600 underline"
-                              >
-                                log in
-                              </a>{" "}
-                              to request a quote.
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="quantity">Required Quantity</Label>
-                          <Input
-                            id="quantity"
-                            type="number"
-                            min={product?.minOrderQuantity}
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            placeholder={`Minimum ${
-                              product?.minOrderQuantity || 1
-                            }`}
-                            disabled={submitting}
-                            required
-                          />
-                          <p className="text-xs text-gray-500">
-                            Minimum quantity: {product?.minOrderQuantity || 1}
+                    <div className="grid gap-4 py-4">
+                      {!session?.user && (
+                        <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
+                          <p className="text-yellow-700 text-sm">
+                            Please{" "}
+                            <a
+                              href="/log-in"
+                              className="text-blue-600 underline"
+                            >
+                              log in
+                            </a>{" "}
+                            to request a quote.
                           </p>
                         </div>
+                      )}
 
-                        <div className="grid gap-2">
-                          <Label htmlFor="message">Message (Optional)</Label>
-                          <Textarea
-                            id="message"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Write any specific details..."
-                            disabled={submitting}
-                          />
-                        </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="quantity">Required Quantity</Label>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          min={product?.minOrderQuantity}
+                          value={quantity}
+                          onChange={(e) => setQuantity(e.target.value)}
+                          placeholder={`Minimum ${
+                            product?.minOrderQuantity || 1
+                          }`}
+                          disabled={submitting}
+                          required
+                        />
+                        <p className="text-xs text-gray-500">
+                          Minimum quantity: {product?.minOrderQuantity || 1}
+                        </p>
                       </div>
 
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="bg-gray-200 text-gray-800 px-4 py-2 font-medium text-sm rounded cursor-pointer hover:bg-gray-300 transition"
-                            disabled={submitting}
-                          >
-                            Cancel
-                          </Button>
-                        </DialogClose>
+                      <div className="grid gap-2">
+                        <Label htmlFor="message">Message (Optional)</Label>
+                        <Textarea
+                          id="message"
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          placeholder="Write any specific details..."
+                          disabled={submitting}
+                        />
+                      </div>
+                    </div>
+
+                    <DialogFooter>
+                      <DialogClose asChild>
                         <Button
-                          type="submit"
-                          className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition"
-                          disabled={submitting || !session?.user}
+                          type="button"
+                          variant="outline"
+                          className="bg-gray-200 text-gray-800 px-4 py-2 font-medium text-sm rounded cursor-pointer hover:bg-gray-300 transition"
+                          disabled={submitting}
                         >
-                          {submitting ? "Submitting..." : "Submit Request"}
+                          Cancel
                         </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </form>
+                      </DialogClose>
+                      <Button
+                        type="button"
+                        onClick={handleSubmitRFQ}
+                        className="bg-[#C9AF2F] text-black px-4 py-2 font-medium text-sm rounded cursor-pointer hover:opacity-90 transition"
+                        disabled={submitting || !session?.user}
+                      >
+                        {submitting ? "Submitting..." : "Submit Request"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
                 </Dialog>
               </div>
-
               <div className="flex justify-between mt-6">
                 <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F]">
                   <AiOutlineHeart size={18} />
@@ -395,7 +404,6 @@ const Page = ({ params }) => {
                   <span>Share</span>
                 </button>
               </div>
-
               <div className="border-t border-gray-200 pt-4 mt-6">
                 <h3 className="text-lg font-semibold mb-2">Shipping</h3>
                 <div className="space-y-2 text-sm text-gray-700">
@@ -409,7 +417,6 @@ const Page = ({ params }) => {
                   </div>
                 </div>
               </div>
-
               <div className="border-t border-gray-200 pt-4 mt-6">
                 <h3 className="text-lg font-semibold mb-2">Payment</h3>
                 <div className="space-y-2 text-sm text-gray-700">

@@ -115,7 +115,6 @@ const storeSchema = new mongoose.Schema(
 );
 
 storeSchema.index({ "location.coordinates": "2dsphere" });
-storeSchema.index({ owner: 1 });
 storeSchema.index({ isActive: 1 });
 storeSchema.index({ productCategories: 1 });
 

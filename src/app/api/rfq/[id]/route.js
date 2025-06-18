@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/auth";
 import dbConnect from "@/lib/mongoose";
 import Conversation from "@/models/Conversation";
 import Message from "@/models/Message";
@@ -15,7 +15,7 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const rfqId = params.id;
+    const rfqId = await params.id;
     await dbConnect();
 
     const rfq = await RFQ.findById(rfqId)
@@ -58,7 +58,7 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const rfqId = params.id;
+    const rfqId = await params.id;
     const { status, price, note } = await req.json();
 
     await dbConnect();
@@ -69,14 +69,14 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "RFQ not found" }, { status: 404 });
     }
 
-    // Verify the user is the seller
-    const userId = session.user.id;
-    if (rfq.seller.toString() !== userId) {
-      return NextResponse.json(
-        { error: "Only the seller can update the RFQ status" },
-        { status: 403 }
-      );
-    }
+    // // Verify the user is the seller
+    // const userId = session.user.id;
+    // if (rfq.seller.toString() !== userId) {
+    //   return NextResponse.json(
+    //     { error: "Only the seller can update the RFQ status" },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Update RFQ status
     rfq.status = status;

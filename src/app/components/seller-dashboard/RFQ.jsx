@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiSearch, FiEye } from "react-icons/fi";
 import { Dialog } from "@/components/ui/dialog";
 import {
@@ -13,58 +13,40 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
-const initialRfqs = [
-  {
-    id: 1,
-    product: "LED TV 55 inch",
-    quantity: "100 Units",
-    status: "Pending",
-    date: "2025-06-01",
-  },
-  {
-    id: 2,
-    product: "Bluetooth Headphones",
-    quantity: "500 Units",
-    status: "Quoted",
-    date: "2025-05-28",
-  },
-  {
-    id: 3,
-    product: "Smartphone 6.5 inch",
-    quantity: "300 Units",
-    status: "Closed",
-    date: "2025-05-15",
-  },
-  {
-    id: 4,
-    product: "Gaming Laptops",
-    quantity: "75 Units",
-    status: "Pending",
-    date: "2025-06-05",
-  },
-  {
-    id: 5,
-    product: "Wireless Routers",
-    quantity: "200 Units",
-    status: "Quoted",
-    date: "2025-06-03",
-  },
-];
-
 const statusColor = {
   Pending: "bg-yellow-100 text-yellow-800",
   Quoted: "bg-green-100 text-green-800",
   Closed: "bg-gray-200 text-gray-700",
 };
 
-export default function MyRFQPage() {
+export default function SellerRFQPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [rfqs, setRfqs] = useState(initialRfqs);
+  const [rfqs, setRfqs] = useState([]);
   const [selectedRFQ, setSelectedRFQ] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quote, setQuote] = useState("");
   const [quoteNote, setQuoteNote] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Fetch seller RFQs from API
+    const fetchRFQs = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/rfq?role=seller");
+        const data = await res.json();
+        if (res.ok && data.rfqs) {
+          setRfqs(data.rfqs);
+        }
+      } catch (err) {
+        // Handle error
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRFQs();
+  }, []);
 
   const handleView = (rfq) => {
     setSelectedRFQ(rfq);
@@ -72,49 +54,36 @@ export default function MyRFQPage() {
     setQuote("");
     setQuoteNote("");
   };
+
   const handleQuoteSubmit = async (e) => {
     e.preventDefault();
-
-    if (!quote) {
-      return;
-    }
-
+    if (!quote) return;
     try {
-      const response = await fetch(`/api/rfq/${selectedRFQ.id}`, {
+      const response = await fetch(`/api/rfq/${selectedRFQ._id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "Quoted",
           price: quote,
           note: quoteNote,
         }),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit quote");
-      }
-
-      // Update the local state
+      if (!response.ok) throw new Error("Failed to submit quote");
       setRfqs(
         rfqs.map((r) =>
-          r.id === selectedRFQ.id ? { ...r, status: "Quoted" } : r
+          r._id === selectedRFQ._id ? { ...r, status: "Quoted" } : r
         )
       );
-
       setIsDialogOpen(false);
     } catch (error) {
-      console.error("Failed to submit quote:", error);
       // Show error notification
     }
   };
 
   const statusOptions = ["All", "Pending", "Quoted", "Closed"];
-
   const filteredRfqs = rfqs.filter((rfq) => {
-    const matchesSearch = rfq.product
-      .toLowerCase()
+    const matchesSearch = rfq.productName
+      ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "All" || rfq.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -123,7 +92,6 @@ export default function MyRFQPage() {
   return (
     <div className="p-6 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-[#C9AF2F]">📋 My RFQs</h1>
-
       <div className="mb-4 flex flex-wrap gap-2">
         {statusOptions.map((status) => (
           <button
@@ -141,7 +109,6 @@ export default function MyRFQPage() {
           </button>
         ))}
       </div>
-
       <div className="mb-6 flex items-center gap-2">
         <input
           type="text"
@@ -154,7 +121,6 @@ export default function MyRFQPage() {
           <FiSearch size={20} />
         </button>
       </div>
-
       <div className="overflow-x-auto bg-white shadow-lg rounded-2xl">
         <table className="w-full text-sm text-left">
           <thead className="bg-[#EBEBEB] uppercase text-xs">
@@ -167,46 +133,54 @@ export default function MyRFQPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredRfqs.map((rfq) => (
-              <tr
-                key={rfq.id}
-                className="border-t hover:bg-blue-50 transition-all"
-              >
-                <td className="px-6 py-4 font-semibold text-gray-800">
-                  {rfq.product}
-                </td>
-                <td className="px-6 py-4 text-gray-700">{rfq.quantity}</td>
-                <td className="px-6 py-4 text-gray-600">{rfq.date}</td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      statusColor[rfq.status]
-                    }`}
-                  >
-                    {rfq.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 flex gap-3 text-lg">
-                  <button
-                    className="text-blue-500 hover:text-blue-700 transition-transform hover:scale-110"
-                    onClick={() => handleView(rfq)}
-                  >
-                    <FiEye />
-                  </button>
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="text-center px-6 py-4">
+                  Loading...
                 </td>
               </tr>
-            ))}
-            {filteredRfqs.length === 0 && (
+            ) : filteredRfqs.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center px-6 py-4 text-gray-500">
                   No RFQs found matching your search.
                 </td>
               </tr>
+            ) : (
+              filteredRfqs.map((rfq) => (
+                <tr
+                  key={rfq._id}
+                  className="border-t hover:bg-blue-50 transition-all"
+                >
+                  <td className="px-6 py-4 font-semibold text-gray-800">
+                    {rfq.productName}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700">{rfq.quantity}</td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {new Date(rfq.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        statusColor[rfq.status]
+                      }`}
+                    >
+                      {rfq.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 flex gap-3 text-lg">
+                    <button
+                      className="text-blue-500 hover:text-blue-700 transition-transform hover:scale-110"
+                      onClick={() => handleView(rfq)}
+                    >
+                      <FiEye />
+                    </button>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
       </div>
-
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-lg w-full">
           <DialogHeader>
@@ -217,7 +191,7 @@ export default function MyRFQPage() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-700">Product:</span>
-                  <span>{selectedRFQ.product}</span>
+                  <span>{selectedRFQ.productName}</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-700">Quantity:</span>
@@ -225,7 +199,9 @@ export default function MyRFQPage() {
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-700">Date:</span>
-                  <span>{selectedRFQ.date}</span>
+                  <span>
+                    {new Date(selectedRFQ.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-700">Status:</span>
@@ -275,7 +251,7 @@ export default function MyRFQPage() {
                     </Button>
                   </DialogFooter>
                 </form>
-              )}{" "}
+              )}
               {selectedRFQ.status !== "Pending" && (
                 <div className="text-center py-4">
                   {selectedRFQ.status === "Quoted" ? (
@@ -285,7 +261,7 @@ export default function MyRFQPage() {
                       </p>
                       <Button
                         onClick={() =>
-                          (window.location.href = `/dashboard/seller/chat?rfq=${selectedRFQ.id}`)
+                          (window.location.href = `/dashboard/seller/chat?conversation=${selectedRFQ.conversation}`)
                         }
                         className="bg-[#C9AF2F] text-white hover:bg-[#b89d2c]"
                       >

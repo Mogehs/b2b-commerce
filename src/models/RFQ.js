@@ -24,6 +24,10 @@ const rfqSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  message: {
+    type: String,
+    default: "",
+  },
   status: {
     type: String,
     enum: ["Pending", "Quoted", "Closed"],

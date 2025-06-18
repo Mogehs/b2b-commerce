@@ -89,8 +89,26 @@ export default function ChatBox() {
   };
 
   // Check if message is from current user
-  const isMyMessage = (senderId) => {
-    return senderId === session?.user?.id;
+  const isMyMessage = (sender) => {
+    if (!session?.user?.id) return false;
+    if (typeof sender === "string") return sender === session.user.id;
+    if (typeof sender === "object" && sender._id)
+      return sender._id === session.user.id;
+    return false;
+  };
+
+  // Helper to check unread messages for a conversation
+  const getUnreadCount = (conv) => {
+    if (!conv.lastMessage) return 0;
+    // Only count if the last message is not read and not sent by the current user
+    if (
+      !conv.lastMessage.read &&
+      conv.lastMessage.sender !== session?.user?.id &&
+      conv.lastMessage.sender?._id !== session?.user?.id
+    ) {
+      return 1;
+    }
+    return 0;
   };
 
   // Render message content based on type
@@ -172,7 +190,7 @@ export default function ChatBox() {
               const otherParticipant = conv.participants[0] || {
                 name: "Unknown",
               };
-
+              const unread = getUnreadCount(conv);
               return (
                 <div
                   key={conv._id}
@@ -183,8 +201,17 @@ export default function ChatBox() {
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-medium text-gray-800">
+                      <p
+                        className={`font-medium text-gray-800 ${
+                          unread ? "font-bold" : ""
+                        }`}
+                      >
                         {otherParticipant.name}
+                        {unread ? (
+                          <span className="ml-2 inline-block bg-red-500 text-white text-xs rounded-full px-2 py-0.5 align-middle">
+                            {unread}
+                          </span>
+                        ) : null}
                       </p>
                       <p className="text-sm text-gray-500 truncate">
                         {conv.type === "rfq" ? "📋 Quote Request" : "Message"}
@@ -230,10 +257,24 @@ export default function ChatBox() {
                         {currentConversation?.participants?.[0]?.name ||
                           "Conversation"}
                       </h3>
-                      {currentConversation?.rfq && (
-                        <p className="text-xs text-gray-500">
-                          Product: {currentConversation.rfq.productName}
-                        </p>
+                      {currentConversation?.product && (
+                        <div
+                          onClick={() =>
+                            router.push(
+                              `/product-details/${currentConversation.product._id}`
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
+                          <p className="text-xs text-gray-500">
+                            Product: {currentConversation.product.name}
+                          </p>
+                          <img
+                            src={currentConversation.product.images[0].url}
+                            alt=""
+                            className="mt-2 h-10 w-10 rounded-md object-cover"
+                          />
+                        </div>
                       )}
                     </div>
                     {currentConversation?.rfq && (
@@ -264,7 +305,7 @@ export default function ChatBox() {
                   </div>
                 ) : messages.length > 0 ? (
                   messages.map((message) => {
-                    const isMine = isMyMessage(message.sender._id);
+                    const isMine = isMyMessage(message.sender);
 
                     return (
                       <div
