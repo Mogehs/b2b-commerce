@@ -36,7 +36,7 @@ const BrandingCards = ({products, loading}) => {
         </div>
       ) : (
         <div className='grid grid-cols-2 md:grid-cols-5 lg:grid-cols-7 gap-8 my-6'>
-          {products.map((product) => (
+          {products.slice(0, 20).map((product) => (
             <div key={product._id} className='flex flex-col gap-2 hover:cursor-pointer' onClick={() => handleCardClick(product._id)} >
               <img
                 className='bg-white w-full h-32 object-contain'

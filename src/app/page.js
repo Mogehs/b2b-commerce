@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import axios from "axios";
 import { toast } from "sonner";
 import Navbar from "./components/common/Navbar";
@@ -14,6 +15,7 @@ import Brands from "./components/home/Brands";
 import Region from "./components/home/Region";
 
 const Home = () => {
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,10 @@ const Home = () => {
     setSelectedCategory(category);
   };
 
+  const handleCardClick = () => {
+    router.push(`/products`);
+  };
+
   return (
     <div className="overflow-hidden">
       <Navbar />
@@ -47,15 +53,15 @@ const Home = () => {
         <Categories />
         <Badge first="Branding Services" second="View All" />
         <BrandingCards products={products} loading={loading} />
-        <Badge first="Products you May Like" second="View All" />
+        <Badge first="Products you May Like" second="View All" handleCardClick={handleCardClick} />
         <Products
           selectedCategory={selectedCategory}
           products={products}
           loading={loading}
         />
-        <Badge first="Popular Brands" second="View All" />
+        <Badge first="Popular Brands" />
         <Brands />
-        <Badge first="Find Supplier by Region" second="View All" />
+        <Badge first="Find Supplier by Region" />
         <Region />
       </div>
     </div>
