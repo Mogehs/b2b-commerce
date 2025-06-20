@@ -83,10 +83,10 @@ const Header = ({ onCategorySelect }) => {
                         {categories.map((category, index) => (
                             <div
                                 key={index}
-                                className="p-2 hover:bg-blue-50 rounded transition-colors duration-200 cursor-pointer"
+                                className="p-2 hover:bg-blue-50 rounded transition-colors duration-200 cursor-pointer group"
                                 onClick={() => handleCategoryClick(category)}
                             >
-                                <h3 className="font-medium text-gray-800 hover:text-blue-600">
+                                <h3 className="font-medium text-gray-800 group-hover:text-[#d2b33a] ">
                                     {category}
                                 </h3>
                             </div>
