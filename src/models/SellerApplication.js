@@ -158,7 +158,6 @@ const sellerApplicationSchema = new mongoose.Schema(
   }
 );
 
-// Add geospatial index for location-based queries
 sellerApplicationSchema.index({
   "applicationData.location.coordinates": "2dsphere",
 });

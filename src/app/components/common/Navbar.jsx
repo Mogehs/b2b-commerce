@@ -16,10 +16,12 @@ import { BsFileEarmarkText } from "react-icons/bs";
 import { FaGlobeAsia } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import NearMeModal from "./NearMeModal";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const [showDialog, setShowDialog] = useState(false);
+  const [showNearMe, setShowNearMe] = useState(false);
   const dialogRef = useRef(null);
   const router = useRouter();
 
@@ -122,7 +124,10 @@ export default function Navbar() {
             )}
           </div>
 
-          <div className="flex flex-col items-center justify-end w-[80px] h-[70px] cursor-pointer">
+          <div
+            className="flex flex-col items-center justify-end w-[80px] h-[70px] cursor-pointer"
+            onClick={() => setShowNearMe(true)}
+          >
             <TbRadar className="text-3xl mb-1" />
             <span className="text-xs font-medium">Near Me</span>
           </div>
@@ -200,6 +205,8 @@ export default function Navbar() {
           </ul>
         </div>
       )}
+
+      <NearMeModal open={showNearMe} onClose={() => setShowNearMe(false)} />
     </header>
   );
 }

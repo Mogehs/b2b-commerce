@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/auth";
 import dbConnect from "@/lib/mongoose";
 import Conversation from "@/models/Conversation";
 import Message from "@/models/Message";
@@ -14,14 +14,13 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const conversationId = params.id;
+    const conversationId = await params.id;
     const searchParams = req.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "50");
     const userId = session.user.id;
 
     await dbConnect();
 
-    // Fetch the conversation and verify user is a participant
     const conversation = await Conversation.findById(conversationId)
       .populate({
         path: "participants",
@@ -35,23 +34,34 @@ export async function GET(req, { params }) {
         { error: "Conversation not found" },
         { status: 404 }
       );
-    }
+    } // Check if user is a participant - handle both populated and unpopulated cases
+    const isParticipant = conversation.participants.some((participant) => {
+      // If participants are populated objects with _id
+      if (participant._id) {
+        return participant._id.toString() === userId;
+      }
+      // If participants are just IDs (not populated)
+      return participant.toString() === userId;
+    });
 
-    // Check if user is a participant
-    if (!conversation.participants.some((p) => p._id.toString() === userId)) {
+    if (!isParticipant) {
+      console.log("User not a participant:", {
+        userId,
+        participants: conversation.participants.map((p) =>
+          p._id ? p._id.toString() : p.toString()
+        ),
+      });
       return NextResponse.json(
         { error: "You are not a participant in this conversation" },
         { status: 403 }
       );
     }
 
-    // Fetch messages
     const messages = await Message.find({ conversation: conversationId })
       .populate("sender", "name email image")
       .sort({ createdAt: 1 })
       .limit(limit);
 
-    // Mark unread messages as read
     await Message.updateMany(
       {
         conversation: conversationId,
@@ -82,7 +92,7 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const conversationId = params.id;
+    const conversationId = await params.id;
     const { content, messageType = "text" } = await req.json();
 
     if (!content) {
@@ -104,9 +114,12 @@ export async function POST(req, { params }) {
         { error: "Conversation not found" },
         { status: 404 }
       );
-    }
+    } // Check if user is a participant - handle both string IDs and ObjectIds
+    const isParticipant = conversation.participants.some((participant) => {
+      return participant.toString() === senderId;
+    });
 
-    if (!conversation.participants.includes(senderId)) {
+    if (!isParticipant) {
       return NextResponse.json(
         { error: "You are not a participant in this conversation" },
         { status: 403 }

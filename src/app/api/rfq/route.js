@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/auth";
 import dbConnect from "@/lib/mongoose";
 import Conversation from "@/models/Conversation";
 import Message from "@/models/Message";
 import RFQ from "@/models/RFQ";
 import User from "@/models/User";
 import Product from "@/models/Product";
+import mongoose from "mongoose";
 
 export async function GET(req) {
   try {
@@ -15,9 +16,16 @@ export async function GET(req) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = session.user.id;
+    const userEmail = session.user.email;
     await dbConnect();
+
+    const userDoc = await User.findOne({ email: userEmail });
+
+    if (!userDoc) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userId = userDoc._id;
 
     const searchParams = req.nextUrl.searchParams;
     const role = searchParams.get("role");
@@ -54,12 +62,11 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);
-
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId, sellerId, quantity } = await req.json();
+    const { productId, sellerId, quantity, message } = await req.json();
 
     if (!productId || !sellerId || !quantity) {
       return NextResponse.json(
@@ -68,50 +75,62 @@ export async function POST(req) {
       );
     }
 
-    await dbConnect();
-
-    const buyerId = session.user.id;
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    if (
+      !mongoose.Types.ObjectId.isValid(productId) ||
+      !mongoose.Types.ObjectId.isValid(sellerId)
+    ) {
+      return NextResponse.json({ error: "Invalid IDs" }, { status: 400 });
     }
 
-    // Create a new conversation
+    await dbConnect(); // Get buyer ID from session
+    const buyerEmail = session.user.email;
+
+    // Find users by identifiable information
+    const [product, buyer, seller] = await Promise.all([
+      Product.findById(productId),
+      User.findOne({ email: buyerEmail }), // Find by email which is unique
+      User.findById(sellerId),
+    ]);
+
+    if (!product || !buyer || !seller) {
+      return NextResponse.json(
+        { error: "Invalid product or user" },
+        { status: 404 }
+      );
+    }
+
     const conversation = await Conversation.create({
-      participants: [buyerId, sellerId],
-      product: productId,
+      participants: [buyer._id, seller._id],
+      product: product._id,
       type: "rfq",
     });
 
-    // Create the RFQ
     const rfq = await RFQ.create({
-      buyer: buyerId,
-      seller: sellerId,
-      product: productId,
+      buyer: buyer._id,
+      seller: seller._id,
+      product: product._id,
       productName: product.name,
       quantity,
+      message: message || "",
       conversation: conversation._id,
     });
 
-    // Update conversation with rfq reference
     await Conversation.findByIdAndUpdate(conversation._id, {
       rfq: rfq._id,
     });
 
-    // Create initial message
     const initialMessage = await Message.create({
       conversation: conversation._id,
-      sender: buyerId,
+      sender: buyer._id,
       content: JSON.stringify({
-        productId,
+        productId: product._id,
         productName: product.name,
         quantity,
+        message: message || "",
       }),
       messageType: "rfq",
     });
 
-    // Update conversation with last message
     await Conversation.findByIdAndUpdate(conversation._id, {
       lastMessage: initialMessage._id,
     });

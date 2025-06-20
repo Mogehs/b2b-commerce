@@ -7,6 +7,7 @@ import connectMongo from "@/lib/mongoose";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
+    console.log("Session:", session.user);
 
     if (!session) {
       return NextResponse.json(

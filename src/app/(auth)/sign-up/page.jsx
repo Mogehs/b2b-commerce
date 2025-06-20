@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { registerSchema } from "@/lib/validations";
+import axios from "axios";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -44,15 +45,10 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await axios.post("/api/auth/register", data);
+      const responseData = res.data;
 
-      const responseData = await res.json();
-
-      if (res.ok) {
+      if (res.status === 200) {
         toast.success("Account created successfully! Please log in.");
         reset();
         router.push("/log-in");
@@ -62,7 +58,9 @@ export default function RegisterPage() {
           // Show the specific error message from the server
           toast.error(responseData.message);
         } else if (res.status === 409) {
-          toast.error("Email already in use. Please try another email address.");
+          toast.error(
+            "Email already in use. Please try another email address."
+          );
         } else if (res.status === 400) {
           toast.error("Please provide all required information.");
         } else {
@@ -79,7 +77,9 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error("Error registering:", error);
-      toast.error("Connection error. Please check your internet and try again.");
+      toast.error(
+        "Connection error. Please check your internet and try again."
+      );
     } finally {
       setLoading(false);
     }

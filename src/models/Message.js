@@ -21,7 +21,7 @@ const messageSchema = new mongoose.Schema(
 
     messageType: {
       type: String,
-      enum: ["text", "image", "quote"],
+      enum: ["text", "image", "quote", "rfq"],
       default: "text",
     },
 

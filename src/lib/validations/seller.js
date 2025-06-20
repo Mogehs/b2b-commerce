@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-// Phone number validation regex (adjust for your country)
 const phoneRegex = /^[\+]?[0-9]{10,15}$/;
 
-// URL validation that allows empty strings
 const urlSchema = z.string().url("Invalid URL").optional().or(z.literal(""));
 
 export const sellerApplicationSchema = z.object({
-  // Basic business information
   name: z
     .string()
     .min(2, "Store name must be at least 2 characters")
@@ -50,7 +47,6 @@ export const sellerApplicationSchema = z.object({
     .max(100, "Landmark must be less than 100 characters")
     .trim(),
 
-  // Contact information
   email: z
     .string()
     .email("Invalid email address")
@@ -84,16 +80,12 @@ export const sellerApplicationSchema = z.object({
     .optional()
     .or(z.literal("")),
 
-  // Website
   website: urlSchema,
-
-  // Social media links
   facebook: urlSchema,
   instagram: urlSchema,
   twitter: urlSchema,
   linkedin: urlSchema,
 
-  // File upload
   image: z
     .any()
     .refine((files) => files?.length > 0, "Title image is required")
@@ -110,7 +102,6 @@ export const sellerApplicationSchema = z.object({
     ),
 });
 
-// Location validation schema (for frontend use)
 export const locationSchema = z.object({
   address: z.string().min(1, "Address is required"),
   coordinates: z.object({
@@ -145,13 +136,11 @@ export const locationSchema = z.object({
     .optional(),
 });
 
-// Service radius validation
 export const serviceRadiusSchema = z
   .number()
   .min(1, "Service radius must be at least 1 km")
   .max(100, "Service radius cannot exceed 100 km");
 
-// Admin review validation schemas
 export const approveApplicationSchema = z.object({
   adminNotes: z
     .string()

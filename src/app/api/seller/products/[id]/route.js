@@ -25,7 +25,7 @@ export async function PATCH(request, { params }) {
 
         const formData = await request.formData();
 
-        const fields = ["name", "brandName", "model", "placeOfOrigin", "price", "minOrderQuantity", "description"];
+        const fields = ["name", "brandName", "model", "placeOfOrigin", "price", "minOrderQuantity", "description", "category"];
         fields.forEach((field) => {
             const value = formData.get(field);
             if (value) {

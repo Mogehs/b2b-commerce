@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSocket } from "@/app/context/SocketContext";
 import { useSession } from "next-auth/react";
+import axios from "axios";
 
 export const useConversation = (conversationId) => {
   const [loading, setLoading] = useState(true);
@@ -12,20 +13,16 @@ export const useConversation = (conversationId) => {
   const { socket, connected, joinConversation, sendMessage } = useSocket();
   const { data: session } = useSession();
 
-  // Fetch conversation and messages
   useEffect(() => {
     if (!conversationId || !session?.user) return;
 
     const fetchConversation = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/conversations/${conversationId}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch conversation");
-        }
-
-        const data = await response.json();
+        const response = await axios.get(
+          `/api/conversations/${conversationId}`
+        );
+        const data = response.data;
         setConversation(data.conversation);
         setMessages(data.messages);
       } catch (err) {
@@ -38,14 +35,12 @@ export const useConversation = (conversationId) => {
     fetchConversation();
   }, [conversationId, session?.user]);
 
-  // Join the conversation socket room
   useEffect(() => {
     if (!connected || !conversationId) return;
 
     joinConversation(conversationId);
   }, [connected, conversationId, joinConversation]);
 
-  // Listen for new messages
   useEffect(() => {
     if (!socket) return;
 
@@ -60,7 +55,6 @@ export const useConversation = (conversationId) => {
     };
   }, [socket]);
 
-  // Send a message
   const sendNewMessage = useCallback(
     (content, messageType = "text") => {
       if (!conversationId) return;
@@ -86,20 +80,14 @@ export const useRfq = (rfqId) => {
   const { socket } = useSocket();
   const { data: session } = useSession();
 
-  // Fetch RFQ details
   useEffect(() => {
     if (!rfqId || !session?.user) return;
 
     const fetchRfq = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/rfq/${rfqId}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch RFQ");
-        }
-
-        const data = await response.json();
+        const response = await axios.get(`/api/rfq/${rfqId}`);
+        const data = response.data;
         setRfq(data.rfq);
       } catch (err) {
         setError(err.message);
@@ -111,7 +99,6 @@ export const useRfq = (rfqId) => {
     fetchRfq();
   }, [rfqId, session?.user]);
 
-  // Listen for RFQ status updates
   useEffect(() => {
     if (!socket || !rfq) return;
 
@@ -128,7 +115,6 @@ export const useRfq = (rfqId) => {
     };
   }, [socket, rfqId, rfq]);
 
-  // Submit a quote
   const submitQuote = async (price, note) => {
     if (!rfqId || !session?.user) return;
 

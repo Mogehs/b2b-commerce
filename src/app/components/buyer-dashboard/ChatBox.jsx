@@ -8,6 +8,7 @@ import { useConversation } from "@/hooks/use-conversation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import axios from "axios";
 
 export default function ChatBox() {
   const router = useRouter();
@@ -25,26 +26,20 @@ export default function ChatBox() {
 
   const messagesEndRef = useRef(null);
 
-  // Get conversation data if ID is provided
   const {
     loading: loadingCurrentConversation,
     conversation: currentConversation,
     messages,
     sendMessage,
   } = useConversation(conversationId);
-  // Fetch conversations list
   useEffect(() => {
     if (!session?.user) return;
 
     const fetchConversations = async () => {
       try {
-        const response = await fetch("/api/conversations");
-        if (!response.ok) throw new Error("Failed to fetch conversations");
-
-        const data = await response.json();
+        const response = await axios.get("/api/conversations");
+        const data = response.data;
         setConversations(data.conversations);
-
-        // If no conversationId is provided but we have conversations, select the first one
         if (
           !conversationId &&
           data.conversations &&
@@ -65,7 +60,6 @@ export default function ChatBox() {
     fetchConversations();
   }, [session, conversationId, router]);
 
-  // Set selected conversation when conversation ID changes
   useEffect(() => {
     if (conversationId && conversations.length > 0) {
       const conv = conversations.find((c) => c._id === conversationId);
@@ -93,15 +87,32 @@ export default function ChatBox() {
     router.push(`/dashboard/buyer/chat?conversationId=${conv._id}`);
   };
 
-  // Format message timestamp
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   // Check if message is from current user
-  const isMyMessage = (senderId) => {
-    return senderId === session?.user?.id;
+  const isMyMessage = (sender) => {
+    if (!session?.user?.id) return false;
+    if (typeof sender === "string") return sender === session.user.id;
+    if (typeof sender === "object" && sender._id)
+      return sender._id === session.user.id;
+    return false;
+  };
+
+  // Helper to check unread messages for a conversation
+  const getUnreadCount = (conv) => {
+    if (!conv.lastMessage) return 0;
+    // Only count if the last message is not read and not sent by the current user
+    if (
+      !conv.lastMessage.read &&
+      conv.lastMessage.sender !== session?.user?.id &&
+      conv.lastMessage.sender?._id !== session?.user?.id
+    ) {
+      return 1;
+    }
+    return 0;
   };
 
   // Render message content based on type
@@ -118,6 +129,9 @@ export default function ChatBox() {
               </p>
               <p className="text-sm text-gray-700">
                 Quantity: {rfqData.quantity}
+              </p>{" "}
+              <p className="text-sm text-gray-700">
+                Message: {rfqData.message || "No additional message"}
               </p>
             </div>
           );
@@ -127,6 +141,8 @@ export default function ChatBox() {
       case "quote":
         try {
           const quoteData = JSON.parse(message.content);
+          const rfqId = currentConversation?.rfq?._id;
+          const isClosed = currentConversation?.rfq?.status === "Closed";
           return (
             <div className="bg-green-50 p-3 rounded-md border border-green-100">
               <p className="font-medium text-green-800">Quote Offered</p>
@@ -142,8 +158,27 @@ export default function ChatBox() {
                 </p>
               )}
               <div className="mt-3">
-                <Button className="bg-[#C9AF2F] hover:bg-[#b89d2c] text-white text-xs">
-                  Accept Quote
+                <Button
+                  className="bg-[#C9AF2F] hover:bg-[#b89d2c] text-white text-xs"
+                  disabled={isClosed}
+                  onClick={async () => {
+                    if (!rfqId) return;
+                    try {
+                      const res = await fetch(`/api/rfq/${rfqId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: "Closed" }),
+                      });
+                      if (!res.ok) throw new Error("Failed to accept quote");
+                      toast.success("Quote accepted. RFQ is now closed.");
+                      // Optionally, refresh conversation or update state
+                      router.refresh && router.refresh();
+                    } catch (err) {
+                      toast.error("Failed to accept quote");
+                    }
+                  }}
+                >
+                  {isClosed ? "RFQ Closed" : "Accept Quote"}
                 </Button>
               </div>
             </div>
@@ -186,7 +221,7 @@ export default function ChatBox() {
               const otherParticipant = conv.participants[0] || {
                 name: "Unknown",
               };
-
+              const unread = getUnreadCount(conv);
               return (
                 <div
                   key={conv._id}
@@ -197,8 +232,17 @@ export default function ChatBox() {
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-medium text-gray-800">
+                      <p
+                        className={`font-medium text-gray-800 ${
+                          unread ? "font-bold" : ""
+                        }`}
+                      >
                         {otherParticipant.name}
+                        {unread ? (
+                          <span className="ml-2 inline-block bg-red-500 text-white text-xs rounded-full px-2 py-0.5 align-middle">
+                            {unread}
+                          </span>
+                        ) : null}
                       </p>
                       {conv.product && (
                         <p className="text-xs text-gray-500">
@@ -255,13 +299,28 @@ export default function ChatBox() {
                   <>
                     <div>
                       <h3 className="font-medium">
-                        {currentConversation?.participants?.[0]?.name ||
+                        {currentConversation?.participants?.[1]?.name ||
                           "Conversation"}
                       </h3>
+
                       {currentConversation?.product && (
-                        <p className="text-xs text-gray-500">
-                          Product: {currentConversation.product.name}
-                        </p>
+                        <div
+                          onClick={() =>
+                            router.push(
+                              `/product-details/${currentConversation.product._id}`
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
+                          <p className="text-xs text-gray-500">
+                            Product: {currentConversation.product.name}
+                          </p>
+                          <img
+                            src={currentConversation.product.images[0].url}
+                            alt=""
+                            className="mt-2 h-10 w-10 rounded-md object-cover"
+                          />
+                        </div>
                       )}
                     </div>
                     {currentConversation?.rfq && (
@@ -294,7 +353,7 @@ export default function ChatBox() {
                   </div>
                 ) : messages.length > 0 ? (
                   messages.map((message) => {
-                    const isMine = isMyMessage(message.sender._id);
+                    const isMine = isMyMessage(message.sender);
 
                     return (
                       <div

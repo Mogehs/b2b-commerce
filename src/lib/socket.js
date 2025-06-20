@@ -28,17 +28,16 @@ export function initSocketServer(server) {
       try {
         const { conversationId, senderId, content, messageType } = messageData;
 
-        // Save message to database - implementation in the Message model
-        const newMessage = await import("../models/Message").then((module) =>
-          module.default.create({
-            conversation: conversationId,
-            sender: senderId,
-            content,
-            messageType: messageType || "text",
-          })
-        );
+        const MessageModel = (
+          await import(new URL("../models/Message.js", import.meta.url))
+        ).default;
+        const newMessage = await MessageModel.create({
+          conversation: conversationId,
+          sender: senderId,
+          content,
+          messageType: messageType || "text",
+        });
 
-        // Emit the message to all users in the conversation
         io.to(conversationId).emit("receive-message", newMessage);
       } catch (error) {
         console.error("Error sending message:", error);
@@ -50,47 +49,26 @@ export function initSocketServer(server) {
       try {
         const { conversationId, senderId, productId, quantity, price, note } =
           quoteData;
+        const quoteContent = { productId, quantity, price, note };
 
-        // Create quote message
-        const quoteContent = {
-          productId,
-          quantity,
-          price,
-          note,
-        };
+        const MessageModel = (
+          await import(new URL("../models/Message.js", import.meta.url))
+        ).default;
+        const RFQModel = (
+          await import(new URL("../models/RFQ.js", import.meta.url))
+        ).default;
 
-        // Save the quote message
-        const newQuote = await import("../models/Message").then((module) =>
-          module.default.create({
-            conversation: conversationId,
-            sender: senderId,
-            content: JSON.stringify(quoteContent),
-            messageType: "quote",
-          })
-        );
-
-        // Update RFQ status
-        await import("../models/RFQ").then((module) =>
-          module.default.findOneAndUpdate(
-            { conversation: conversationId },
-            { status: "Quoted" }
-          )
-        );
-
-        // Emit the quote to all users in the conversation
-        io.to(conversationId).emit("receive-message", newQuote);
-        io.to(conversationId).emit("quote-updated", {
-          conversationId,
-          status: "Quoted",
+        const newQuote = await RFQModel.create({
+          conversation: conversationId,
+          sender: senderId,
+          ...quoteContent,
         });
+
+        io.to(conversationId).emit("receive-quote", newQuote);
       } catch (error) {
         console.error("Error sending quote:", error);
         socket.emit("error", { message: "Error sending quote" });
       }
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
     });
   });
 

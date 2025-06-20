@@ -10,63 +10,112 @@ export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
   const { data: session } = useSession();
-
   useEffect(() => {
     if (!session?.user) return;
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || "", {
-      withCredentials: true,
-    });
+    let socketInstance;
 
-    socketInstance.on("connect", () => {
-      console.log("Socket connected");
-      setConnected(true);
-    });
+    try {
+      const socketUrl =
+        process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
+      console.log("Connecting to socket at:", socketUrl);
 
-    socketInstance.on("disconnect", () => {
-      console.log("Socket disconnected");
-      setConnected(false);
-    });
+      socketInstance = io(socketUrl, {
+        withCredentials: true,
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+      });
 
-    socketInstance.on("error", (error) => {
-      console.error("Socket error:", error);
-    });
+      socketInstance.on("connect", () => {
+        console.log("Socket connected with ID:", socketInstance.id);
+        setConnected(true);
+      });
 
-    setSocket(socketInstance);
+      socketInstance.on("disconnect", (reason) => {
+        console.log("Socket disconnected. Reason:", reason);
+        setConnected(false);
+      });
+
+      socketInstance.on("connect_error", (error) => {
+        console.error("Socket connection error:", error.message);
+      });
+
+      socketInstance.on("error", (error) => {
+        console.error("Socket error:", error);
+      });
+
+      setSocket(socketInstance);
+    } catch (error) {
+      console.error("Error initializing socket connection:", error);
+    }
 
     return () => {
-      socketInstance.disconnect();
+      if (socketInstance) {
+        console.log("Cleaning up socket connection");
+        socketInstance.disconnect();
+      }
     };
   }, [session]);
-
   const joinConversation = (conversationId) => {
-    if (!socket || !session?.user) return;
+    if (!socket || !session?.user) {
+      console.log("Cannot join conversation: socket or session not available");
+      return;
+    }
 
-    socket.emit("join-chat", {
-      conversationId,
-      userId: session.user.id,
-    });
+    try {
+      console.log(`Joining conversation: ${conversationId}`);
+      socket.emit("join-chat", {
+        conversationId,
+        userId: session.user.id,
+      });
+    } catch (error) {
+      console.error("Error joining conversation:", error);
+    }
   };
 
   const sendMessage = (conversationId, content, messageType = "text") => {
-    if (!socket || !session?.user) return;
+    if (!socket || !session?.user) {
+      console.log("Cannot send message: socket or session not available");
+      return false;
+    }
 
-    socket.emit("send-message", {
-      conversationId,
-      senderId: session.user.id,
-      content,
-      messageType,
-    });
+    try {
+      console.log(
+        `Sending ${messageType} message to conversation: ${conversationId}`
+      );
+      socket.emit("send-message", {
+        conversationId,
+        senderId: session.user.id,
+        content,
+        messageType,
+      });
+      return true;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      return false;
+    }
   };
 
   const sendQuote = (conversationId, quoteData) => {
-    if (!socket || !session?.user) return;
+    if (!socket || !session?.user) {
+      console.log("Cannot send quote: socket or session not available");
+      return false;
+    }
 
-    socket.emit("send-quote", {
-      conversationId,
-      senderId: session.user.id,
-      ...quoteData,
-    });
+    try {
+      console.log(`Sending quote to conversation: ${conversationId}`);
+      socket.emit("send-quote", {
+        conversationId,
+        senderId: session.user.id,
+        ...quoteData,
+      });
+      return true;
+    } catch (error) {
+      console.error("Error sending quote:", error);
+      return false;
+    }
   };
 
   return (
