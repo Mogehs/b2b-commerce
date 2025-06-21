@@ -128,6 +128,25 @@ const Page = ({ params }) => {
       fetchProduct();
     }
   }, [id]);
+
+  useEffect(() => {
+  const fetchFavoriteStatus = async () => {
+    if (!session?.user || !id) return;
+
+    try {
+      const res = await axios.post("/api/user/fav-product/status", {
+        productId: id,
+      });
+      setIsFavorite(res.data.favorited);
+    } catch (err) {
+      console.error("Error checking favorite status:", err);
+    }
+  };
+
+  fetchFavoriteStatus();
+}, [id, session]);
+
+
   // Handle RFQ submission with axios
   const handleSubmitRFQ = async () => {
     if (!session?.user) {

@@ -101,6 +101,24 @@ const page = () => {
     fetchSellerData();
   }, [sellerId]);
 
+  useEffect(() => {
+  const fetchFavSellerStatus = async () => {
+    if (!session?.user || !sellerId) return;
+
+    try {
+      const res = await axios.post("/api/user/fav-seller/status", {
+        sellerId,
+      });
+      setIsFavorite(res.data.favorited);
+    } catch (err) {
+      console.error("Error checking favorite seller status:", err);
+    }
+  };
+
+  fetchFavSellerStatus();
+}, [sellerId, session]);
+
+
   if (isLoading) {
     return (
       <div>

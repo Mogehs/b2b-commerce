@@ -49,9 +49,9 @@ const Home = () => {
       <Header onCategorySelect={handleCategorySelect} />
       <Hero />
       <div className="bg-[#F1F1F1] p-4">
-        <Badge first="Categories to Explore" second="View All" />
+        <Badge first="Categories to Explore" second="View All" handleCardClick={handleCardClick}  />
         <Categories />
-        <Badge first="Branding Services" second="View All" />
+        <Badge first="Branding Services" second="View All" handleCardClick={handleCardClick}  />
         <BrandingCards products={products} loading={loading} />
         <Badge first="Products you May Like" second="View All" handleCardClick={handleCardClick} />
         <Products
