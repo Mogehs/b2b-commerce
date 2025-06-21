@@ -8,6 +8,8 @@ import BPProducts from "../../components/business-profile/BPProducts";
 import Navbar from "../../components/common/Navbar";
 import { CiSearch } from "react-icons/ci";
 import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 const products = [
   {
@@ -65,6 +67,10 @@ const page = () => {
   const [sellerData, setSellerData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+    const [isFavorite, setIsFavorite] = useState(false);
+
+      const { data: session } = useSession();
+  
 
   const params = useParams();
   const sellerId = params.id;
@@ -118,6 +124,27 @@ const page = () => {
     );
   }
 
+    const toggleFavorite = async () => {
+    if (!session?.user) {
+      toast.error("Please login to add to favorites");
+      return router.push("/log-in");
+    }
+  
+    try {
+      const res = await axios.post("/api/user/fav-seller", {
+        sellerId
+      });
+      setIsFavorite(res.data.favorited);
+      toast.success(
+        res.data.favorited
+          ? "Seller added to favorites"
+          : "Seller removed from favorites"
+      );
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -140,8 +167,8 @@ const page = () => {
                 <span className="font-medium">
                   {sellerData?.phone || "Not available"}
                 </span>{" "}
-                <span className="float-right text-blue-600 cursor-pointer">
-                  Detail
+                <span className="float-right text-blue-600 cursor-pointer" onClick={toggleFavorite}>
+                      {isFavorite ? "Remove from Favourite" : "Add Seller to Favourite"}
                 </span>
               </p>
             </div>

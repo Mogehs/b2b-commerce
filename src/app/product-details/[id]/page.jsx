@@ -98,6 +98,8 @@ const Page = ({ params }) => {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
 
   // Fetch product details using axios
   useEffect(() => {
@@ -174,6 +176,32 @@ const Page = ({ params }) => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const toggleFavorite = async () => {
+  if (!session?.user) {
+    toast.error("Please login to add to favorites");
+    return router.push("/log-in");
+  }
+
+  try {
+    const res = await axios.post("/api/user/fav-product", {
+      productId: product._id,
+    });
+    setIsFavorite(res.data.favorited);
+    toast.success(
+      res.data.favorited
+        ? "Product added to favorites"
+        : "Product removed from favorites"
+    );
+  } catch (error) {
+    toast.error("Something went wrong");
+  }
+};
+
+
+    const handleClick = (id) => {
+    router.push(`/business-profile/${id}`);
   };
 
   return (
@@ -394,14 +422,14 @@ const Page = ({ params }) => {
                   </DialogContent>
                 </Dialog>
               </div>
-              <div className="flex justify-between mt-6">
-                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F]">
+              <div className="flex md:flex-row flex-col gap-4 md:gap-0 justify-between mt-6">
+                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F] hover:cursor-pointer"  onClick={toggleFavorite}>
                   <AiOutlineHeart size={18} />
-                  <span>Add to Wishlist</span>
+    {isFavorite ? "Remove from Favourite" : "Add Product to Favourite"}
                 </button>
-                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F]">
+                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F] hover:cursor-pointer" onClick={() => handleClick(product?.seller?._id)}>
                   <AiOutlineShareAlt size={18} />
-                  <span>Share</span>
+                  <span>View Seller</span>
                 </button>
               </div>
               <div className="border-t border-gray-200 pt-4 mt-6">
