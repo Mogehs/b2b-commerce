@@ -9,12 +9,12 @@ export default function SellerDashboardLayout({ children }) {
   const pathname = usePathname();
 
   const tabRoutes = {
-    Home: "/dashboard/seller",
+    // Home: "/dashboard/seller",
     Profile: "/dashboard/seller/profile",
     Message: "/dashboard/seller/chat",
-    Reviews: "/dashboard/seller/reviews",
+    // Reviews: "/dashboard/seller/reviews",
     RFQ: "/dashboard/seller/rfq",
-    History: "/dashboard/seller/history",
+    // History: "/dashboard/seller/history",
     "Store Profile": "/dashboard/seller/store-profile",
     Products: "/dashboard/seller/products",
   };

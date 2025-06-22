@@ -11,66 +11,14 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
-const products = [
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-];
-
 const page = () => {
   const [selectedComponent, setSelectedComponent] = React.useState("home");
   const [sellerData, setSellerData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-    const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-      const { data: session } = useSession();
-  
+  const { data: session } = useSession();
 
   const params = useParams();
   const sellerId = params.id;
@@ -102,22 +50,21 @@ const page = () => {
   }, [sellerId]);
 
   useEffect(() => {
-  const fetchFavSellerStatus = async () => {
-    if (!session?.user || !sellerId) return;
+    const fetchFavSellerStatus = async () => {
+      if (!session?.user || !sellerId) return;
 
-    try {
-      const res = await axios.post("/api/user/fav-seller/status", {
-        sellerId,
-      });
-      setIsFavorite(res.data.favorited);
-    } catch (err) {
-      console.error("Error checking favorite seller status:", err);
-    }
-  };
+      try {
+        const res = await axios.post("/api/user/fav-seller/status", {
+          sellerId,
+        });
+        setIsFavorite(res.data.favorited);
+      } catch (err) {
+        console.error("Error checking favorite seller status:", err);
+      }
+    };
 
-  fetchFavSellerStatus();
-}, [sellerId, session]);
-
+    fetchFavSellerStatus();
+  }, [sellerId, session]);
 
   if (isLoading) {
     return (
@@ -142,15 +89,15 @@ const page = () => {
     );
   }
 
-    const toggleFavorite = async () => {
+  const toggleFavorite = async () => {
     if (!session?.user) {
       toast.error("Please login to add to favorites");
       return router.push("/log-in");
     }
-  
+
     try {
       const res = await axios.post("/api/user/fav-seller", {
-        sellerId
+        sellerId,
       });
       setIsFavorite(res.data.favorited);
       toast.success(
@@ -168,9 +115,9 @@ const page = () => {
       <Navbar />
       <div className="h-fit py-10 bg-gray-100 font-sans p-6">
         {/* Top Section */}
-        <div className="flex flex-col lg:flex-row gap-4 p-4 bg-white">
+        <div className="flex flex-col lg:flex-row gap-20 p-4 ">
           {/* Left Section: Company Info */}
-          <div className="flex-1">
+          <div className="w-1/2">
             <h1 className="text-3xl font-bold">
               {sellerData?.name || "Store Name"}
             </h1>
@@ -185,8 +132,13 @@ const page = () => {
                 <span className="font-medium">
                   {sellerData?.phone || "Not available"}
                 </span>{" "}
-                <span className="float-right text-blue-600 cursor-pointer" onClick={toggleFavorite}>
-                      {isFavorite ? "Remove from Favourite" : "Add Seller to Favourite"}
+                <span
+                  className="float-right text-blue-600 cursor-pointer"
+                  onClick={toggleFavorite}
+                >
+                  {isFavorite
+                    ? "Remove from Favourite"
+                    : "Add Seller to Favourite"}
                 </span>
               </p>
             </div>
@@ -216,14 +168,14 @@ const page = () => {
           </div>
 
           {/* Right Section: Image */}
-          <div className="flex-1">
+          <div className="flex justify-center items-center w-1/2">
             <img
               src={
                 sellerData?.bannerImage?.url ||
                 "/business-profile/grocery-hero.png"
               }
               alt={sellerData?.name || "Store"}
-              className="rounded w-full h-full object-cover"
+              className="rounded w-100  object-cover"
             />
           </div>
         </div>
@@ -291,9 +243,7 @@ const page = () => {
       {selectedComponent === "home" && (
         <BPHome sellerId={sellerId} sellerData={sellerData} />
       )}
-      {selectedComponent === "products" && (
-        <BPProducts products={products} sellerId={sellerId} />
-      )}
+      {selectedComponent === "products" && <BPProducts sellerId={sellerId} />}
       {selectedComponent === "about" && (
         <BPAbout sellerId={sellerId} sellerData={sellerData} />
       )}

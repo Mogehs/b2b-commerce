@@ -12,7 +12,7 @@ export async function GET(req) {
 
     let stores = [];
     const projection =
-      "_id name address location description businessType businessLegalStatus yearEstablished typeOfProducts mainMarkets yearlyRevenue formattedAddress placeId serviceRadius landmark email phone secondaryPhones whatsappNumbers website productCategories offers bannerImage socialLinks certifications isActive isVerified approvedAt originalApplication createdAt updatedAt";
+      "_id owner name address location description businessType businessLegalStatus yearEstablished typeOfProducts mainMarkets yearlyRevenue formattedAddress placeId serviceRadius landmark email phone secondaryPhones whatsappNumbers website productCategories offers bannerImage socialLinks certifications isActive isVerified approvedAt originalApplication createdAt updatedAt";
 
     if (!isNaN(userLng) && !isNaN(userLat)) {
       stores = await Store.find({

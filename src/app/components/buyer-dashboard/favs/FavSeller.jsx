@@ -1,7 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import axios from "axios";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 // Product card used inside SellerCard
 const ProductCard = () => {
@@ -20,23 +24,29 @@ const ProductCard = () => {
   );
 };
 
-// Card used in Group Name 2
-const GroupTwoCard = () => (
+// Card for Group Name 2 style
+const GroupTwoCard = ({ seller, onRemove, onVisit }) => (
   <div className="bg-white border rounded-md p-4 shadow-sm w-full">
-    <div className="text-md font-bold text-black">Madina Traders</div>
-    <div className="text-sm text-gray-600">Lahore, Punjab</div>
+    <div className="text-md font-bold text-black">{seller.name}</div>
+    <div className="text-sm text-gray-600">{seller.location}</div>
     <div className="flex items-center text-sm text-gray-600 mb-2">
-      <div className="text-orange-400 text-xl mt-3">★★★★☆</div>
-      <span className="ml-2 mt-3">(994)</span>
+      <div className="text-orange-400 text-xl mt-3">
+        {Array(5)
+          .fill(0)
+          .map((_, i) => (
+            <span key={i}>{i < Math.floor(seller.rating) ? "★" : "☆"}</span>
+          ))}
+      </div>
+      <span className="ml-2 mt-3">({seller.reviewCount})</span>
     </div>
     <div className="text-sm font-medium text-black mt-2">
-      Manufacturer, Online Seller , Exporter
+      {seller.businessType}
     </div>
     <div className="text-sm font-medium text-black mt-2">
-      Garments, Industrial Machinery
+      {seller.productCategories}
     </div>
     <div className="text-sm font-medium text-black mt-2">
-      OEM, Customization, Private labeling
+      {seller.capabilities?.join(", ") || ""}
     </div>
 
     <div className="flex justify-start items-center flex-wrap gap-2 mb-3 mt-8">
@@ -62,34 +72,45 @@ const GroupTwoCard = () => (
         <button
           type="button"
           className="w-full md:w-[90px] h-[38px] bg-[#C9AF2F] text-black text-xs font-medium rounded hover:bg-yellow-600 transition-colors duration-200 cursor-pointer"
+          onClick={() => onVisit(seller.ownerId)}
         >
           Visit Store
         </button>
         <button
           type="button"
-          className="w-full md:w-[90px] h-[38px] bg-[#C9AF2F] text-black text-xs font-medium rounded hover:bg-yellow-600 transition-colors duration-200 cursor-pointer"
+          className="w-full md:w-[90px] h-[38px] bg-white border border-gray-300 text-black text-xs font-medium rounded hover:bg-red-50 hover:text-red-500 transition-colors duration-200 cursor-pointer"
+          onClick={() => onRemove(seller.ownerId)}
         >
-          Contact
+          Remove
         </button>
       </div>
     </div>
   </div>
 );
 
-// SellerCard for Group 1
-const SellerCard = () => {
+// SellerCard for Group 1 style
+const SellerCard = ({ seller, onRemove, onVisit }) => {
   return (
     <div className="bg-white shadow rounded-md p-3 space-y-4 border">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         <div className="text-left mb-4 md:mb-0 md:max-w-md">
-          <p className="text-md font-bold">Madina Traders</p>
-          <p className="text-sm text-gray-600">Lahore, Punjab</p>
+          <p className="text-md font-bold">{seller.name}</p>
+          <p className="text-sm text-gray-600">{seller.location}</p>
           <div className="flex items-center text-md text-yellow-500 mt-2">
-            ★★★★☆ <span className="text-gray-500 text-xs ml-1">(994)</span>
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <span key={i}>{i < Math.floor(seller.rating) ? "★" : "☆"}</span>
+              ))}
+            <span className="text-gray-500 text-xs ml-1">
+              ({seller.reviewCount})
+            </span>
           </div>
-          <p className="text-sm mt-4 ">Manufacturer, Online Seller, Exporter</p>
-          <p className="text-sm mt-4">Garments, Industrial Machinery</p>
-          <p className="text-sm mt-4">OEM, Customization, Private labeling</p>
+          <p className="text-sm mt-4">{seller.businessType}</p>
+          <p className="text-sm mt-4">{seller.productCategories}</p>
+          <p className="text-sm mt-4">
+            {seller.capabilities?.join(", ") || ""}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 flex-1">
@@ -104,14 +125,16 @@ const SellerCard = () => {
           <button
             type="button"
             className="w-full md:w-[150px] h-[38px] bg-[#C9AF2F] text-black text-sm font-medium rounded hover:bg-yellow-600 transition-colors duration-200 cursor-pointer"
+            onClick={() => onVisit(seller.ownerId)}
           >
             Visit Store
           </button>
           <button
             type="button"
-            className="w-full md:w-[150px] h-[38px] bg-[#C9AF2F] text-black text-sm font-medium rounded hover:bg-yellow-600 transition-colors duration-200 cursor-pointer"
+            className="w-full md:w-[150px] h-[38px] bg-white border border-gray-300 text-black text-sm font-medium rounded hover:bg-red-50 hover:text-red-500 transition-colors duration-200 cursor-pointer"
+            onClick={() => onRemove(seller.ownerId)}
           >
-            Contact
+            Remove
           </button>
         </div>
       </div>
@@ -119,29 +142,143 @@ const SellerCard = () => {
   );
 };
 
-// Final merged component
-const SellerGroups = () => {
-  return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
-      {/* Group 1 Section */}
-      <div className="bg-gray-100 p-6 space-y-6 w-full ">
-        <h2 className="text-xl font-bold mb-4">Group Name 1</h2>
-        {[1, 2, 3].map((group) => (
-          <SellerCard key={group} />
-        ))}
-      </div>
+// Final component
+export default function FavSellers() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [groupedSellers, setGroupedSellers] = useState({});
+  const [groups, setGroups] = useState([]);
 
-      {/* Group 2 Section (merged below Group 1) */}
-      <div className="bg-gray-100 p-6 space-y-6 w-full">
-        <h2 className="text-xl font-bold mb-4">Group Name 2</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <GroupTwoCard key={i} />
-          ))}
+  useEffect(() => {
+    const fetchFavoriteSellers = async () => {
+      if (!session?.user) return;
+
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/user/fav-seller/list");
+
+        if (response.data.success) {
+          setGroupedSellers(response.data.groupedSellers);
+          setGroups(Object.keys(response.data.groupedSellers));
+        } else {
+          toast.error("Failed to load favorite sellers");
+        }
+      } catch (error) {
+        console.error("Error fetching favorite sellers:", error);
+        toast.error("Error loading favorite sellers");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFavoriteSellers();
+  }, [session]);
+
+  const removeFromFavorites = async (sellerId) => {
+    try {
+      const res = await axios.post("/api/user/fav-seller", {
+        sellerId,
+      });
+
+      if (res.data.success) {
+        // Remove seller from state
+        const updatedGroupedSellers = {};
+        let isEmpty = true;
+
+        // Filter out the removed seller from each group
+        for (const groupName in groupedSellers) {
+          const filteredSellers = groupedSellers[groupName].filter(
+            (seller) => seller.ownerId !== sellerId
+          );
+
+          if (filteredSellers.length > 0) {
+            updatedGroupedSellers[groupName] = filteredSellers;
+            isEmpty = false;
+          }
+        }
+
+        setGroupedSellers(updatedGroupedSellers);
+        setGroups(Object.keys(updatedGroupedSellers));
+        toast.success("Seller removed from favorites");
+      }
+    } catch (error) {
+      toast.error("Failed to remove from favorites");
+    }
+  };
+
+  const visitSellerStore = (sellerId) => {
+    router.push(`/business-profile/${sellerId}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 text-gray-800 p-4 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9AF2F]"></div>
+      </div>
+    );
+  }
+
+  if (groups.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
+        <div className="flex justify-center items-center h-60 bg-white rounded shadow">
+          <div className="text-gray-500 text-center">
+            <p className="text-xl mb-2">No favorite sellers found</p>
+            <p>Browse sellers and add them to your favorites</p>
+            <button
+              onClick={() => router.push("/products")}
+              className="mt-4 bg-[#C9AF2F] text-black px-4 py-2 rounded hover:bg-opacity-80"
+            >
+              Browse Products
+            </button>
+          </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 text-gray-800 p-4">
+      {groups.map((groupName, index) => {
+        const sellers = groupedSellers[groupName] || [];
+        if (sellers.length === 0) return null;
+
+        return (
+          <div
+            key={groupName}
+            className="bg-gray-100 p-6 space-y-6 w-full mb-8"
+          >
+            <h2 className="text-xl font-bold mb-4">{groupName}</h2>
+
+            {/* For odd-numbered groups, use SellerCard style */}
+            {index % 2 === 0 ? (
+              <div className="space-y-6">
+                {sellers.map((seller) => (
+                  <SellerCard
+                    key={seller.ownerId}
+                    seller={seller}
+                    onRemove={removeFromFavorites}
+                    onVisit={visitSellerStore}
+                  />
+                ))}
+              </div>
+            ) : (
+              /* For even-numbered groups, use grid layout with GroupTwoCard */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                {sellers.map((seller) => (
+                  <GroupTwoCard
+                    key={seller.ownerId}
+                    seller={seller}
+                    onRemove={removeFromFavorites}
+                    onVisit={visitSellerStore}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
-};
-
-export default SellerGroups;
+}
