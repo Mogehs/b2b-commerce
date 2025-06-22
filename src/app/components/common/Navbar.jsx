@@ -169,19 +169,33 @@ export default function Navbar() {
           )}
 
           <ul className="space-y-3 mt-2">
-            <li className="flex items-center gap-2 cursor-pointer">
+            <li
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                router.push("/dashboard/buyer/profile");
+              }}
+            >
               <FaUser /> My Profile
             </li>
-            <li className="flex items-center gap-2 cursor-pointer">
+            <li
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => router.push("/dashboard/buyer/chat")}
+            >
               <BiMessageRoundedDetail /> Message
             </li>
-            <li className="flex items-center gap-2 cursor-pointer">
+            <li
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => router.push("/dashboard/buyer/favourite")}
+            >
               <FaHeart /> Favourite
             </li>
             <li className="flex items-center gap-2 cursor-pointer">
               <MdOutlineRateReview /> My Reviews
             </li>
-            <li className="flex items-center gap-2 cursor-pointer">
+            <li
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => router.push("/dashboard/buyer/rfq")}
+            >
               <BsFileEarmarkText /> My RFQ
             </li>
             {/* <li className="flex items-center gap-2 cursor-pointer">
