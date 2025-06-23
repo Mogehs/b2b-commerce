@@ -70,7 +70,7 @@ export async function PUT(req, { params }) {
     }
 
     // // Verify the user is the seller
-    // const userId = session.user.id;
+    const userId = session.user.id;
     // if (rfq.seller.toString() !== userId) {
     //   return NextResponse.json(
     //     { error: "Only the seller can update the RFQ status" },

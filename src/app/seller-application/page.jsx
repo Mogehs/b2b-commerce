@@ -327,7 +327,7 @@ const SellerProfile = () => {
                   your seller dashboard.
                 </p>
                 <Link
-                  href="/dashboard/seller"
+                  href="/dashboard/seller/profile"
                   className="inline-block mt-6 bg-[#C9AF2F] text-white font-semibold px-8 py-3 rounded-lg hover:bg-[#b79e29] transition-all duration-300 shadow-md"
                 >
                   Go to Seller Dashboard

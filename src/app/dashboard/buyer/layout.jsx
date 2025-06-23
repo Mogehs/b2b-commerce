@@ -13,9 +13,9 @@ export default function BuyerDashboardLayout({ children }) {
     Profile: "/dashboard/buyer/profile",
     Message: "/dashboard/buyer/chat",
     Favourite: "/dashboard/buyer/favourite",
-    Reviews: "/dashboard/buyer/reviews",
+    // Reviews: "/dashboard/buyer/reviews",
     "My RFQ": "/dashboard/buyer/my-rfq",
-    History: "/dashboard/buyer/history",
+    // History: "/dashboard/buyer/history",
   };
 
   // Get active tab based on current path

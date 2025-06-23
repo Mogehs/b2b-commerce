@@ -100,7 +100,6 @@ const Page = ({ params }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-
   // Fetch product details using axios
   useEffect(() => {
     const fetchProduct = async () => {
@@ -130,22 +129,21 @@ const Page = ({ params }) => {
   }, [id]);
 
   useEffect(() => {
-  const fetchFavoriteStatus = async () => {
-    if (!session?.user || !id) return;
+    const fetchFavoriteStatus = async () => {
+      if (!session?.user || !id) return;
 
-    try {
-      const res = await axios.post("/api/user/fav-product/status", {
-        productId: id,
-      });
-      setIsFavorite(res.data.favorited);
-    } catch (err) {
-      console.error("Error checking favorite status:", err);
-    }
-  };
+      try {
+        const res = await axios.post("/api/user/fav-product/status", {
+          productId: id,
+        });
+        setIsFavorite(res.data.favorited);
+      } catch (err) {
+        console.error("Error checking favorite status:", err);
+      }
+    };
 
-  fetchFavoriteStatus();
-}, [id, session]);
-
+    fetchFavoriteStatus();
+  }, [id, session]);
 
   // Handle RFQ submission with axios
   const handleSubmitRFQ = async () => {
@@ -198,28 +196,27 @@ const Page = ({ params }) => {
   };
 
   const toggleFavorite = async () => {
-  if (!session?.user) {
-    toast.error("Please login to add to favorites");
-    return router.push("/log-in");
-  }
+    if (!session?.user) {
+      toast.error("Please login to add to favorites");
+      return router.push("/log-in");
+    }
 
-  try {
-    const res = await axios.post("/api/user/fav-product", {
-      productId: product._id,
-    });
-    setIsFavorite(res.data.favorited);
-    toast.success(
-      res.data.favorited
-        ? "Product added to favorites"
-        : "Product removed from favorites"
-    );
-  } catch (error) {
-    toast.error("Something went wrong");
-  }
-};
+    try {
+      const res = await axios.post("/api/user/fav-product", {
+        productId: product._id,
+      });
+      setIsFavorite(res.data.favorited);
+      toast.success(
+        res.data.favorited
+          ? "Product added to favorites"
+          : "Product removed from favorites"
+      );
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
 
-
-    const handleClick = (id) => {
+  const handleClick = (id) => {
     router.push(`/business-profile/${id}`);
   };
 
@@ -442,11 +439,19 @@ const Page = ({ params }) => {
                 </Dialog>
               </div>
               <div className="flex md:flex-row flex-col gap-4 md:gap-0 justify-between mt-6">
-                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F] hover:cursor-pointer"  onClick={toggleFavorite}>
+                <button
+                  className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F] hover:cursor-pointer"
+                  onClick={toggleFavorite}
+                >
                   <AiOutlineHeart size={18} />
-    {isFavorite ? "Remove from Favourite" : "Add Product to Favourite"}
+                  {isFavorite
+                    ? "Remove from Favourite"
+                    : "Add Product to Favourite"}
                 </button>
-                <button className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F] hover:cursor-pointer" onClick={() => handleClick(product?.seller?._id)}>
+                <button
+                  className="flex items-center gap-1 text-gray-600 hover:text-[#C9AF2F] hover:cursor-pointer"
+                  onClick={() => handleClick(product?.seller?._id)}
+                >
                   <AiOutlineShareAlt size={18} />
                   <span>View Seller</span>
                 </button>
