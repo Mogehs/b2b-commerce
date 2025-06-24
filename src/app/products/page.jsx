@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Sidebar from "../components/products/Sidebar";
 import ProductGrid from "../components/products/ProductGrid";
@@ -13,6 +14,9 @@ const Page = () => {
   const [latestProducts, setLatestProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
+
+  const searchParams = useSearchParams();
+const searchQuery = searchParams.get("search")?.toLowerCase() || "";
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -42,10 +46,17 @@ const Page = () => {
     fetchProducts();
   }, []);
 
-  const filteredProducts =
-    selectedCategory === "All"
-      ? products
-      : products.filter((p) => p.category === selectedCategory);
+const filteredByCategory =
+  selectedCategory === "All"
+    ? products
+    : products.filter((p) => p.category === selectedCategory);
+
+const filteredProducts =
+  searchQuery && searchQuery !== "all"
+    ? filteredByCategory.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery)
+      )
+    : filteredByCategory;
 
   return (
     <>
@@ -81,7 +92,14 @@ const Page = () => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C9AF2F]"></div>
             </div>
           ) : (
-            <ProductGrid products={filteredProducts} />
+            filteredProducts.length === 0 ? (
+<div className="text-center mt-10 text-gray-600 text-xl">
+  No products found for <span className="font-semibold">"{searchQuery}"</span>
+</div>
+) : (
+  <ProductGrid products={filteredProducts} />
+)
+
           )}
         </div>
       </main>

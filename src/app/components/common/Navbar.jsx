@@ -22,6 +22,9 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const [showDialog, setShowDialog] = useState(false);
   const [showNearMe, setShowNearMe] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const dialogRef = useRef(null);
   const router = useRouter();
 
@@ -43,6 +46,12 @@ export default function Navbar() {
     await signOut();
     setShowDialog(false);
   };
+
+  const handleSearch = () => {
+  if (searchQuery.trim()) {
+    router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+  }
+};
 
   return (
     <header className="w-full bg-white border-b border-[#ACAAAA] relative">
@@ -80,14 +89,21 @@ export default function Navbar() {
           </nav>
 
           <div className="flex w-full h-[45px] lg:h-[50px] border border-[#ACAAAA] rounded overflow-hidden shadow-sm p-1 mt-1">
-            <input
-              type="text"
-              placeholder="I am Looking for"
-              className="flex-grow px-2 md:px-4 text-base outline-none"
-            />
-            <button className="bg-[#d2b33a] text-black font-semibold px-6 max-md:px-2 hover:bg-[#c4a831] transition text-base cursor-pointer">
-              Search
-            </button>
+<input
+  type="text"
+  placeholder="I am Looking for"
+  className="flex-grow px-2 md:px-4 text-base outline-none"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+/>
+<button
+  onClick={handleSearch}
+  className="bg-[#d2b33a] text-black font-semibold px-6 max-md:px-2 hover:bg-[#c4a831] transition text-base cursor-pointer"
+>
+  Search
+</button>
+
           </div>
         </div>
 
