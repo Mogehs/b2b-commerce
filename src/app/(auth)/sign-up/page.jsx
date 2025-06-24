@@ -19,6 +19,7 @@ export default function RegisterPage() {
     password: false,
   });
 
+
   const {
     register,
     handleSubmit,
@@ -48,11 +49,12 @@ export default function RegisterPage() {
       const res = await axios.post("/api/auth/register", data);
       const responseData = res.data;
 
-      if (res.status === 200) {
-        toast.success("Account created successfully! Please log in.");
-        reset();
-        router.push("/log-in");
-      } else {
+if (res.status === 200) {
+  toast.success("Account created! Please verify OTP.");
+  router.push(`/otp-verification?email=${encodeURIComponent(data.email)}`);
+  return;
+}
+ else {
         // Enhanced error handling with specific messages
         if (responseData.message) {
           // Show the specific error message from the server
