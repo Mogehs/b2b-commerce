@@ -52,7 +52,7 @@ export default function OtpVerificationPage() {
         <button
           onClick={handleVerify}
           disabled={loading}
-          className="w-full bg-[#C9AF2F] hover:bg-yellow-700 text-black font-semibold py-2 rounded disabled:opacity-50"
+          className="w-full bg-[#C9AF2F] hover:text-white text-black font-semibold py-2 rounded disabled:opacity-50 transition duration-200 hover:cursor-pointer"
         >
           {loading ? "Verifying..." : "Verify OTP"}
         </button>
