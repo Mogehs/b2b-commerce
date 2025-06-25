@@ -2,27 +2,141 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  MessageCircle,
+  Heart,
+  Star,
+  FileText,
+  Clock,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
+
+// Import socket hook if you have one, or we'll create inline socket logic
+// import { useSocket } from "@/app/context/SocketContext";
 
 const cards = [
   {
     title: "Messages",
-    subtitle: "1 New Message",
+    subtitle: "New Messages",
     highlight: true,
     link: "Message",
+    icon: MessageCircle,
+    color: "from-[#C9AF2F] to-[#B8A028]",
   },
-  { title: "Favourite Products", link: "Favourite" },
-  { title: "Favourite Supplier", link: "Favourite" },
-  { title: "My Reviews", link: "Reviews" },
-  { title: "My RFQ", link: "My RFQ" },
-  { title: "My History", link: "History" },
+  {
+    title: "Favourite Products",
+    link: "Favourite",
+    icon: Heart,
+    color: "from-red-500 to-red-600",
+  },
+  {
+    title: "Favourite Supplier",
+    link: "Favourite",
+    icon: Users,
+    color: "from-blue-500 to-blue-600",
+  },
+  // {
+  //   title: "My Reviews",
+  //   link: "Reviews",
+  //   icon: Star,
+  //   color: "from-yellow-500 to-yellow-600",
+  // },
+  {
+    title: "My RFQ",
+    link: "My RFQ",
+    icon: FileText,
+    color: "from-purple-500 to-purple-600",
+  },
+  // {
+  //   title: "My History",
+  //   link: "History",
+  //   icon: Clock,
+  //   color: "from-green-500 to-green-600",
+  // },
 ];
 
 export default function Dashboard({ activeTab }) {
   const { data: session, status } = useSession();
   const [profile, setProfile] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [socket, setSocket] = useState(null);
+
+  // Socket connection for real-time updates
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const initSocket = async () => {
+      const { io } = await import("socket.io-client");
+      const socketUrl =
+        process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
+
+      const socketInstance = io(socketUrl, {
+        withCredentials: true,
+        transports: ["websocket", "polling"],
+      });
+
+      socketInstance.on("connect", () => {
+        console.log("Connected to socket server");
+        // Join user's room for personal notifications
+        socketInstance.emit("join-user-room", session.user.id);
+      });
+
+      socketInstance.on("new-message", (data) => {
+        console.log("New message received:", data);
+        // Show toast notification for new message
+        toast.success(`New message from ${data.senderName || "someone"}`, {
+          description:
+            data.content?.length > 50
+              ? data.content.substring(0, 50) + "..."
+              : data.content,
+          action: {
+            label: "View",
+            onClick: () => activeTab("Message"),
+          },
+        });
+        // Update conversations and unread count
+        fetchConversations();
+      });
+
+      socketInstance.on("message-read", (data) => {
+        console.log("Message read:", data);
+        // Update read status
+        fetchConversations();
+      });
+
+      setSocket(socketInstance);
+
+      return () => {
+        socketInstance.disconnect();
+      };
+    };
+
+    initSocket();
+  }, [session]);
+
+  const fetchConversations = async () => {
+    try {
+      const conversationsResponse = await fetch("/api/conversations");
+      if (conversationsResponse.ok) {
+        const conversationsData = await conversationsResponse.json();
+        setConversations(conversationsData.conversations || []);
+
+        // Calculate total unread messages count
+        const unread =
+          conversationsData.conversations?.reduce((total, conv) => {
+            return total + (conv.unreadCount || 0);
+          }, 0) || 0;
+        setUnreadCount(unread);
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    }
+  };
 
   const formatMembershipDuration = (createdAt) => {
     if (!createdAt) return "Recently joined";
@@ -58,16 +172,19 @@ export default function Dashboard({ activeTab }) {
       if (status === "authenticated") {
         try {
           setLoading(true);
-          const response = await fetch("/api/user/profile");
 
-          if (!response.ok) {
+          // Fetch user profile
+          const profileResponse = await fetch("/api/user/profile");
+          if (!profileResponse.ok) {
             throw new Error("Failed to fetch profile");
           }
+          const profileData = await profileResponse.json();
+          setProfile(profileData.user);
 
-          const data = await response.json();
-          setProfile(data.user);
+          // Fetch conversations
+          await fetchConversations();
         } catch (err) {
-          console.error("Error fetching user profile:", err);
+          console.error("Error fetching data:", err);
           setError(err.message);
         } finally {
           setLoading(false);
@@ -80,23 +197,46 @@ export default function Dashboard({ activeTab }) {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f1f1f1]">
-        <Loader2 className="animate-spin" size={48} />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-[#C9AF2F]/20 border-t-[#C9AF2F] rounded-full animate-spin mx-auto"></div>
+            <div className="w-12 h-12 border-4 border-[#B8A028]/20 border-t-[#B8A028] rounded-full animate-spin mx-auto absolute top-2 left-1/2 transform -translate-x-1/2"></div>
+          </div>
+          <div className="text-xl font-semibold text-gray-700">
+            Loading dashboard...
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f1f1f1]">
-        <div className="bg-white p-6 rounded-md shadow-md">
-          <h2 className="text-xl text-red-600 font-semibold">Error</h2>
-          <p className="mt-2">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center max-w-md">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-6 py-3 bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] text-white rounded-full hover:from-[#B8A028] hover:to-[#A69124] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            Retry
+            Try Again
           </button>
         </div>
       </div>
@@ -104,81 +244,172 @@ export default function Dashboard({ activeTab }) {
   }
 
   return (
-    <div className="bg-[#f1f1f1] text-black flex flex-col items-center justify-start p-6 space-y-6">
-      {/* Profile Info */}
-      <div className="bg-white w-full max-w-6xl p-6 font-sans rounded-md border border-[#ACAAAA]">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-          <div className="flex-shrink-0">
-            {profile?.image ? (
-              <img
-                src={profile.image}
-                alt={profile.name}
-                className="w-16 h-16 rounded-full"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-xl font-bold text-gray-500">
-                  {profile?.name?.charAt(0) ||
-                    session?.user?.name?.charAt(0) ||
-                    "U"}
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Profile Info */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="flex-shrink-0">
+              {profile?.image ? (
+                <img
+                  src={profile.image}
+                  alt={profile.name}
+                  className="w-20 h-20 rounded-full border-4 border-[#C9AF2F]/20 shadow-lg"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] flex items-center justify-center shadow-lg">
+                  <span className="text-2xl font-bold text-white">
+                    {profile?.name?.charAt(0) ||
+                      session?.user?.name?.charAt(0) ||
+                      "U"}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-3xl font-bold text-gray-800">
+                  {profile?.name || session?.user?.name}
+                </h2>
+                <span className="px-3 py-1 bg-gradient-to-r from-[#C9AF2F]/10 to-[#B8A028]/10 text-[#C9AF2F] rounded-full text-sm font-medium border border-[#C9AF2F]/20">
+                  Buyer
                 </span>
               </div>
-            )}
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-black">
-              {profile?.name || session?.user?.name}
-            </h2>
-            <p className="text-sm text-gray-700 mt-1">
-              {profile?.email || session?.user?.email}
-            </p>
-            <p className="text-sm text-gray-700 mt-4">
-              {formatMembershipDuration(
-                profile?.createdAt || session?.user?.createdAt
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Dashboard Cards */}
-      <div className="w-full max-w-4xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {cards.map((card, idx) => (
-            <div
-              onClick={() => {
-                activeTab(card.link);
-              }}
-              key={idx}
-              className="bg-white shadow-md rounded-lg p-4 flex flex-col justify-between h-28 transition-transform hover:scale-105 hover:shadow-lg"
-            >
-              <div>
-                <h2 className="text-sm text-gray-600 font-semibold mb-1">
-                  {card.title}
-                </h2>
-                {card.highlight && (
-                  <p className="text-sm text-red-600 font-medium">
-                    {card.subtitle}
-                  </p>
+              <p className="text-lg text-gray-600 mb-1">
+                {profile?.email || session?.user?.email}
+              </p>
+              <p className="text-sm text-gray-500 bg-gray-50/80 px-4 py-2 rounded-lg inline-block">
+                {formatMembershipDuration(
+                  profile?.createdAt || session?.user?.createdAt
                 )}
-              </div>
-              <div className="text-sm text-gray-500">
-                Total -{" "}
-                {idx === 0
-                  ? profile?.conversations?.length || 0
-                  : idx === 1
-                  ? profile?.favProducts?.length || 0
-                  : idx === 2
-                  ? profile?.favSellers?.length || 0
-                  : idx === 3
-                  ? profile?.reviews?.length || 0
-                  : idx === 4
-                  ? profile?.rfqs?.length || 0
-                  : profile?.purchaseHistory?.length || 0}
-              </div>
+              </p>
             </div>
-          ))}
+          </div>
         </div>
+
+        {/* Dashboard Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cards.map((card, idx) => {
+            const Icon = card.icon;
+            const getCount = () => {
+              switch (idx) {
+                case 0:
+                  return conversations?.length || 0;
+                case 1:
+                  return profile?.favProducts?.length || 0;
+                case 2:
+                  return profile?.favSellers?.length || 0;
+                case 3:
+                  return profile?.reviews?.length || 0;
+                case 4:
+                  return profile?.rfqs?.length || 0;
+                case 5:
+                  return profile?.purchaseHistory?.length || 0;
+                default:
+                  return 0;
+              }
+            };
+
+            const count = getCount();
+            const showNotification = idx === 0 && unreadCount > 0;
+
+            return (
+              <div
+                onClick={() => activeTab(card.link)}
+                key={idx}
+                className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden"
+              >
+                {/* Background Gradient */}
+                <div
+                  className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:opacity-10 transition-opacity duration-300`}
+                ></div>
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div
+                      className={`w-12 h-12 bg-gradient-to-r ${card.color} rounded-xl flex items-center justify-center shadow-lg`}
+                    >
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    {showNotification && (
+                      <div className="relative">
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          {unreadCount}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-200">
+                    {card.title}
+                  </h3>
+
+                  {showNotification && (
+                    <p className="text-sm text-red-600 font-medium mb-3">
+                      {unreadCount} {card.subtitle}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-gray-700">
+                      {count}
+                    </span>
+                    <span className="text-sm text-gray-500">Total</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Recent Conversations Preview */}
+        {conversations.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] rounded-lg flex items-center justify-center mr-3">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Recent Conversations
+                </h3>
+              </div>
+              <button
+                onClick={() => activeTab("Message")}
+                className="text-[#C9AF2F] hover:text-[#B8A028] font-medium text-sm transition-colors duration-200"
+              >
+                View All
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {conversations.slice(0, 3).map((conversation, idx) => (
+                <div
+                  key={conversation._id}
+                  className="flex items-center p-3 rounded-xl bg-gray-50/50 hover:bg-[#C9AF2F]/5 transition-all duration-200 cursor-pointer"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-white font-medium text-sm">
+                      {conversation.participants?.[0]?.name?.charAt(0) || "U"}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-800">
+                      {conversation.participants?.[0]?.name || "Unknown User"}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {conversation.lastMessage?.content || "No messages yet"}
+                    </p>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {new Date(conversation.updatedAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

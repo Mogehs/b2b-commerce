@@ -16,6 +16,7 @@ export default function LoginPage() {
   const { data: session, status } = useSession();
 
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [fbLoading, setFbLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState({
     email: false,
@@ -43,13 +44,6 @@ export default function LoginPage() {
     }));
   };
 
-  // Redirect if already authenticated
-  // useEffect(() => {
-  //   if (status === "authenticated") {
-  //     router.replace("/");
-  //   }
-  // }, [status, router]);
-
   const onSubmit = async (data) => {
     try {
       setLoading(true);
@@ -63,40 +57,134 @@ export default function LoginPage() {
         toast.success("Login successful!");
         router.replace("/");
       } else {
-        toast.error(
-          res?.error || "Login failed. Please check your credentials."
-        );
+        // Handle specific error cases based on the actual error from NextAuth
+        if (res?.error) {
+          // Map NextAuth errors to user-friendly messages
+          switch (res.error) {
+            case "CredentialsSignin":
+              // Check if user exists but credentials are wrong
+              const response = await fetch("/api/user/check-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: data.email }),
+              });
+
+              if (response.ok) {
+                const userData = await response.json();
+                if (userData.exists && !userData.emailVerified) {
+                  toast.error(
+                    "Please verify your email address before logging in."
+                  );
+                  setTimeout(() => {
+                    const resend = confirm(
+                      "Would you like to resend the verification email?"
+                    );
+                    if (resend) {
+                      router.push(
+                        `/otp-verification?email=${encodeURIComponent(
+                          data.email
+                        )}`
+                      );
+                    }
+                  }, 2000);
+                } else if (userData.accountLocked) {
+                  toast.error(
+                    "Account temporarily locked due to failed login attempts. Please try again later."
+                  );
+                } else if (userData.exists) {
+                  toast.error(
+                    "Invalid password. Please check your credentials and try again."
+                  );
+                } else {
+                  toast.error(
+                    "No account found with this email address. Please check your email or sign up."
+                  );
+                }
+              } else {
+                toast.error("Invalid email or password. Please try again.");
+              }
+              break;
+            case "AccessDenied":
+              toast.error(
+                "Access denied. Please contact support if this issue persists."
+              );
+              break;
+            case "Configuration":
+              toast.error(
+                "Authentication service is temporarily unavailable. Please try again later."
+              );
+              break;
+            default:
+              toast.error(
+                "Login failed. Please check your credentials and try again."
+              );
+          }
+        } else {
+          toast.error("An unexpected error occurred. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("An unexpected error occurred.");
+      toast.error(
+        "Connection error. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
-    const res = await signIn("google", { redirect: false });
-    if (res?.error) {
-      toast.error(res.error || "Google login failed");
-    } else if (res?.ok) {
-      toast.success("Google login successful!");
-      router.replace("/");
+    try {
+      setGoogleLoading(true);
+      const res = await signIn("google", { redirect: false });
+      if (res?.error) {
+        // Handle specific Google login errors
+        if (res.error.includes("OAuthAccountNotLinked")) {
+          toast.error(
+            "This email is already associated with another login method. Please use your original login method."
+          );
+        } else if (res.error.includes("AccessDenied")) {
+          toast.error("Google login was cancelled or access was denied.");
+        } else {
+          toast.error("Google login failed. Please try again.");
+        }
+      } else if (res?.ok) {
+        toast.success("Google login successful!");
+        router.replace("/");
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error("Failed to connect with Google. Please try again.");
+    } finally {
+      setGoogleLoading(false);
     }
-    setLoading(false);
   };
 
   const handleFacebookLogin = async () => {
-    setFbLoading(true);
-    const res = await signIn("facebook", { redirect: false });
-    if (res?.error) {
-      toast.error(res.error || "Facebook login failed");
-    } else if (res?.ok) {
-      toast.success("Facebook login successful!");
-      router.replace("/");
+    try {
+      setFbLoading(true);
+      const res = await signIn("facebook", { redirect: false });
+      if (res?.error) {
+        // Handle specific Facebook login errors
+        if (res.error.includes("OAuthAccountNotLinked")) {
+          toast.error(
+            "This email is already associated with another login method. Please use your original login method."
+          );
+        } else if (res.error.includes("AccessDenied")) {
+          toast.error("Facebook login was cancelled or access was denied.");
+        } else {
+          toast.error("Facebook login failed. Please try again.");
+        }
+      } else if (res?.ok) {
+        toast.success("Facebook login successful!");
+        router.replace("/");
+      }
+    } catch (error) {
+      console.error("Facebook login error:", error);
+      toast.error("Failed to connect with Facebook. Please try again.");
+    } finally {
+      setFbLoading(false);
     }
-    setFbLoading(false);
   };
 
   if (status === "loading") {
@@ -111,19 +199,19 @@ export default function LoginPage() {
     <div>
       <Navbar />
 
-      <div className="min-h-screen flex items-center justify-center bg-[#F1F1F1] px-4">
-        <div className="bg-white p-6 sm:p-14 rounded shadow-md w-full max-w-2xl border border-[#ACAAAA]">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-black text-center sm:text-left md:ml-13">
+      <div className="min-h-screen flex items-center justify-center bg-[#F1F1F1] px-4 py-8">
+        <div className="bg-white p-6 sm:p-8 lg:p-14 rounded-lg shadow-lg w-full max-w-lg lg:max-w-2xl border border-[#ACAAAA]">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-6 text-black text-center">
             Login to your account
           </h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Input */}
             <div className="flex justify-center">
-              <div className="w-full md:w-[80%]">
+              <div className="w-full lg:w-[80%]">
                 <label
                   htmlFor="email"
-                  className="block text-md font-medium text-black mb-1"
+                  className="block text-sm sm:text-md font-medium text-black mb-2"
                 >
                   Email
                 </label>
@@ -133,7 +221,7 @@ export default function LoginPage() {
                   {...register("email")}
                   onBlur={() => handleFieldBlur("email")}
                   placeholder="Enter your Email"
-                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-2 transition-all duration-200 ${
                     touchedFields.email && errors.email
                       ? "border-red-500 focus:ring-red-500"
                       : touchedFields.email && !errors.email
@@ -142,29 +230,34 @@ export default function LoginPage() {
                   }`}
                 />
                 {touchedFields.email && errors.email && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs sm:text-sm mt-1">
                     {errors.email.message}
                   </p>
                 )}
                 {touchedFields.email &&
                   !errors.email &&
                   watchedFields.email && (
-                    <p className="text-green-500 text-sm mt-1">Valid email</p>
+                    <p className="text-green-500 text-xs sm:text-sm mt-1">
+                      ✓ Valid email
+                    </p>
                   )}
               </div>
             </div>
 
             {/* Password Input */}
             <div className="flex justify-center">
-              <div className="w-full md:w-[80%]">
-                <div className="flex justify-between items-center mb-1">
+              <div className="w-full lg:w-[80%]">
+                <div className="flex justify-between items-center mb-2">
                   <label
                     htmlFor="password"
-                    className="text-md font-medium text-black"
+                    className="text-sm sm:text-md font-medium text-black"
                   >
                     Password
                   </label>
-                  <Link href="/forget-password" className="text-sm text-black hover:underline">
+                  <Link
+                    href="/forget-password"
+                    className="text-xs sm:text-sm text-blue-600 hover:underline transition-colors duration-200"
+                  >
                     Forget Password?
                   </Link>
                 </div>
@@ -174,7 +267,7 @@ export default function LoginPage() {
                   {...register("password")}
                   onBlur={() => handleFieldBlur("password")}
                   placeholder="Enter your Password"
-                  className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-2 transition-all duration-200 ${
                     touchedFields.password && errors.password
                       ? "border-red-500 focus:ring-red-500"
                       : touchedFields.password && !errors.password
@@ -183,15 +276,15 @@ export default function LoginPage() {
                   }`}
                 />
                 {touchedFields.password && errors.password && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs sm:text-sm mt-1">
                     {errors.password.message}
                   </p>
                 )}
                 {touchedFields.password &&
                   !errors.password &&
                   watchedFields.password && (
-                    <p className="text-green-500 text-sm mt-1">
-                      Valid password
+                    <p className="text-green-500 text-xs sm:text-sm mt-1">
+                      ✓ Valid password
                     </p>
                   )}
               </div>
@@ -201,62 +294,99 @@ export default function LoginPage() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full sm:w-1/3 bg-[#C9AF2F] hover:text-white text-black font-medium py-2 rounded transition duration-200 text-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={loading}
+                className="w-full sm:w-2/3 lg:w-1/2 bg-[#C9AF2F] hover:bg-yellow-600 text-black font-medium py-2 sm:py-3 rounded-md transition-all duration-200 text-sm sm:text-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || googleLoading || fbLoading}
               >
-                <div className="flex items-center justify-center gap-5">
-                  <p>Login</p>
-                  {loading && <Loader2 className="animate-spin text-white" />}
+                <div className="flex items-center justify-center gap-2">
+                  <span>Login</span>
+                  {loading && (
+                    <Loader2 className="animate-spin w-4 h-4 text-white" />
+                  )}
                 </div>
               </button>
             </div>
 
             {/* Sign Up Link */}
-            <p className="text-sm text-center mt-2 text-black">
+            <p className="text-xs sm:text-sm text-center mt-4 text-black">
               Don't have an account?{" "}
-              <Link href="/sign-up" className="text-[#00A3E8] hover:underline">
+              <Link
+                href="/sign-up"
+                className="text-[#00A3E8] hover:underline font-medium"
+              >
                 Sign Up
               </Link>
             </p>
           </form>
 
           {/* OR Divider */}
-          <div className="my-4 flex items-center justify-center">
-            <span className="text-black">- OR -</span>
+          <div className="my-6 flex items-center justify-center">
+            <div className="border-t border-gray-300 w-full"></div>
+            <span className="bg-white px-4 text-gray-500 text-sm">OR</span>
+            <div className="border-t border-gray-300 w-full"></div>
           </div>
 
           {/* Social Login Buttons */}
           <div className="flex justify-center">
-            <div className="flex flex-col sm:flex-row gap-3 md:w-[80%] w-full max-w-xl">
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-[80%] max-w-xl">
               <button
                 onClick={handleGoogleLogin}
-                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
+                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-3 sm:px-4 py-2 sm:py-3 rounded-md hover:bg-gray-50 hover:border-gray-400 w-full sm:w-1/2 text-xs sm:text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
-                disabled={loading}
+                disabled={loading || googleLoading || fbLoading}
               >
-                <img src="/login/google.png" alt="Google" className="w-5 h-5" />
-                {loading ? "Loading..." : "Log in with Google"}
+                <img
+                  src="/login/google.png"
+                  alt="Google"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                />
+                <span>
+                  {googleLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="animate-spin w-3 h-3" />
+                      <span>Connecting...</span>
+                    </div>
+                  ) : (
+                    "Log in with Google"
+                  )}
+                </span>
               </button>
 
               <button
                 onClick={handleFacebookLogin}
-                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-4 py-2 rounded hover:bg-gray-50 w-full sm:w-[48%] text-xs"
+                className="flex items-center justify-center gap-3 border border-[#ACAAAA] px-3 sm:px-4 py-2 sm:py-3 rounded-md hover:bg-gray-50 hover:border-gray-400 w-full sm:w-1/2 text-xs sm:text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
-                disabled={fbLoading}
+                disabled={loading || googleLoading || fbLoading}
               >
                 <img
                   src="/login/facebook.png"
                   alt="Facebook"
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                 />
-                {fbLoading ? "Loading..." : "Log in with Facebook"}
+                <span>
+                  {fbLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="animate-spin w-3 h-3" />
+                      <span>Connecting...</span>
+                    </div>
+                  ) : (
+                    "Log in with Facebook"
+                  )}
+                </span>
               </button>
             </div>
           </div>
 
           {/* Terms & Conditions */}
-          <p className="text-xs text-center text-gray-500 mt-4">
-            By proceeding, you agree to our terms and conditions.
+          <p className="text-xs text-center text-gray-500 mt-6">
+            By proceeding, you agree to our{" "}
+            <Link href="/terms" className="underline hover:text-gray-700">
+              terms and conditions
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline hover:text-gray-700">
+              privacy policy
+            </Link>
+            .
           </p>
         </div>
       </div>

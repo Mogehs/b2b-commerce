@@ -11,7 +11,7 @@ const sellerApplicationSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "suspended"],
       default: "pending",
     },
 
@@ -151,6 +151,18 @@ const sellerApplicationSchema = new mongoose.Schema(
     submissionCount: {
       type: Number,
       default: 1,
+    },
+
+    // Suspension tracking
+    suspendedAt: {
+      type: Date,
+    },
+    suspendedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    suspensionReason: {
+      type: String,
     },
   },
   {

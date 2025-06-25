@@ -115,6 +115,40 @@ const userSchema = new mongoose.Schema(
         ref: "Conversation",
       },
     ],
+
+    // Email verification and security fields
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    emailVerifiedAt: {
+      type: Date,
+    },
+
+    // Password reset tracking
+    passwordResetToken: {
+      type: String,
+    },
+
+    passwordResetExpiresAt: {
+      type: Date,
+    },
+
+    // Account security
+    lastLoginAt: {
+      type: Date,
+    },
+
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+      max: 5,
+    },
+
+    accountLockedUntil: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

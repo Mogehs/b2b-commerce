@@ -36,7 +36,23 @@ export async function GET(req) {
       .sort({ updatedAt: -1 })
       .limit(limit);
 
-    return NextResponse.json({ conversations });
+    // Add unread count to each conversation
+    const conversationsWithUnread = await Promise.all(
+      conversations.map(async (conversation) => {
+        const unreadCount = await Message.countDocuments({
+          conversation: conversation._id,
+          sender: { $ne: userId }, // Messages not sent by the current user
+          read: false,
+        });
+
+        return {
+          ...conversation.toObject(),
+          unreadCount,
+        };
+      })
+    );
+
+    return NextResponse.json({ conversations: conversationsWithUnread });
   } catch (error) {
     console.error("Conversations fetch error:", error);
     return NextResponse.json(

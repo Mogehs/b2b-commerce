@@ -19,12 +19,50 @@ export const authOptions = {
 
           const user = await User.findOne({ email: credentials.email });
 
-          if (
-            !user ||
-            !(await bcrypt.compare(credentials.password, user.password))
-          ) {
+          if (!user) {
             return null;
           }
+
+          // Check if user has a password (credentials account)
+          if (!user.password) {
+            return null;
+          }
+
+          // Verify password
+          if (!(await bcrypt.compare(credentials.password, user.password))) {
+            // Increment failed login attempts
+            await User.updateOne(
+              { _id: user._id },
+              {
+                $inc: { failedLoginAttempts: 1 },
+                accountLockedUntil:
+                  user.failedLoginAttempts >= 4
+                    ? new Date(Date.now() + 15 * 60 * 1000)
+                    : undefined, // Lock for 15 minutes after 5 failed attempts
+              }
+            );
+            return null;
+          }
+
+          // Check if account is locked
+          if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
+            return null;
+          }
+
+          // Check if email is verified
+          if (!user.emailVerified) {
+            return null;
+          }
+
+          // Reset failed login attempts and update last login
+          await User.updateOne(
+            { _id: user._id },
+            {
+              failedLoginAttempts: 0,
+              accountLockedUntil: null,
+              lastLoginAt: new Date(),
+            }
+          );
 
           return {
             id: user._id.toString(),
@@ -34,6 +72,7 @@ export const authOptions = {
             provider: user.provider || "credentials",
             profile: user.profile || {},
             createdAt: user.createdAt || new Date(),
+            emailVerified: user.emailVerified,
           };
         } catch (error) {
           console.error("Authentication error:", error);

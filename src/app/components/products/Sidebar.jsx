@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { useRouter } from "next/navigation";
+import { X, Tag, Clock, TrendingUp, Star } from "lucide-react";
 
 const Sidebar = ({
   categories,
@@ -15,78 +16,114 @@ const Sidebar = ({
 
   const handleProductClick = (id) => {
     router.push(`/product-details/${id}`);
-    onClose?.(); 
+    onClose?.();
   };
 
   return (
     <div
       className={`
-        fixed md:static top-0 left-0 z-50 bg-white w-full md:w-[25%] h-full md:h-auto 
-        shadow-lg md:shadow-none p-4 md:rounded-lg overflow-y-auto transition-transform duration-300 ease-in-out
-        ${showSidebar ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+        fixed md:sticky md:top-[84px] md:h-[calc(100vh-84px)] top-0 left-0 z-40 bg-white w-full md:w-[300px] h-full
+        shadow-xl md:shadow-lg rounded-none md:rounded-none overflow-hidden transition-transform duration-300 ease-in-out
+        ${showSidebar ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
+        border-r border-gray-200
       `}
     >
-      {/* Close button on mobile */}
-      <div className="flex justify-end mb-4 md:hidden">
+      {/* Mobile Header */}
+      <div className="flex items-center justify-between p-4 md:hidden bg-gradient-to-r from-[#C9AF2F] to-[#d2b33a] text-white flex-shrink-0">
+        <h2 className="text-lg font-bold">Filter Products</h2>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-800 text-sm"
+          className="p-1 hover:bg-white/20 rounded transition-colors"
         >
-          ✕ 
+          <X size={20} />
         </button>
       </div>
 
-      {/* Categories */}
-      <h2 className="text-xl font-bold mb-4 text-center md:text-left text-[#C9AF2F]">
-        Categories
-      </h2>
-      <ul className="space-y-2 mb-6">
-        {categories.map((cat, index) => (
-          <li key={index}>
-            <button
-              onClick={() => {
-                setSelectedCategory(cat);
-                onClose?.();
-              }}
-              className={`w-full text-left px-4 py-2 rounded transition uppercase hover:cursor-pointer ${
-                selectedCategory === cat
-                  ? 'bg-[#C9AF2F] text-white'
-                  : 'hover:bg-gray-100 text-gray-700'
-              }`}
-            >
-              {cat}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {/* Scrollable Content */}
+      <div className="h-full md:h-[calc(100vh-84px)] overflow-y-auto sidebar-scrollable">
+        <div className="p-4 md:p-6">
+          {/* Categories Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Tag className="text-[#C9AF2F]" size={20} />
+              <h2 className="text-xl font-bold text-[#C9AF2F]">Categories</h2>
+            </div>
 
-      {/* Latest Products */}
-      {latestProducts.length > 0 && (
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold mb-3 text-[#C9AF2F]">Latest Products</h3>
-          <ul className="space-y-3">
-            {latestProducts.slice(0, 4).map((product) => (
-              <li
-                key={product._id}
-                className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-2 rounded"
-                onClick={() => handleProductClick(product._id)}
-              >
-                <img
-                  src={product?.images?.[0]?.url || '/no-image.jpg'}
-                  alt={product.name}
-                  className="w-10 h-10 object-cover rounded"
-                />
-                <div>
-                  <p className="text-sm text-gray-800 line-clamp-2">{product.name}</p>
-                  <p className="text-xs text-[#C9AF2F] font-semibold">
-                    ${product.price?.toFixed(2)}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+            <div className="space-y-2">
+              {categories.map((cat, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    onClose?.();
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
+                    selectedCategory === cat
+                      ? "bg-[#C9AF2F] text-white shadow-md transform scale-[1.02]"
+                      : "hover:bg-gray-100 text-gray-700 hover:translate-x-1"
+                  }`}
+                >
+                  <span className="font-medium">{cat}</span>
+                  {selectedCategory === cat && (
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Latest Products Section */}
+          {latestProducts.length > 0 && (
+            <div className="border-t pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="text-[#C9AF2F]" size={20} />
+                <h3 className="text-lg font-semibold text-[#C9AF2F]">
+                  Latest Products
+                </h3>
+              </div>
+
+              <div className="space-y-3">
+                {latestProducts.slice(0, 4).map((product) => (
+                  <div
+                    key={product._id}
+                    className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200 border border-gray-100 hover:border-[#C9AF2F]/30 hover:shadow-sm"
+                    onClick={() => handleProductClick(product._id)}
+                  >
+                    <div className="relative">
+                      <img
+                        src={product?.images?.[0]?.url || "/no-image.jpg"}
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 line-clamp-2 mb-1">
+                        {product.name}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-[#C9AF2F]">
+                          PKR {product.price?.toLocaleString()}
+                        </p>
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <Clock size={10} />
+                          New
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 p-3 bg-gradient-to-r from-[#C9AF2F]/10 to-[#d2b33a]/10 rounded-lg border border-[#C9AF2F]/20">
+                <p className="text-xs text-gray-600 text-center">
+                  ✨ Fresh arrivals updated daily
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

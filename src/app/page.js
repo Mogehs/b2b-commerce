@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import Navbar from "./components/common/Navbar";
@@ -43,17 +43,33 @@ const Home = () => {
     router.push(`/products`);
   };
 
+  const handleSuppliersClick = () => {
+    router.push("/suppliers");
+  };
+
   return (
     <div className="overflow-hidden">
       <Navbar />
       <Header onCategorySelect={handleCategorySelect} />
       <Hero />
       <div className="bg-[#F1F1F1] p-4">
-        <Badge first="Categories to Explore" second="View All" handleCardClick={handleCardClick}  />
+        <Badge
+          first="Categories to Explore"
+          second="View All"
+          handleCardClick={handleCardClick}
+        />
         <Categories />
-        <Badge first="Branding Services" second="View All" handleCardClick={handleCardClick}  />
+        <Badge
+          first="Branding Services"
+          second="View All"
+          handleCardClick={handleCardClick}
+        />
         <BrandingCards products={products} loading={loading} />
-        <Badge first="Products you May Like" second="View All" handleCardClick={handleCardClick} />
+        <Badge
+          first="Products you May Like"
+          second="View All"
+          handleCardClick={handleCardClick}
+        />
         <Products
           selectedCategory={selectedCategory}
           products={products}
@@ -61,7 +77,11 @@ const Home = () => {
         />
         <Badge first="Popular Brands" />
         <Brands />
-        <Badge first="Find Supplier by Region" />
+        <Badge
+          first="Find Supplier by Region"
+          second="View All"
+          handleCardClick={handleSuppliersClick}
+        />
         <Region />
       </div>
     </div>

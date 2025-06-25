@@ -21,8 +21,23 @@ const messageSchema = new mongoose.Schema(
 
     messageType: {
       type: String,
-      enum: ["text", "image", "quote", "rfq"],
+      enum: ["text", "image", "quote", "rfq", "warning"],
       default: "text",
+    },
+
+    warningType: {
+      type: String,
+      enum: [
+        "policy_violation",
+        "quality_concern",
+        "delivery_issue",
+        "final_warning",
+      ],
+    },
+
+    isAdminMessage: {
+      type: Boolean,
+      default: false,
     },
 
     read: {

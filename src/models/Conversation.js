@@ -14,7 +14,7 @@ const conversationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["general", "rfq"],
+      enum: ["general", "rfq", "admin_seller"],
       default: "general",
     },
     rfq: {
@@ -24,6 +24,10 @@ const conversationSchema = new mongoose.Schema(
     lastMessage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {

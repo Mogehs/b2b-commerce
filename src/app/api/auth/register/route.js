@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import connectMongo from "@/lib/mongoose";
 import User from "@/models/User";
+import OTP from "@/models/OTP";
+import { sendEmail, generateOTP } from "@/lib/email";
 
 export async function POST(request) {
   try {
@@ -71,11 +73,33 @@ export async function POST(request) {
     // Save user to database
     const savedUser = await newUser.save();
 
+    // Generate OTP for email verification
+    const otp = generateOTP();
+
+    // Save OTP to database
+    await OTP.create({
+      email: savedUser.email,
+      otp: otp,
+      purpose: "email_verification",
+    });
+
+    // Send verification email
+    const emailResult = await sendEmail(savedUser.email, "email_verification", {
+      name: savedUser.name,
+      otp: otp,
+    });
+
+    if (!emailResult.success) {
+      console.error("Failed to send verification email:", emailResult.error);
+      // Don't fail registration if email fails, but log it
+    }
+
     // Return success without sensitive info
     return NextResponse.json(
       {
         success: true,
-        message: "Account created successfully! Please log in.",
+        message:
+          "Account created successfully! Please check your email for verification code.",
         user: {
           id: savedUser._id,
           name: savedUser.name,
@@ -83,7 +107,7 @@ export async function POST(request) {
           role: savedUser.role,
         },
       },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Error in signup:", error);
