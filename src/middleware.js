@@ -13,6 +13,11 @@ export default withAuth(
         return NextResponse.redirect(new URL("/", req.url));
       }
     }
+    if (pathname.startsWith("/dashboard/admin")) {
+      if (userRole !== "admin") {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
+    }
 
     if (pathname.startsWith("/seller-application")) {
       if (userRole === "seller" || userRole === "admin") {
