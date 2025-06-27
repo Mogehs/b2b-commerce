@@ -1,7 +1,6 @@
 import connectMongo from "@/lib/mongoose";
 import User from "@/models/User";
 import SellerApplication from "@/models/SellerApplication";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { NextResponse } from "next/server";
@@ -56,7 +55,8 @@ export async function POST(request) {
     }
 
     const formData = await request.formData();
-    const businessName = formData.get("name"); // Parse location JSON string into an object
+    const businessName = formData.get("name");
+    const imageUrl = formData.get("imageUrl"); // Get image URL instead of file
     let location;
     try {
       location = JSON.parse(formData.get("location"));
@@ -110,11 +110,12 @@ export async function POST(request) {
       !businessAddress ||
       !businessPhone ||
       !businessEmail ||
-      !landmark
+      !landmark ||
+      !imageUrl
     ) {
       return NextResponse.json(
         {
-          message: "Please fill in all required fields",
+          message: "Please fill in all required fields including image URL",
         },
         { status: 400 }
       );
@@ -130,100 +131,46 @@ export async function POST(request) {
       );
     }
 
-    let titleImage = null;
-    const imageFile = formData.get("image");
-
-    if (imageFile && imageFile instanceof File) {
-      // Validate file size (5MB limit)
-      if (imageFile.size > 5 * 1024 * 1024) {
-        return NextResponse.json(
-          {
-            message: "Image file size must be less than 5MB",
-          },
-          { status: 400 }
-        );
-      }
-
-      // Validate file type
-      const allowedTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-      ];
-      if (!allowedTypes.includes(imageFile.type)) {
-        return NextResponse.json(
-          {
-            message: "Only JPEG, PNG, and WebP image files are allowed",
-          },
-          { status: 400 }
-        );
-      }
-
-      try {
-        console.log(
-          `Processing image: ${imageFile.name}, Size: ${imageFile.size}, Type: ${imageFile.type}`
-        );
-
-        const bytes = await imageFile.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // Validate buffer
-        if (!buffer || buffer.length === 0) {
-          throw new Error("Failed to process image file");
-        }
-
-        console.log(
-          `Image buffer created successfully, size: ${buffer.length} bytes`
-        );
-
-        const uploadResult = await uploadToCloudinary(
-          buffer,
-          "seller-applications",
-          {
-            public_id: `seller_${userId}_${Date.now()}`,
-            overwrite: true,
-          }
-        );
-
-        titleImage = {
-          url: uploadResult.url,
-          publicId: uploadResult.publicId,
-          width: uploadResult.width,
-          height: uploadResult.height,
-          format: uploadResult.format,
-          bytes: uploadResult.bytes,
-        };
-
-        console.log("Image uploaded successfully:", titleImage.url);
-      } catch (uploadError) {
-        console.error("Image upload error details:", {
-          message: uploadError.message,
-          stack: uploadError.stack,
-          fileName: imageFile.name,
-          fileSize: imageFile.size,
-          fileType: imageFile.type,
-        });
-
-        return NextResponse.json(
-          {
-            message: `Failed to upload image: ${uploadError.message}. Please try again with a different image.`,
-            error:
-              process.env.NODE_ENV === "development"
-                ? uploadError.message
-                : undefined,
-          },
-          { status: 400 }
-        );
-      }
-    } else {
+    // Validate image URL
+    try {
+      new URL(imageUrl);
+    } catch (error) {
       return NextResponse.json(
         {
-          message: "Title image is required",
+          message: "Please provide a valid image URL",
         },
         { status: 400 }
       );
     }
+
+    // Check if URL appears to be an image
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    const lowerUrl = imageUrl.toLowerCase();
+    const isValidImageUrl =
+      imageExtensions.some((ext) => lowerUrl.includes(ext)) ||
+      lowerUrl.includes("imgur.com") ||
+      lowerUrl.includes("cloudinary.com") ||
+      lowerUrl.includes("unsplash.com") ||
+      lowerUrl.includes("pexels.com");
+
+    if (!isValidImageUrl) {
+      return NextResponse.json(
+        {
+          message:
+            "URL should point to an image file or be from a trusted image hosting service",
+        },
+        { status: 400 }
+      );
+    }
+
+    const titleImage = {
+      url: imageUrl,
+      publicId: null, // Not applicable for external URLs
+      width: null, // Will be determined when displayed
+      height: null, // Will be determined when displayed
+      format: null, // Will be determined when displayed
+      bytes: null, // Not applicable for external URLs
+    };
     const applicationData = {
       businessName,
       location,

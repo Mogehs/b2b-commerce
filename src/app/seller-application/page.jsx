@@ -207,15 +207,13 @@ const SellerProfile = () => {
       formData.append("location", JSON.stringify(selectedLocation));
       formData.append("serviceRadius", serviceRadius.toString());
       Object.keys(data).forEach((key) => {
-        if (key === "image" && data[key]?.[0]) {
-          formData.append("image", data[key][0]);
-        } else if (key !== "location" && data[key]) {
+        if (key !== "location" && data[key]) {
           formData.append(key, data[key]);
         }
       });
       const response = await axios.post("/api/seller/apply", formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         withCredentials: true,
         timeout: 60000,
@@ -351,11 +349,11 @@ const SellerProfile = () => {
     },
     { label: "Offers", name: "offers", type: "text", required: true },
     {
-      label: "Title Picture",
-      name: "image",
-      type: "file",
+      label: "Title Picture URL",
+      name: "imageUrl",
+      type: "url",
       required: true,
-      accept: "image/*",
+      placeholder: "https://example.com/your-business-image.jpg",
     },
     { label: "Website (Optional)", name: "website", type: "url" },
     {
@@ -408,6 +406,7 @@ const SellerProfile = () => {
                   </label>
                   <input
                     type={field.type}
+                    placeholder={field.placeholder || ""}
                     {...register(field.name, {
                       onChange: () => trigger(field.name),
                     })}
@@ -418,6 +417,12 @@ const SellerProfile = () => {
                         : "border-gray-300 focus:ring-[#C9AF2F]"
                     }`}
                   />
+                  {field.name === "imageUrl" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Provide a direct link to your business image (JPG, PNG,
+                      WebP formats recommended)
+                    </p>
+                  )}
                   {errors[field.name] && (
                     <p className="text-red-500 text-sm mt-1 animate-pulse">
                       {errors[field.name].message}

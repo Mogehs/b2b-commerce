@@ -86,20 +86,22 @@ export const sellerApplicationSchema = z.object({
   twitter: urlSchema,
   linkedin: urlSchema,
 
-  image: z
-    .any()
-    .refine((files) => files?.length > 0, "Title image is required")
-    .refine(
-      (files) => files?.[0]?.size <= 5 * 1024 * 1024,
-      "Image size must be less than 5MB"
-    )
-    .refine(
-      (files) =>
-        ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
-          files?.[0]?.type
-        ),
-      "Only .jpg, .jpeg, .png and .webp formats are supported"
-    ),
+  imageUrl: z
+    .string()
+    .url("Please provide a valid image URL")
+    .min(1, "Image URL is required")
+    .refine((url) => {
+      // Check if URL ends with image extension
+      const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+      const lowerUrl = url.toLowerCase();
+      return (
+        imageExtensions.some((ext) => lowerUrl.includes(ext)) ||
+        lowerUrl.includes("imgur.com") ||
+        lowerUrl.includes("cloudinary.com") ||
+        lowerUrl.includes("unsplash.com") ||
+        lowerUrl.includes("pexels.com")
+      );
+    }, "URL should point to an image (jpg, png, webp, gif) or be from a trusted image hosting service"),
 });
 
 export const locationSchema = z.object({
