@@ -25,6 +25,7 @@ console.log("Configuring Cloudinary with:", {
   cloud_name: cloudName,
   api_key: apiKey.substring(0, 6) + "...", // Only show first 6 chars for security
   has_secret: !!apiSecret,
+  environment: process.env.NODE_ENV
 });
 
 cloudinary.config({
@@ -32,6 +33,7 @@ cloudinary.config({
   api_key: apiKey,
   api_secret: apiSecret,
   secure: true, // Force HTTPS
+  timeout: 120000, // 2 minutes timeout for production
 });
 
 export const uploadToCloudinary = async (
@@ -40,10 +42,28 @@ export const uploadToCloudinary = async (
   options = {}
 ) => {
   return new Promise((resolve, reject) => {
+    // Validate Cloudinary configuration
+    if (
+      !cloudinary ||
+      !cloudinary.uploader ||
+      typeof cloudinary.uploader.upload_stream !== "function"
+    ) {
+      return reject(new Error("Cloudinary is not configured correctly."));
+    }
+
     // Validate input
-    if (!fileBuffer || fileBuffer.length === 0) {
-      reject(new Error("Invalid file buffer provided"));
-      return;
+    if (
+      !fileBuffer ||
+      !Buffer.isBuffer(fileBuffer) ||
+      fileBuffer.length === 0
+    ) {
+      return reject(new Error("Invalid or empty file buffer provided."));
+    }
+
+    // Optional: File size limit check (e.g., 10MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (fileBuffer.length > MAX_SIZE) {
+      return reject(new Error("File size exceeds 10MB limit."));
     }
 
     const uploadOptions = {
@@ -52,9 +72,9 @@ export const uploadToCloudinary = async (
       transformation: [
         { width: 1200, height: 900, crop: "limit" },
         { quality: "auto:good" },
-        { format: "auto" },
+        { fetch_format: "auto" }, // Changed `format` to `fetch_format` for clarity
       ],
-      timeout: 60000, // 60 seconds timeout
+      timeout: 60000, // 60 seconds
       ...options,
     };
 
@@ -69,48 +89,52 @@ export const uploadToCloudinary = async (
           console.error("Cloudinary upload error details:", {
             message: error.message,
             http_code: error.http_code,
-            error: error,
+            error,
           });
 
-          // Handle specific error types
-          let errorMessage = "Unknown error";
-          if (error.http_code === 500) {
-            errorMessage =
-              "Cloudinary server error (500). This could be due to invalid credentials, quota exceeded, or service issues. Please check your Cloudinary account.";
-          } else if (error.http_code === 401) {
-            errorMessage =
-              "Invalid Cloudinary credentials (401). Please check your API key and secret.";
-          } else if (error.http_code === 403) {
-            errorMessage =
-              "Cloudinary access forbidden (403). Please check your account permissions.";
-          } else if (error.message) {
-            errorMessage = error.message;
+          let errorMessage = "Image upload failed: ";
+
+          switch (error.http_code) {
+            case 500:
+              errorMessage +=
+                "Cloudinary server error (500). Check credentials or service status.";
+              break;
+            case 401:
+              errorMessage +=
+                "Unauthorized (401). Verify your API key and secret.";
+              break;
+            case 403:
+              errorMessage +=
+                "Access forbidden (403). Check your account permissions.";
+              break;
+            default:
+              errorMessage += error.message || "Unknown error occurred.";
           }
 
-          reject(new Error(`Image upload failed: ${errorMessage}`));
-        } else {
-          console.log("Cloudinary upload successful:", {
-            public_id: result.public_id,
-            url: result.secure_url,
-            format: result.format,
-            bytes: result.bytes,
-          });
-          resolve({
-            url: result.secure_url,
-            publicId: result.public_id,
-            width: result.width,
-            height: result.height,
-            format: result.format,
-            bytes: result.bytes,
-          });
+          return reject(new Error(errorMessage));
         }
+
+        console.log("Cloudinary upload successful:", {
+          public_id: result.public_id,
+          url: result.secure_url,
+          format: result.format,
+          bytes: result.bytes,
+        });
+
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+          width: result.width,
+          height: result.height,
+          format: result.format,
+          bytes: result.bytes,
+        });
       }
     );
 
-    // Handle stream errors
-    uploadStream.on("error", (error) => {
-      console.error("Upload stream error:", error);
-      reject(new Error(`Upload stream failed: ${error.message}`));
+    uploadStream.on("error", (streamError) => {
+      console.error("Upload stream error:", streamError);
+      reject(new Error(`Upload stream failed: ${streamError.message}`));
     });
 
     uploadStream.end(fileBuffer);

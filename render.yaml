@@ -9,16 +9,52 @@ services:
         value: production
       - key: PORT
         value: 10000
-    # Add your environment variables here
-    # - key: MONGODB_URI
-    #   sync: false
-    # - key: NEXTAUTH_SECRET
-    #   sync: false
-    # - key: NEXTAUTH_URL
-    #   sync: false
-    # - key: CLOUDINARY_CLOUD_NAME
-    #   sync: false
-    # - key: CLOUDINARY_API_KEY
-    #   sync: false
-    # - key: CLOUDINARY_API_SECRET
-    #   sync: false
+      # Database
+      - key: MONGODB_URI
+        sync: false
+      # Authentication
+      - key: AUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      # OAuth
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_CLIENT_ID
+        sync: false
+      - key: FACEBOOK_CLIENT_SECRET
+        sync: false
+      # Cloudinary (REQUIRED for image uploads)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # Email
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        sync: false
+      - key: EMAIL_SECURE
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_FROM_NAME
+        sync: false
+      # Maps
+      - key: NEXT_PUBLIC_MAPBOX_TOKEN
+        sync: false
+      # Site URL for production
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SOCKET_URL
+        sync: false

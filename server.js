@@ -2,6 +2,15 @@ import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
 import { initSocketServer } from "./src/lib/socket.js";
+import { validateEnvironment } from "./src/lib/validateEnv.js";
+
+// Validate environment variables on startup
+try {
+  validateEnvironment();
+} catch (error) {
+  console.error("Environment validation failed:", error.message);
+  process.exit(1);
+}
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
