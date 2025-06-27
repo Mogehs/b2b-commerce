@@ -1,4 +1,6 @@
 const nextConfig = {
+  output: 'standalone',
+  serverExternalPackages: ['mongoose'],
   images: {
     remotePatterns: [
       {
@@ -7,7 +9,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "your-other-domains.com",
+        hostname: "platform-lookaside.fbsbx.com",
       },
       {
         protocol: "https",
@@ -15,11 +17,13 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config) => {
-    config.externals.push({
-      bufferutil: "bufferutil",
-      "utf-8-validate": "utf-8-validate",
-    });
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push({
+        bufferutil: "bufferutil",
+        "utf-8-validate": "utf-8-validate",
+      });
+    }
     return config;
   },
 };

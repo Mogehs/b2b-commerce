@@ -9,9 +9,16 @@ const SocketContext = createContext(null);
 export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
+  const [isProduction, setIsProduction] = useState(false);
   const { data: session } = useSession();
+
   useEffect(() => {
-    if (!session?.user) return;
+    // Check if we're in production (Vercel) where WebSockets might not work
+    setIsProduction(window.location.hostname.includes('vercel.app'));
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user || isProduction) return; // Skip socket in production
 
     let socketInstance;
 
@@ -57,7 +64,7 @@ export function SocketProvider({ children }) {
         socketInstance.disconnect();
       }
     };
-  }, [session]);
+  }, [session, isProduction]);
   const joinConversation = (conversationId) => {
     if (!socket || !session?.user) {
       console.log("Cannot join conversation: socket or session not available");
@@ -122,7 +129,8 @@ export function SocketProvider({ children }) {
     <SocketContext.Provider
       value={{
         socket,
-        connected,
+        connected: connected && !isProduction,
+        isProduction,
         joinConversation,
         sendMessage,
         sendQuote,
