@@ -134,6 +134,7 @@ export async function POST(request) {
     const imageFile = formData.get("image");
 
     if (imageFile && imageFile instanceof File) {
+      // Validate file size (5MB limit)
       if (imageFile.size > 5 * 1024 * 1024) {
         return NextResponse.json(
           {
@@ -143,18 +144,38 @@ export async function POST(request) {
         );
       }
 
-      if (!imageFile.type.startsWith("image/")) {
+      // Validate file type
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+      ];
+      if (!allowedTypes.includes(imageFile.type)) {
         return NextResponse.json(
           {
-            message: "Only image files are allowed",
+            message: "Only JPEG, PNG, and WebP image files are allowed",
           },
           { status: 400 }
         );
       }
 
       try {
+        console.log(
+          `Processing image: ${imageFile.name}, Size: ${imageFile.size}, Type: ${imageFile.type}`
+        );
+
         const bytes = await imageFile.arrayBuffer();
         const buffer = Buffer.from(bytes);
+
+        // Validate buffer
+        if (!buffer || buffer.length === 0) {
+          throw new Error("Failed to process image file");
+        }
+
+        console.log(
+          `Image buffer created successfully, size: ${buffer.length} bytes`
+        );
 
         const uploadResult = await uploadToCloudinary(
           buffer,
@@ -173,12 +194,24 @@ export async function POST(request) {
           format: uploadResult.format,
           bytes: uploadResult.bytes,
         };
+
+        console.log("Image uploaded successfully:", titleImage.url);
       } catch (uploadError) {
-        console.error("Image upload error:", uploadError);
+        console.error("Image upload error details:", {
+          message: uploadError.message,
+          stack: uploadError.stack,
+          fileName: imageFile.name,
+          fileSize: imageFile.size,
+          fileType: imageFile.type,
+        });
+
         return NextResponse.json(
           {
-            message:
-              "Failed to upload image. Please try again with a different image.",
+            message: `Failed to upload image: ${uploadError.message}. Please try again with a different image.`,
+            error:
+              process.env.NODE_ENV === "development"
+                ? uploadError.message
+                : undefined,
           },
           { status: 400 }
         );

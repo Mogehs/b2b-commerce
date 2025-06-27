@@ -1,9 +1,22 @@
 import { v2 as cloudinary } from "cloudinary";
 
+// Validate environment variables
+if (
+  !process.env.CLOUDINARY_CLOUD_NAME ||
+  !process.env.CLOUDINARY_API_KEY ||
+  !process.env.CLOUDINARY_API_SECRET
+) {
+  console.error("Missing Cloudinary environment variables");
+  throw new Error(
+    "Cloudinary configuration is missing required environment variables"
+  );
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true, // Force HTTPS
 });
 
 export const uploadToCloudinary = async (
@@ -12,23 +25,49 @@ export const uploadToCloudinary = async (
   options = {}
 ) => {
   return new Promise((resolve, reject) => {
+    // Validate input
+    if (!fileBuffer || fileBuffer.length === 0) {
+      reject(new Error("Invalid file buffer provided"));
+      return;
+    }
+
     const uploadOptions = {
       resource_type: "auto",
       folder: folder,
       transformation: [
-        { width: 800, height: 600, crop: "limit" },
-        { quality: "auto" },
+        { width: 1200, height: 900, crop: "limit" },
+        { quality: "auto:good" },
         { format: "auto" },
       ],
+      timeout: 60000, // 60 seconds timeout
       ...options,
     };
 
-    cloudinary.uploader
-      .upload_stream(uploadOptions, (error, result) => {
+    console.log(
+      `Uploading to Cloudinary - Folder: ${folder}, Size: ${fileBuffer.length} bytes`
+    );
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      uploadOptions,
+      (error, result) => {
         if (error) {
-          console.error("Cloudinary upload error:", error);
-          reject(new Error(`Image upload failed: ${error.message}`));
+          console.error("Cloudinary upload error details:", {
+            message: error.message,
+            http_code: error.http_code,
+            error: error,
+          });
+          reject(
+            new Error(
+              `Image upload failed: ${error.message || "Unknown error"}`
+            )
+          );
         } else {
+          console.log("Cloudinary upload successful:", {
+            public_id: result.public_id,
+            url: result.secure_url,
+            format: result.format,
+            bytes: result.bytes,
+          });
           resolve({
             url: result.secure_url,
             publicId: result.public_id,
@@ -38,8 +77,16 @@ export const uploadToCloudinary = async (
             bytes: result.bytes,
           });
         }
-      })
-      .end(fileBuffer);
+      }
+    );
+
+    // Handle stream errors
+    uploadStream.on("error", (error) => {
+      console.error("Upload stream error:", error);
+      reject(new Error(`Upload stream failed: ${error.message}`));
+    });
+
+    uploadStream.end(fileBuffer);
   });
 };
 
