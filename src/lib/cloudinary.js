@@ -25,7 +25,7 @@ console.log("Configuring Cloudinary with:", {
   cloud_name: cloudName,
   api_key: apiKey.substring(0, 6) + "...", // Only show first 6 chars for security
   has_secret: !!apiSecret,
-  environment: process.env.NODE_ENV
+  environment: process.env.NODE_ENV,
 });
 
 cloudinary.config({

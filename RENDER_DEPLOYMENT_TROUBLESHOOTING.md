@@ -3,6 +3,7 @@
 ## ❗ CRITICAL: Why Image Uploads Fail on Render
 
 ### 1. **Environment Variables Missing**
+
 - ✅ Set all Cloudinary variables in Render Dashboard
 - ✅ Verify no extra spaces in environment values
 - ✅ Test with `/api/debug/env` endpoint
@@ -44,6 +45,7 @@ NEXT_PUBLIC_SOCKET_URL=https://your-app-name.onrender.com
 ### 3. **Deployment Steps**
 
 1. **Push Code to Git**
+
    ```bash
    git add .
    git commit -m "Fix Cloudinary for Render deployment"
@@ -51,6 +53,7 @@ NEXT_PUBLIC_SOCKET_URL=https://your-app-name.onrender.com
    ```
 
 2. **In Render Dashboard:**
+
    - Go to your service settings
    - Add ALL environment variables above
    - **Replace `your-app-name` with your actual Render app name**
@@ -64,12 +67,12 @@ NEXT_PUBLIC_SOCKET_URL=https://your-app-name.onrender.com
 
 ### 4. **Common Issues & Solutions**
 
-| Issue | Solution |
-|-------|----------|
-| "Environment variables missing" | Set ALL variables in Render dashboard |
-| "Invalid credentials" | Copy-paste credentials exactly (no spaces) |
-| "500 server error" | Check Cloudinary account is active |
-| "Timeout errors" | Increase timeout in production |
+| Issue                           | Solution                                   |
+| ------------------------------- | ------------------------------------------ |
+| "Environment variables missing" | Set ALL variables in Render dashboard      |
+| "Invalid credentials"           | Copy-paste credentials exactly (no spaces) |
+| "500 server error"              | Check Cloudinary account is active         |
+| "Timeout errors"                | Increase timeout in production             |
 
 ### 5. **Debug Commands After Deployment**
 
@@ -89,9 +92,11 @@ curl https://your-app-name.onrender.com/api/test/cloudinary
 After deployment, update these in your OAuth providers:
 
 **Google Console:**
+
 - Add: `https://your-app-name.onrender.com/api/auth/callback/google`
 
 **Facebook Developer:**
+
 - Add: `https://your-app-name.onrender.com/api/auth/callback/facebook`
 
 ---
