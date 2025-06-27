@@ -6,6 +6,8 @@ import connectMongo from "@/lib/mongoose";
 import User from "@/models/User";
 
 export const authOptions = {
+  secret: process.env.AUTH_SECRET,
+
   providers: [
     CredentialsProvider({
       name: "Credentials",

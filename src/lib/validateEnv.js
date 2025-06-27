@@ -6,7 +6,6 @@ export const validateEnvironment = () => {
 
     // Authentication
     AUTH_SECRET: process.env.AUTH_SECRET,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 
     // Cloudinary (Critical for image uploads)
