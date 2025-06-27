@@ -14,11 +14,28 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     // Check if we're in production (Vercel) where WebSockets might not work
-    setIsProduction(window.location.hostname.includes("vercel.app"));
+    const isVercel =
+      window.location.hostname.includes("vercel.app") ||
+      window.location.hostname.includes(".vercel.app") ||
+      process.env.NODE_ENV === "production";
+    setIsProduction(isVercel);
+
+    // Log the environment for debugging
+    console.log("Environment check:", {
+      hostname: window.location.hostname,
+      nodeEnv: process.env.NODE_ENV,
+      isProduction: isVercel,
+    });
   }, []);
 
   useEffect(() => {
-    if (!session?.user || isProduction) return; // Skip socket in production
+    if (!session?.user) return;
+
+    // Skip socket connection in production/Vercel environment
+    if (isProduction) {
+      console.log("Skipping socket connection in production environment");
+      return;
+    }
 
     let socketInstance;
 

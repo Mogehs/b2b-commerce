@@ -16,8 +16,8 @@ app.prepare().then(() => {
   // Initialize Socket.io
   initSocketServer(server);
 
-  server.listen(process.env.PORT || 3000, (err) => {
+  server.listen(process.env.PORT || 3000, "0.0.0.0", (err) => {
     if (err) throw err;
-    console.log(`> Ready on http://localhost:${process.env.PORT || 3000}`);
+    console.log(`> Ready on http://0.0.0.0:${process.env.PORT || 3000}`);
   });
 });
