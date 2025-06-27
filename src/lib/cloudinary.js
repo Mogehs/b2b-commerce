@@ -12,10 +12,25 @@ if (
   );
 }
 
+// Validate credentials format
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME.trim();
+const apiKey = process.env.CLOUDINARY_API_KEY.trim();
+const apiSecret = process.env.CLOUDINARY_API_SECRET.trim();
+
+if (cloudName.length === 0 || apiKey.length === 0 || apiSecret.length === 0) {
+  throw new Error("Cloudinary credentials cannot be empty");
+}
+
+console.log("Configuring Cloudinary with:", {
+  cloud_name: cloudName,
+  api_key: apiKey.substring(0, 6) + "...", // Only show first 6 chars for security
+  has_secret: !!apiSecret,
+});
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
   secure: true, // Force HTTPS
 });
 
@@ -56,11 +71,23 @@ export const uploadToCloudinary = async (
             http_code: error.http_code,
             error: error,
           });
-          reject(
-            new Error(
-              `Image upload failed: ${error.message || "Unknown error"}`
-            )
-          );
+
+          // Handle specific error types
+          let errorMessage = "Unknown error";
+          if (error.http_code === 500) {
+            errorMessage =
+              "Cloudinary server error (500). This could be due to invalid credentials, quota exceeded, or service issues. Please check your Cloudinary account.";
+          } else if (error.http_code === 401) {
+            errorMessage =
+              "Invalid Cloudinary credentials (401). Please check your API key and secret.";
+          } else if (error.http_code === 403) {
+            errorMessage =
+              "Cloudinary access forbidden (403). Please check your account permissions.";
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          reject(new Error(`Image upload failed: ${errorMessage}`));
         } else {
           console.log("Cloudinary upload successful:", {
             public_id: result.public_id,
@@ -128,6 +155,50 @@ export const deleteMultipleFromCloudinary = async (publicIds) => {
   } catch (error) {
     console.error("Error deleting multiple from Cloudinary:", error);
     throw error;
+  }
+};
+
+// Test Cloudinary credentials
+export const testCloudinaryConnection = async () => {
+  try {
+    console.log("Testing Cloudinary connection...");
+
+    // Test with a simple API call
+    const result = await cloudinary.api.ping();
+    console.log("Cloudinary connection test successful:", result);
+    return { success: true, result };
+  } catch (error) {
+    console.error("Cloudinary connection test failed:", {
+      message: error.message,
+      http_code: error.http_code,
+      error: error,
+    });
+
+    // Provide specific error messages
+    if (error.http_code === 401) {
+      return {
+        success: false,
+        error:
+          "Invalid API credentials. Please check your Cloudinary API key and secret.",
+      };
+    } else if (error.http_code === 403) {
+      return {
+        success: false,
+        error:
+          "Access forbidden. Please check your Cloudinary account permissions.",
+      };
+    } else if (error.http_code === 500) {
+      return {
+        success: false,
+        error:
+          "Cloudinary server error. The service might be down or your account might have issues.",
+      };
+    } else {
+      return {
+        success: false,
+        error: error.message || "Unknown connection error",
+      };
+    }
   }
 };
 
