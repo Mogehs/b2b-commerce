@@ -32,16 +32,14 @@ cloudinary.config({
   cloud_name: cloudName,
   api_key: apiKey,
   api_secret: apiSecret,
-  secure: true, // Force HTTPS
-  timeout: 120000, // 2 minutes timeout for production
+  secure: true,
 });
 
 console.log("Cloudinary configured successfully");
 
 export const uploadToCloudinary = async (
   fileBuffer,
-  folder = "b2b-commerece/seller-applications",
-  options = {}
+  folder = "b2b-commerece/seller-applications"
 ) => {
   return new Promise((resolve, reject) => {
     // Validate Cloudinary configuration
@@ -71,13 +69,6 @@ export const uploadToCloudinary = async (
     const uploadOptions = {
       resource_type: "auto",
       folder: folder,
-      transformation: [
-        { width: 1200, height: 900, crop: "limit" },
-        { quality: "auto:good" },
-        { fetch_format: "auto" },
-      ],
-      timeout: 60000,
-      ...options,
     };
 
     console.log(
