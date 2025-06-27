@@ -1,7 +1,6 @@
 import connectMongo from "@/lib/mongoose";
 import Product from "@/models/Product";
 import User from "@/models/User";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { NextResponse } from "next/server";
@@ -28,42 +27,62 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const formData = await request.formData();
+    const data = await request.json();
 
+    // Update basic fields
     const fields = [
       "name",
       "brandName",
       "model",
       "placeOfOrigin",
-      "price",
-      "minOrderQuantity",
       "description",
       "category",
     ];
+
     fields.forEach((field) => {
-      const value = formData.get(field);
-      if (value) {
-        product[field] = ["price", "minOrderQuantity"].includes(field)
-          ? parseFloat(value)
-          : value;
+      if (data[field] !== undefined) {
+        product[field] = data[field];
       }
     });
 
-    const newImages = [];
-    const files = formData.getAll("images");
-    for (const file of files) {
-      if (file instanceof File) {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const uploaded = await uploadToCloudinary(buffer, "products", {
-          public_id: `product_${user._id}_${Date.now()}`,
-        });
-        newImages.push({ url: uploaded.url, publicId: uploaded.publicId });
-      }
+    // Handle numeric fields
+    if (data.price !== undefined) {
+      product.price = parseFloat(data.price);
+    }
+    if (data.minOrderQuantity !== undefined) {
+      product.minOrderQuantity = parseInt(data.minOrderQuantity);
     }
 
-    if (newImages.length > 0) {
-      product.images = newImages;
+    // Handle image URLs
+    if (data.imageUrls && Array.isArray(data.imageUrls)) {
+      // Validate image URLs
+      const validateUrl = (url) => {
+        try {
+          new URL(url);
+          const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+          const lowerUrl = url.toLowerCase();
+          return (
+            imageExtensions.some((ext) => lowerUrl.includes(ext)) ||
+            lowerUrl.includes("imgur.com") ||
+            lowerUrl.includes("cloudinary.com") ||
+            lowerUrl.includes("unsplash.com") ||
+            lowerUrl.includes("pexels.com")
+          );
+        } catch {
+          return false;
+        }
+      };
+
+      const validImageUrls = data.imageUrls.filter(
+        (url) => url && validateUrl(url)
+      );
+
+      if (validImageUrls.length > 0) {
+        product.images = validImageUrls.map((url) => ({
+          url: url,
+          publicId: null, // Not applicable for external URLs
+        }));
+      }
     }
 
     await product.save();

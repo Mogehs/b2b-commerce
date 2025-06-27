@@ -1,7 +1,6 @@
 import connectMongo from "@/lib/mongoose";
 import Product from "@/models/Product";
 import User from "@/models/User";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { NextResponse } from "next/server";
@@ -24,16 +23,19 @@ export async function POST(request) {
       );
     }
 
-    const formData = await request.formData();
+    const data = await request.json();
 
-    const name = formData.get("name");
-    const brandName = formData.get("brandName");
-    const model = formData.get("model");
-    const placeOfOrigin = formData.get("placeOfOrigin");
-    const price = parseFloat(formData.get("price"));
-    const minOrderQuantity = parseInt(formData.get("minOrderQuantity"));
-    const description = formData.get("description");
-    const category = formData.get("category");
+    const {
+      name,
+      brandName,
+      model,
+      placeOfOrigin,
+      price,
+      minOrderQuantity,
+      description,
+      category,
+      imageUrls,
+    } = data;
 
     if (
       !name ||
@@ -43,77 +45,57 @@ export async function POST(request) {
       !price ||
       !minOrderQuantity ||
       !description ||
-      !category
+      !category ||
+      !imageUrls ||
+      !Array.isArray(imageUrls) ||
+      imageUrls.length === 0
     ) {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "Missing required fields or image URLs" },
         { status: 400 }
       );
     }
 
-    const files = formData.getAll("images");
-
-    if (!files || files.length === 0) {
-      return NextResponse.json(
-        { message: "At least one image is required" },
-        { status: 400 }
-      );
-    }
-
-    const uploadPromises = files.map(async (file) => {
-      if (file instanceof File) {
-        // Validate file type
-        const allowedTypes = [
-          "image/jpeg",
-          "image/jpg",
-          "image/png",
-          "image/webp",
-        ];
-        if (!allowedTypes.includes(file.type)) {
-          throw new Error(
-            `Invalid file type: ${file.type}. Only JPEG, PNG, and WebP are allowed.`
-          );
-        }
-
-        // Validate file size (5MB limit)
-        if (file.size > 5 * 1024 * 1024) {
-          throw new Error(
-            `File ${file.name} is too large. Maximum size is 5MB.`
-          );
-        }
-
-        console.log(
-          `Processing product image: ${file.name}, Size: ${file.size}, Type: ${file.type}`
+    // Validate image URLs
+    const validateUrl = (url) => {
+      try {
+        new URL(url);
+        const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+        const lowerUrl = url.toLowerCase();
+        return (
+          imageExtensions.some((ext) => lowerUrl.includes(ext)) ||
+          lowerUrl.includes("imgur.com") ||
+          lowerUrl.includes("cloudinary.com") ||
+          lowerUrl.includes("unsplash.com") ||
+          lowerUrl.includes("pexels.com")
         );
-
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        if (!buffer || buffer.length === 0) {
-          throw new Error(`Failed to process image file: ${file.name}`);
-        }
-
-        const uploaded = await uploadToCloudinary(buffer, "products", {
-          public_id: `product_${user._id}_${Date.now()}_${Math.random()
-            .toString(36)
-            .substr(2, 5)}`,
-        });
-
-        console.log(`Product image uploaded successfully: ${uploaded.url}`);
-        return { url: uploaded.url, publicId: uploaded.publicId };
+      } catch {
+        return false;
       }
-      return null;
-    });
+    };
 
-    const images = (await Promise.all(uploadPromises)).filter(Boolean);
+    const validImageUrls = imageUrls.filter((url) => url && validateUrl(url));
+
+    if (validImageUrls.length === 0) {
+      return NextResponse.json(
+        { message: "At least one valid image URL is required" },
+        { status: 400 }
+      );
+    }
+
+    // Convert URLs to the format expected by the model
+    const images = validImageUrls.map((url) => ({
+      url: url,
+      publicId: null, // Not applicable for external URLs
+    }));
 
     const newProduct = new Product({
       name,
       brandName,
       model,
       placeOfOrigin,
-      price,
-      minOrderQuantity,
+      price: parseFloat(price),
+      minOrderQuantity: parseInt(minOrderQuantity),
       description,
       category,
       images,
