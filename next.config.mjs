@@ -1,6 +1,6 @@
 const nextConfig = {
-  output: 'standalone',
-  serverExternalPackages: ['mongoose'],
+  output: "standalone",
+  serverExternalPackages: ["mongoose"],
   images: {
     remotePatterns: [
       {

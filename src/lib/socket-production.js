@@ -9,7 +9,10 @@ export function initSocketServer(server) {
     cors: {
       origin:
         process.env.NODE_ENV === "production"
-          ? [process.env.NEXT_PUBLIC_SOCKET_URL, "https://your-app-name.vercel.app"]
+          ? [
+              process.env.NEXT_PUBLIC_SOCKET_URL,
+              "https://your-app-name.vercel.app",
+            ]
           : "http://localhost:3000",
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,

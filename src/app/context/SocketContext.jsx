@@ -14,7 +14,7 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     // Check if we're in production (Vercel) where WebSockets might not work
-    setIsProduction(window.location.hostname.includes('vercel.app'));
+    setIsProduction(window.location.hostname.includes("vercel.app"));
   }, []);
 
   useEffect(() => {
