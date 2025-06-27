@@ -36,6 +36,8 @@ cloudinary.config({
   timeout: 120000, // 2 minutes timeout for production
 });
 
+console.log("Cloudinary configured successfully");
+
 export const uploadToCloudinary = async (
   fileBuffer,
   folder = "b2b-commerece/seller-applications",
@@ -72,9 +74,9 @@ export const uploadToCloudinary = async (
       transformation: [
         { width: 1200, height: 900, crop: "limit" },
         { quality: "auto:good" },
-        { fetch_format: "auto" }, // Changed `format` to `fetch_format` for clarity
+        { fetch_format: "auto" },
       ],
-      timeout: 60000, // 60 seconds
+      timeout: 60000,
       ...options,
     };
 
