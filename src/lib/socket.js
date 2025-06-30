@@ -9,11 +9,17 @@ export function initSocketServer(server) {
     cors: {
       origin:
         process.env.NODE_ENV === "production"
-          ? process.env.NEXT_PUBLIC_SITE_URL
-          : "http://localhost:3000",
+          ? [
+              process.env.NEXT_PUBLIC_SITE_URL,
+              /\.onrender\.com$/,
+              /\.vercel\.app$/,
+            ]
+          : ["http://localhost:3000", "http://127.0.0.1:3000"],
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
     },
+    allowEIO3: true,
+    transports: ["websocket", "polling"],
   });
 
   io.on("connection", (socket) => {

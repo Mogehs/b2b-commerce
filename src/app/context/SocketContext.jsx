@@ -13,43 +13,57 @@ export function SocketProvider({ children }) {
   const { data: session } = useSession();
 
   useEffect(() => {
-    // Check if we're in production (Vercel) where WebSockets might not work
-    const isVercel =
+    // Check if we're in production (Render, Vercel, or other hosting)
+    const isHostedEnvironment =
       window.location.hostname.includes("vercel.app") ||
       window.location.hostname.includes(".vercel.app") ||
+      window.location.hostname.includes("onrender.com") ||
+      window.location.hostname.includes(".onrender.com") ||
       process.env.NODE_ENV === "production";
-    setIsProduction(isVercel);
+    setIsProduction(isHostedEnvironment);
 
     // Log the environment for debugging
     console.log("Environment check:", {
       hostname: window.location.hostname,
       nodeEnv: process.env.NODE_ENV,
-      isProduction: isVercel,
+      isProduction: isHostedEnvironment,
     });
   }, []);
 
   useEffect(() => {
     if (!session?.user) return;
 
-    // Skip socket connection in production/Vercel environment
-    if (isProduction) {
-      console.log("Skipping socket connection in production environment");
-      return;
-    }
-
     let socketInstance;
 
     try {
-      const socketUrl =
-        process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
+      // Use production socket URL if available, fallback to current origin
+      let socketUrl;
+
+      if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+        socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+      } else if (isProduction) {
+        // For production deployments (Render, Vercel, etc.)
+        socketUrl = `${window.location.protocol}//${window.location.host}`;
+      } else {
+        // For local development
+        socketUrl = window.location.origin;
+      }
+
       console.log("Connecting to socket at:", socketUrl);
+      console.log("Is production environment:", isProduction);
 
       socketInstance = io(socketUrl, {
         withCredentials: true,
         autoConnect: true,
         reconnection: true,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: 10,
         reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+        // Additional options for production
+        transports: ["websocket", "polling"],
+        upgrade: true,
+        forceNew: false,
       });
 
       socketInstance.on("connect", () => {
@@ -146,7 +160,7 @@ export function SocketProvider({ children }) {
     <SocketContext.Provider
       value={{
         socket,
-        connected: connected && !isProduction,
+        connected,
         isProduction,
         joinConversation,
         sendMessage,
