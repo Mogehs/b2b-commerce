@@ -37,12 +37,17 @@ const BrandingCards = ({products, loading}) => {
       ) : (
         <div className='grid grid-cols-2 md:grid-cols-5 lg:grid-cols-7 gap-8 my-6'>
           {products.slice(0, 20).map((product) => (
-            <div key={product._id} className='flex flex-col gap-2 hover:cursor-pointer' onClick={() => handleCardClick(product._id)} >
+            <div key={product._id} className='relative  flex flex-col gap-2 hover:cursor-pointer group' onClick={() => handleCardClick(product._id)} >
               <img
                 className='bg-white w-full h-32 object-contain'
                 src={product.images[0].url || '/home-page/dslr.png'}
                 alt={product.name}
               />
+                {/* Hover Popup */}
+  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-1 rounded opacity-0 group-hover:opacity-80 transition duration-300 z-10 whitespace-nowrap">
+  Get Bulk Price
+</div>
+
               <p className='bg-white text-center font-semibold'>  {product.name.length > 12 ? product.name.slice(0, 12) + '...' : product.name}</p>
             </div>
           ))}

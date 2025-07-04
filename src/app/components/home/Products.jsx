@@ -39,11 +39,11 @@ const Products = ({ selectedCategory, products, loading }) => {
                   />
                   <div className="bg-white px-2 py-6 pt-0 flex flex-col gap-2 rounded-b-xl w-full">
                     <div>
-                      <p className="font-bold text-lg">{product.name}</p>
+                      {/* <p className="font-bold text-lg">{product.name}</p> */}
                       <p className="font-semibold text-[17px]  line-clamp-2">{product.description}</p>
                     </div>
                     <div>
-                      <p className="font-bold text-xl">PKR: {product.price}</p>
+                      <p className="font-bold text-[16px]">PKR: {product.price}</p>
                       <p className="font-semibold">Min Qty: {product.minOrderQuantity || 'N/A'}</p>
                     </div>
                     <div>

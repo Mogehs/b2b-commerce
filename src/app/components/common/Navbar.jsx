@@ -109,7 +109,7 @@ export default function Navbar() {
               >
                 Join as Supplier
               </span>
-              <span
+              {/* <span
                 className="navbar-link cursor-pointer hover:text-[#d2b33a] transition-colors duration-200 hover:scale-105 transform"
                 onClick={() =>
                   router.replace(
@@ -118,7 +118,7 @@ export default function Navbar() {
                 }
               >
                 {isAdmin ? "Admin Dashboard" : "Buyer Dashboard"}
-              </span>
+              </span> */}
             </nav>
 
             {/* Search Bar */}

@@ -2,7 +2,7 @@ import React from "react";
 
 const Hero = () => {
   return (
-    <div className="w-full h-full md:h-[50vh] lg:h-[70vh]">
+    <div className="w-full h-full md:h-[300px]">
       <img
         src="/home-page/hero.jpg"
         alt="Hero"
