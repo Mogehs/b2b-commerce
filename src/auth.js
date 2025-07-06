@@ -51,8 +51,9 @@ export const authOptions = {
             return null;
           }
 
-          // Check if email is verified
-          if (!user.emailVerified) {
+          // Check if email is verified (only for credentials users)
+          // OAuth users (Google/Facebook) don't need email verification
+          if (user.provider === "credentials" && !user.emailVerified) {
             return null;
           }
 
@@ -119,6 +120,7 @@ export const authOptions = {
               image: user.image,
               provider: account.provider,
               role: "buyer",
+              emailVerified: true, // OAuth users are automatically verified
               profile: {
                 phone: "",
                 company: "",
@@ -140,6 +142,13 @@ export const authOptions = {
           }
         } else {
           if (account.provider !== "credentials") {
+            // Update existing OAuth user to ensure emailVerified is true
+            if (!existingUser.emailVerified) {
+              await User.updateOne(
+                { _id: existingUser._id },
+                { emailVerified: true }
+              );
+            }
             user.role = existingUser.role;
             user.profile = existingUser.profile;
             user.createdAt = existingUser.createdAt;

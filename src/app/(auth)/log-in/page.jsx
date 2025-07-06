@@ -71,7 +71,7 @@ export default function LoginPage() {
 
               if (response.ok) {
                 const userData = await response.json();
-                if (userData.exists && !userData.emailVerified) {
+                if (userData.exists && !userData.emailVerified && userData.provider === "credentials") {
                   toast.error(
                     "Please verify your email address before logging in."
                   );

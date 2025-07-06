@@ -22,6 +22,7 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [hasPassword, setHasPassword] = useState(false);
 
   // Populate form with user data when session is available
   useEffect(() => {
@@ -33,10 +34,10 @@ export default function Profile() {
       if (session.user.profile) {
         setWhatsapp(session.user.profile.whatsapp || "");
         setMobile(session.user.profile.phone || "");
-      } else {
-        // If profile data isn't in session, fetch it from API
-        fetchUserProfile();
       }
+      
+      // Always fetch user profile to get hasPassword status
+      fetchUserProfile();
     }
   }, [session]);
 
@@ -50,6 +51,8 @@ export default function Profile() {
           setWhatsapp(userData.user.profile.whatsapp || "");
           setMobile(userData.user.profile.phone || "");
         }
+        // Check if user has a password set
+        setHasPassword(userData.user?.hasPassword || false);
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -98,6 +101,38 @@ export default function Profile() {
       return;
     }
 
+    // If user has no password, use set-password endpoint
+    if (!hasPassword) {
+      try {
+        setPasswordLoading(true);
+        const response = await axios.put("/api/user/set-password", {
+          newPassword,
+        });
+        const data = response.data;
+        if (response.status === 200) {
+          toast.success("Password set successfully! You can now login with email/password.");
+          setHasPassword(true);
+          // Clear form
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        } else {
+          setPasswordError(data.message || "Failed to set password");
+        }
+      } catch (error) {
+        setPasswordError("An unexpected error occurred");
+      } finally {
+        setPasswordLoading(false);
+      }
+      return;
+    }
+
+    // If user has password, use update-password endpoint
+    if (!oldPassword) {
+      setPasswordError("Please enter your current password");
+      return;
+    }
+
     try {
       setPasswordLoading(true);
       const response = await axios.put("/api/user/update-password", {
@@ -129,11 +164,9 @@ export default function Profile() {
     );
   }
 
-  // Determine if user is OAuth user
-  const isOAuthUser =
-    session?.user?.provider === "google" ||
-    session?.user?.provider === "facebook" ||
-    session?.user?.provider !== "credentials";
+  // Determine user type based on whether they have a password set
+  // If they don't have a password, they're effectively OAuth-only users
+  const isOAuthUser = !hasPassword;
 
   return (
     <div className="min-h-screen bg-[#f1f1f1] text-black flex flex-col items-center justify-center p-4 space-y-6">
@@ -255,74 +288,97 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Update Password Section - Only shown for credentials users */}
-      {!isOAuthUser && (
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-5xl border border-[#ACAAAA]">
-          <h2 className="text-2xl font-semibold mb-6">Update Password</h2>
+      {/* Update Password Section - Now available for all users */}
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-5xl border border-[#ACAAAA]">
+        <h2 className="text-2xl font-semibold mb-6">
+          {!hasPassword ? "Set Password" : "Update Password"}
+        </h2>
 
-          {passwordError && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-              {passwordError}
-            </div>
-          )}
+        {!hasPassword && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="font-medium text-blue-900 mb-2">🔐 Set a password to login directly</p>
+            <p className="text-sm text-blue-700">
+              You don't currently have a password set for your account. 
+              Setting a password will allow you to login directly with your email and password, 
+              in addition to your current login method.
+            </p>
+          </div>
+        )}
 
+        {hasPassword && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+            <p className="font-medium text-green-900 mb-2">✅ Password enabled</p>
+            <p className="text-sm text-green-700">
+              You can login using your email and password, or continue using your preferred login method.
+            </p>
+          </div>
+        )}
+
+        {passwordError && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {passwordError}
+          </div>
+        )}
+
+        {/* Show old password field only if user has a password set */}
+        {hasPassword && (
           <div className="mb-4 w-full md:w-[70%]">
             <label className="block text-md font-medium mb-1">
-              Old Password
+              Current Password
             </label>
             <input
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               className="w-full h-[50px] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="Enter old password"
+              placeholder="Enter current password"
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="w-full md:w-[70%]">
+            <label className="block text-md font-medium mb-1">
+              {!hasPassword ? "New Password" : "New Password"}
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full h-[50px] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder={!hasPassword ? "Set your password" : "Enter new password"}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="w-full md:w-[70%]">
-              <label className="block text-md font-medium mb-1">
-                New Password
-              </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full h-[50px] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="Enter new password"
-              />
-            </div>
-
-            <div className="w-full md:w-[70%]">
-              <label className="block text-md font-medium mb-1">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full h-[50px] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="Confirm new password"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <button
-              type="button"
-              onClick={handlePasswordSubmit}
-              disabled={passwordLoading}
-              className="bg-[#C9AF2F] hover:bg-yellow-700 text-black font-bold px-6 rounded cursor-pointer w-[170px] h-[50px] text-nowrap flex items-center justify-center"
-            >
-              {passwordLoading ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                "Update Password"
-              )}
-            </button>
+          <div className="w-full md:w-[70%]">
+            <label className="block text-md font-medium mb-1">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full h-[50px] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Confirm password"
+            />
           </div>
         </div>
-      )}
+
+        <div className="flex justify-end mt-4">
+          <button
+            type="button"
+            onClick={handlePasswordSubmit}
+            disabled={passwordLoading}
+            className="bg-[#C9AF2F] hover:bg-yellow-700 text-black font-bold px-6 rounded cursor-pointer w-[170px] h-[50px] text-nowrap flex items-center justify-center"
+          >
+            {passwordLoading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              !hasPassword ? "Set Password" : "Update Password"
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

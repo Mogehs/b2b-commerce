@@ -64,6 +64,7 @@ export async function GET(req) {
           reviews: user.reviews || [],
           rfqs: user.rfqs || [],
           purchaseHistory: user.purchaseHistory || [],
+          hasPassword: Boolean(user.password), // Add password status
         },
       },
       { status: 200 }
