@@ -35,7 +35,7 @@ export default function Profile() {
         setWhatsapp(session.user.profile.whatsapp || "");
         setMobile(session.user.profile.phone || "");
       }
-      
+
       // Always fetch user profile to get hasPassword status
       fetchUserProfile();
     }
@@ -110,7 +110,9 @@ export default function Profile() {
         });
         const data = response.data;
         if (response.status === 200) {
-          toast.success("Password set successfully! You can now login with email/password.");
+          toast.success(
+            "Password set successfully! You can now login with email/password."
+          );
           setHasPassword(true);
           // Clear form
           setOldPassword("");
@@ -296,20 +298,25 @@ export default function Profile() {
 
         {!hasPassword && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="font-medium text-blue-900 mb-2">🔐 Set a password to login directly</p>
+            <p className="font-medium text-blue-900 mb-2">
+              🔐 Set a password to login directly
+            </p>
             <p className="text-sm text-blue-700">
-              You don't currently have a password set for your account. 
-              Setting a password will allow you to login directly with your email and password, 
-              in addition to your current login method.
+              You don't currently have a password set for your account. Setting
+              a password will allow you to login directly with your email and
+              password, in addition to your current login method.
             </p>
           </div>
         )}
 
         {hasPassword && (
           <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
-            <p className="font-medium text-green-900 mb-2">✅ Password enabled</p>
+            <p className="font-medium text-green-900 mb-2">
+              ✅ Password enabled
+            </p>
             <p className="text-sm text-green-700">
-              You can login using your email and password, or continue using your preferred login method.
+              You can login using your email and password, or continue using
+              your preferred login method.
             </p>
           </div>
         )}
@@ -346,7 +353,9 @@ export default function Profile() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full h-[50px] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder={!hasPassword ? "Set your password" : "Enter new password"}
+              placeholder={
+                !hasPassword ? "Set your password" : "Enter new password"
+              }
             />
           </div>
 
@@ -373,8 +382,10 @@ export default function Profile() {
           >
             {passwordLoading ? (
               <Loader2 className="animate-spin" size={20} />
+            ) : !hasPassword ? (
+              "Set Password"
             ) : (
-              !hasPassword ? "Set Password" : "Update Password"
+              "Update Password"
             )}
           </button>
         </div>
