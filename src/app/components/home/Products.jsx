@@ -33,29 +33,29 @@ const Products = ({ selectedCategory, products, loading }) => {
               <div key={product._id || index} className="flex overflow-hidden flex-col w-full gap-4">
                 <div className="w-full">
                   <img
-                    className="rounded-t-xl object-cover w-full h-[200px]"
+                    className="rounded-t-[10px] object-cover w-full h-[200px]"
                     src={product.images[0].url || '/home-page/product.jpg'}
                     alt={product.name}
                   />
-                  <div className="bg-white px-2 py-6 pt-0 flex flex-col gap-2 rounded-b-xl w-full">
+                  <div className="bg-white px-2 py-6 pt-0 flex flex-col gap-2 rounded-b-[10px] w-full">
                     <div>
                       {/* <p className="font-bold text-lg">{product.name}</p> */}
-                      <p className="font-semibold text-[17px]  line-clamp-2">{product.description}</p>
+                      <p className="font-semibold text-[14px] line-clamp-2">{product.description}</p>
                     </div>
                     <div>
                       <p className="font-bold text-[16px]">PKR: {product.price}</p>
-                      <p className="font-semibold">Min Qty: {product.minOrderQuantity || 'N/A'}</p>
+                      <p className="text-[12px]">Min Qty: {product.minOrderQuantity || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className='italic'>Madina Traders - Lahore</p>
+                      <p className='italic text-[12px]'>Madina Traders - Lahore</p>
                     </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 w-full">
-                  <button className="bg-white text-nowrap text-[14px] font-semibold py-2.5 px-2 rounded hover:cursor-pointer" onClick={() => handleCardClick(product._id)}>
+                  <button className="bg-white text-nowrap text-[12px] font-bold py-2.5 px-2 rounded hover:cursor-pointer" onClick={() => handleCardClick(product._id)}>
                     View Product
                   </button>
-                  <button className="bg-white text-nowrap text-[14px] font-semibold py-2.5 px-2 rounded hover:cursor-pointer">
+                  <button className="bg-white text-nowrap text-[12px] font-bold py-2.5 px-2 rounded hover:cursor-pointer">
                     Contact Seller
                   </button>
                 </div>

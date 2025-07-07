@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules'; // ⬅️ Only Autoplay
+import { Autoplay } from 'swiper/modules'; 
 import 'swiper/css';
 
 const categories = [
@@ -25,7 +25,7 @@ const Categories = () => {
     <div className='my-6 px-4 bg-white'>
       <Swiper
         modules={[Autoplay]}
-        spaceBetween={20}
+        spaceBetween={0}
         slidesPerView={2}
         autoplay={{ delay: 2500 }}
         breakpoints={{
@@ -39,10 +39,10 @@ const Categories = () => {
       >
         {categories.map((category, i) => (
           <SwiperSlide key={i}>
-<div className='flex flex-col items-center gap-2 p-2 hover:scale-105 transition'>
-  <div className="h-24 w-32 bg-white flex items-center justify-center overflow-hidden">
+<div className='flex flex-col items-center gap-2 py-2 hover:scale-105 transition'>
+  <div className="h-28 w-full bg-white flex items-center justify-center overflow-hidden">
     <img
-      className='object-contain h-full'
+      className='object-contain h-full rounded w-full'
       src={category.img}
       alt={category.title}
     />

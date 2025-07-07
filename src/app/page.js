@@ -13,6 +13,7 @@ import BrandingCards from "./components/home/BrandingCards";
 import Products from "./components/home/Products";
 import Brands from "./components/home/Brands";
 import Region from "./components/home/Region";
+import Footer from "./components/common/Footer";
 
 const Home = () => {
   const router = useRouter();
@@ -83,6 +84,7 @@ const Home = () => {
           handleCardClick={handleSuppliersClick}
         />
         <Region />
+        <Footer />
       </div>
     </div>
   );
