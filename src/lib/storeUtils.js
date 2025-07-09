@@ -25,6 +25,7 @@ export async function createStoreFromApplication(application) {
       whatsappNumbers: applicationData.whatsappNumbers || [],
       website: applicationData.businessWebsite,
       productCategories: applicationData.productCategories || [],
+      brandingServices: applicationData.brandingServices || [],
       offers: applicationData.offers,
       bannerImage: applicationData.titleImage,
       socialLinks: applicationData.socialMedia,

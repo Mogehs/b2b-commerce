@@ -31,6 +31,7 @@ export default function SuppliersPage() {
   const [filters, setFilters] = useState({
     region: "all",
     category: "all",
+    service: "all",
     search: "",
     sortBy: "createdAt",
     sortOrder: "desc",
@@ -46,6 +47,7 @@ export default function SuppliersPage() {
   const [filterOptions, setFilterOptions] = useState({
     regions: [],
     categories: [],
+    services: [],
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -63,6 +65,7 @@ export default function SuppliersPage() {
       if (filters.region !== "all") params.append("region", filters.region);
       if (filters.category !== "all")
         params.append("category", filters.category);
+      if (filters.service !== "all") params.append("service", filters.service);
       if (filters.search.trim()) params.append("search", filters.search.trim());
 
       const response = await axios.get(`/api/store/all?${params}`);
@@ -85,7 +88,27 @@ export default function SuppliersPage() {
 
   // Initial fetch
   useEffect(() => {
+    // Check for URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceParam = urlParams.get("service");
+
+    if (serviceParam) {
+      setFilters((prev) => ({ ...prev, service: serviceParam }));
+    }
+
     fetchStores();
+  }, []);
+
+  // Handle URL parameter changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceParam = urlParams.get("service");
+
+    if (serviceParam && serviceParam !== filters.service) {
+      setFilters((prev) => ({ ...prev, service: serviceParam }));
+      // Re-fetch stores with new service filter
+      setTimeout(() => fetchStores(1), 100);
+    }
   }, []);
 
   // Handle filter changes
@@ -120,6 +143,7 @@ export default function SuppliersPage() {
     setFilters({
       region: "all",
       category: "all",
+      service: "all",
       search: "",
       sortBy: "createdAt",
       sortOrder: "desc",
@@ -211,6 +235,28 @@ export default function SuppliersPage() {
                 {store.productCategories.length > 2 && (
                   <span className="text-gray-500 text-xs">
                     +{store.productCategories.length - 2}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Branding Services */}
+          {store.brandingServices && store.brandingServices.length > 0 && (
+            <div className="flex items-center text-sm text-gray-600 mb-3">
+              <div className="w-4 h-4 mr-1 flex-shrink-0 text-[#C9AF2F]">★</div>
+              <div className="flex flex-wrap gap-1">
+                {store.brandingServices.slice(0, 2).map((service, index) => (
+                  <span
+                    key={index}
+                    className="bg-[#C9AF2F] bg-opacity-10 text-[#C9AF2F] px-2 py-1 rounded-full text-xs font-medium"
+                  >
+                    {service}
+                  </span>
+                ))}
+                {store.brandingServices.length > 2 && (
+                  <span className="text-[#C9AF2F] text-xs font-medium">
+                    +{store.brandingServices.length - 2}
                   </span>
                 )}
               </div>
@@ -351,6 +397,27 @@ export default function SuppliersPage() {
                     {filterOptions.categories.map((category) => (
                       <option key={category} value={category}>
                         {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Service Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branding Service
+                  </label>
+                  <select
+                    value={filters.service}
+                    onChange={(e) =>
+                      handleFilterChange("service", e.target.value)
+                    }
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#C9AF2F] focus:border-transparent"
+                  >
+                    <option value="all">All Services</option>
+                    {filterOptions.services.map((service) => (
+                      <option key={service} value={service}>
+                        {service}
                       </option>
                     ))}
                   </select>

@@ -95,6 +95,9 @@ export async function POST(request) {
     const secondaryPhones = [phone2, phone3].filter(Boolean);
     const whatsappNumbers = [whatsapp, whatsapp2].filter(Boolean);
 
+    // Handle branding services
+    const brandingServices = formData.getAll("brandingServices") || [];
+
     const socialMedia = {
       facebook: formData.get("facebook") || "",
       instagram: formData.get("instagram") || "",
@@ -188,6 +191,7 @@ export async function POST(request) {
       landmark,
       titleImage,
       socialMedia,
+      brandingServices,
     };
 
     let application;

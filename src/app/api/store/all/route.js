@@ -12,6 +12,7 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit")) || 12;
     const region = searchParams.get("region");
     const category = searchParams.get("category");
+    const service = searchParams.get("service"); // Add service filter
     const search = searchParams.get("search");
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
@@ -30,6 +31,11 @@ export async function GET(request) {
     // Add category filter if provided
     if (category && category !== "all") {
       filter.productCategories = { $in: [category] };
+    }
+
+    // Add branding service filter if provided
+    if (service && service !== "all") {
+      filter.brandingServices = { $in: [service] };
     }
 
     // Add search filter if provided
@@ -75,6 +81,12 @@ export async function GET(request) {
       isVerified: true,
     });
 
+    // Get unique services for filter options
+    const services = await Store.distinct("brandingServices", {
+      isActive: true,
+      isVerified: true,
+    });
+
     // Calculate pagination info
     const totalPages = Math.ceil(totalStores / limit);
     const hasNextPage = page < totalPages;
@@ -96,6 +108,7 @@ export async function GET(request) {
           filters: {
             regions: regions.filter(Boolean).sort(),
             categories: categories.flat().filter(Boolean).sort(),
+            services: services.flat().filter(Boolean).sort(),
           },
         },
       },

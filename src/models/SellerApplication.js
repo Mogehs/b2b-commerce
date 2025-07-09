@@ -94,6 +94,17 @@ const sellerApplicationSchema = new mongoose.Schema(
         required: true,
         trim: true,
       },
+      brandingServices: [
+        {
+          type: String,
+          enum: [
+            "Low MOQ",
+            "OEM Services",
+            "Private Labeling",
+            "Ready to Ship",
+          ],
+        },
+      ],
       titleImage: {
         url: String,
         publicId: String,

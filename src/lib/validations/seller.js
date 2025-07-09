@@ -41,6 +41,8 @@ export const sellerApplicationSchema = z.object({
     .max(500, "Offers description must be less than 500 characters")
     .trim(),
 
+  brandingServices: z.array(z.string()).optional().default([]),
+
   landmark: z
     .string()
     .min(2, "Landmark is required")

@@ -63,6 +63,9 @@ const StoreProfile = () => {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
 
+      // Handle branding services (multiple checkbox values)
+      const brandingServices = formData.getAll("brandingServices");
+
       // Handle nested fields for social links
       const socialLinks = {
         facebook: data.facebook || "",
@@ -108,6 +111,7 @@ const StoreProfile = () => {
       // Add nested objects to the data
       data.socialLinks = socialLinks;
       data.certifications = certifications;
+      data.brandingServices = brandingServices;
 
       const response = await axios.put("/api/seller/store-profile", data);
       if (response.data.success) {
@@ -248,6 +252,35 @@ const StoreProfile = () => {
                   defaultValue={store.yearlyRevenue}
                   className="w-full p-2 border rounded"
                 />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block mb-1 text-sm font-medium">
+                  Branding Services
+                </label>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-3 border rounded">
+                  {[
+                    "Low MOQ",
+                    "OEM Services",
+                    "Private Labeling",
+                    "Ready to Ship",
+                  ].map((service) => (
+                    <label
+                      key={service}
+                      className="flex items-center space-x-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        name="brandingServices"
+                        value={service}
+                        defaultChecked={store.brandingServices?.includes(
+                          service
+                        )}
+                        className="w-4 h-4 text-[#C9AF2F] bg-gray-100 border-gray-300 rounded focus:ring-[#C9AF2F] focus:ring-2"
+                      />
+                      <span className="text-sm">{service}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -780,62 +813,61 @@ const StoreProfile = () => {
 
       <Separator className="my-6" />
 
-      {/* Social Media */}
-      <div>
+      {/* Branding Services */}
+      {store.brandingServices && store.brandingServices.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+            <div className="w-5 h-5 text-[#C9AF2F]">⭐</div>
+            Branding Services
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {store.brandingServices.map((service, index) => (
+              <span
+                key={index}
+                className="bg-[#C9AF2F] bg-opacity-10 text-[#C9AF2F] px-3 py-2 rounded-lg text-sm font-medium border border-[#C9AF2F] border-opacity-20"
+              >
+                {service}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Separator className="my-6" />
+
+      {/* Contact */}
+      <div className="mb-6">
         <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-          <Globe size={18} /> Social Media
+          <Phone size={18} /> Contact Information
         </h3>
-        <div className="flex flex-wrap gap-3">
-          {store.socialLinks?.facebook && (
-            <a
-              href={store.socialLinks.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2"
-            >
-              <Facebook size={16} className="text-blue-600" />
-              <span>Facebook</span>
-            </a>
-          )}
-          {store.socialLinks?.instagram && (
-            <a
-              href={store.socialLinks.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2"
-            >
-              <Instagram size={16} className="text-pink-600" />
-              <span>Instagram</span>
-            </a>
-          )}
-          {store.socialLinks?.twitter && (
-            <a
-              href={store.socialLinks.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2"
-            >
-              <Twitter size={16} className="text-blue-400" />
-              <span>Twitter</span>
-            </a>
-          )}
-          {store.socialLinks?.linkedin && (
-            <a
-              href={store.socialLinks.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2"
-            >
-              <Linkedin size={16} className="text-blue-700" />
-              <span>LinkedIn</span>
-            </a>
-          )}
-          {!store.socialLinks?.facebook &&
-            !store.socialLinks?.instagram &&
-            !store.socialLinks?.twitter &&
-            !store.socialLinks?.linkedin && (
-              <p className="text-gray-500">No social media links added</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+          <div>
+            <p className="text-sm text-gray-500">Email</p>
+            <p>{store.email}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Phone</p>
+            <p>{store.phone}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Website</p>
+            {store.website ? (
+              <a
+                href={store.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {store.website}
+              </a>
+            ) : (
+              <p>Not specified</p>
             )}
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Address</p>
+            <p>{store.address}</p>
+          </div>
         </div>
       </div>
     </div>

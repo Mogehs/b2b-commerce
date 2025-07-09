@@ -648,6 +648,61 @@ const SellerProfile = () => {
           </section>
 
           <section>
+            <h2 className="text-2xl font-bold text-[#C9AF2F] border-b pb-2 mb-6">
+              Branding Services
+            </h2>
+            <div className="space-y-4">
+              <p className="text-gray-600 text-sm">
+                Select the branding services you provide to your customers:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    value: "Low MOQ",
+                    label: "Low MOQ (Minimum Order Quality)",
+                  },
+                  {
+                    value: "OEM Services",
+                    label: "OEM Services (Original Equipment Manufacture)",
+                  },
+                  {
+                    value: "Private Labeling",
+                    label: "Private Labeling (Private Label Manufactures)",
+                  },
+                  {
+                    value: "Ready to Ship",
+                    label: "Ready to Ship (Deliver on time, every day)",
+                  },
+                ].map((service) => (
+                  <div
+                    key={service.value}
+                    className="flex items-center space-x-2"
+                  >
+                    <input
+                      type="checkbox"
+                      id={service.value}
+                      {...register("brandingServices")}
+                      value={service.value}
+                      className="w-4 h-4 text-[#C9AF2F] bg-gray-100 border-gray-300 rounded focus:ring-[#C9AF2F] focus:ring-2"
+                    />
+                    <label
+                      htmlFor={service.value}
+                      className="text-sm text-gray-700 font-medium cursor-pointer"
+                    >
+                      {service.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {errors.brandingServices && (
+                <p className="text-red-500 text-sm mt-1 animate-pulse">
+                  {errors.brandingServices.message}
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-bold text-[#C9AF2F] border-b pb-2 mb-4">
               Social Media Links (Optional)
             </h2>

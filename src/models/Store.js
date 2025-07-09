@@ -48,6 +48,12 @@ const storeSchema = new mongoose.Schema(
     whatsappNumbers: [String],
     website: { type: String },
     productCategories: [{ type: String }],
+    brandingServices: [
+      {
+        type: String,
+        enum: ["Low MOQ", "OEM Services", "Private Labeling", "Ready to Ship"],
+      },
+    ],
     offers: { type: String },
     bannerImage: {
       url: { type: String },
