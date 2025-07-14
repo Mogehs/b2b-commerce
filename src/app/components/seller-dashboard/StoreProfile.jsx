@@ -817,14 +817,14 @@ const StoreProfile = () => {
       {store.brandingServices && store.brandingServices.length > 0 && (
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-            <div className="w-5 h-5 text-[#C9AF2F]">⭐</div>
+            {/* <div className="w-5 h-5 text-[#C9AF2F]">⭐</div> */}
             Branding Services
           </h3>
           <div className="flex flex-wrap gap-2">
             {store.brandingServices.map((service, index) => (
               <span
                 key={index}
-                className="bg-[#C9AF2F] bg-opacity-10 text-[#C9AF2F] px-3 py-2 rounded-lg text-sm font-medium border border-[#C9AF2F] border-opacity-20"
+                className="bg-[#C9AF2F] bg-opacity-10 px-3 py-2 rounded-lg text-sm font-medium border border-[#C9AF2F] border-opacity-20"
               >
                 {service}
               </span>

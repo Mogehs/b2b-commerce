@@ -82,6 +82,7 @@ export async function PUT(req) {
       "whatsappNumbers",
       "website",
       "productCategories",
+      "brandingServices",
       "offers",
       "socialLinks",
       "certifications",
