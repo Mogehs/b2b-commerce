@@ -134,8 +134,8 @@ const BrandingCards = ({ products, loading }) => {
       console.error("RFQ submission error:", error);
       toast.error(
         error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Something went wrong"
+        error.response?.data?.message ||
+        "Something went wrong"
       );
     } finally {
       setSubmitting(false);
@@ -155,26 +155,17 @@ const BrandingCards = ({ products, loading }) => {
           {cards.map((card, i) => (
             <div
               key={i}
-              className={`bg-white space-y-4 py-6 text-center cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg border ${
-                selectedService === card.service
-                  ? " shadow-lg bg-[#C9AF2F]/5 border-2 border-[#0a0a0a99]"
-                  : "hover:border-[#0a0a0a99] border-2"
-              }`}
+              className="bg-white space-y-4 py-6 text-center cursor-pointer rounded-lg"
               onClick={() => handleBrandingServiceClick(card.service)}
             >
               <p
-                className={`text-nowrap md:text-[20px] font-bold ${
-                  selectedService === card.service
-                    ? "text-black"
-                    : "text-black"
-                }`}
-              >
+                className="text-nowrap md:text-[20px] font-bold">
                 {card.title1}
               </p>
-              <p className="text-nowrap text-gray-600">{card.title2}</p>
-              {selectedService === card.service && (
-                <div className="w-2 h-2 bg-black rounded-full mx-auto mt-2"></div>
-              )}
+              <p
+                className="text-nowrap text-gray-600">
+                {card.title2}
+              </p>
             </div>
           ))}
         </div>
@@ -265,9 +256,8 @@ const BrandingCards = ({ products, loading }) => {
                 min={selectedProduct?.minOrderQuantity}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                placeholder={`Minimum ${
-                  selectedProduct?.minOrderQuantity || 1
-                }`}
+                placeholder={`Minimum ${selectedProduct?.minOrderQuantity || 1
+                  }`}
                 disabled={submitting}
                 required
               />
