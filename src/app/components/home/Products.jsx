@@ -80,8 +80,8 @@ const Products = ({ selectedCategory, products, loading }) => {
       console.error("RFQ submission error:", error);
       toast.error(
         error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Something went wrong"
+        error.response?.data?.message ||
+        "Something went wrong"
       );
     } finally {
       setSubmitting(false);
@@ -119,14 +119,14 @@ const Products = ({ selectedCategory, products, loading }) => {
               >
                 <div className="w-full">
                   <img
-                    className="rounded-t-[10px] object-cover w-full h-[200px]"
+                    className="rounded-t-[10px]  w-full h-[220px]"
                     src={product.images[0].url || "/home-page/product.jpg"}
                     alt={product.name}
                   />
                   <div className="bg-white px-2 py-6 pt-0 flex flex-col gap-2 rounded-b-[10px] w-full">
                     <div>
-                      {/* <p className="font-bold text-lg">{product.name}</p> */}
-                      <p className="font-semibold text-[14px] line-clamp-2">
+                      <p className="font-bold text-[17px] line-clamp-1">{product.name}</p>
+                      <p className="font-semibold text-[14px] line-clamp-2 h-10 leading-5">
                         {product.description}
                       </p>
                     </div>
@@ -197,9 +197,8 @@ const Products = ({ selectedCategory, products, loading }) => {
                 min={selectedProduct?.minOrderQuantity}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                placeholder={`Minimum ${
-                  selectedProduct?.minOrderQuantity || 1
-                }`}
+                placeholder={`Minimum ${selectedProduct?.minOrderQuantity || 1
+                  }`}
                 disabled={submitting}
                 required
               />

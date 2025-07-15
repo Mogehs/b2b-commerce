@@ -157,23 +157,23 @@ const BrandingCards = ({ products, loading }) => {
               key={i}
               className={`bg-white space-y-4 py-6 text-center cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg border ${
                 selectedService === card.service
-                  ? "border-[#C9AF2F] shadow-lg bg-[#C9AF2F]/5"
-                  : "hover:border-[#C9AF2F]"
+                  ? " shadow-lg bg-[#C9AF2F]/5 border-2 border-[#0a0a0a99]"
+                  : "hover:border-[#0a0a0a99] border-2"
               }`}
               onClick={() => handleBrandingServiceClick(card.service)}
             >
               <p
                 className={`text-nowrap md:text-[20px] font-bold ${
                   selectedService === card.service
-                    ? "text-[#C9AF2F]"
-                    : "text-[#C9AF2F]"
+                    ? "text-black"
+                    : "text-black"
                 }`}
               >
                 {card.title1}
               </p>
               <p className="text-nowrap text-gray-600">{card.title2}</p>
               {selectedService === card.service && (
-                <div className="w-2 h-2 bg-[#C9AF2F] rounded-full mx-auto mt-2"></div>
+                <div className="w-2 h-2 bg-black rounded-full mx-auto mt-2"></div>
               )}
             </div>
           ))}
