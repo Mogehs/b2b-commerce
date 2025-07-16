@@ -16,6 +16,7 @@ import { BiMessageRoundedDetail } from "react-icons/bi";
 import { MdOutlineRateReview, MdDashboard } from "react-icons/md";
 import { BsFileEarmarkText } from "react-icons/bs";
 import { FaGlobeAsia } from "react-icons/fa";
+import { Search, Clock, X, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import NearMeModal from "./NearMeModal";
@@ -27,11 +28,84 @@ export default function Navbar() {
   const [showNearMe, setShowNearMe] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const dialogRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const searchRef = useRef(null);
   const router = useRouter();
   const isMobile = useIsMobile();
+
+  // Search suggestions data
+  const searchSuggestions = [
+    "Office Supplies",
+    "Industrial Machinery",
+    "Safety Equipment",
+    "Laptops & Computers",
+    "Furniture",
+    "Beauty Products",
+    "Clothing & Apparel",
+    "Raw Materials",
+    "Packaging Solutions",
+    "Medical Equipment",
+    "Electrical Components",
+    "Construction Materials",
+  ];
+
+  // Popular searches
+  const popularSearches = [
+    "Bulk Office Supplies",
+    "Industrial Safety Gear",
+    "Commercial Kitchen Equipment",
+    "Wholesale Electronics",
+    "Business Furniture",
+  ];
+
+  // Load search history from localStorage on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("searchHistory");
+    if (savedHistory) {
+      setSearchHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  // Save search to history
+  const saveSearchToHistory = (query) => {
+    if (query.trim()) {
+      const updatedHistory = [
+        query,
+        ...searchHistory.filter((item) => item !== query),
+      ].slice(0, 5);
+      setSearchHistory(updatedHistory);
+      localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+    }
+  };
+
+  // Clear search history
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem("searchHistory");
+  };
+
+  // Remove single item from history
+  const removeFromHistory = (itemToRemove) => {
+    const updatedHistory = searchHistory.filter(
+      (item) => item !== itemToRemove
+    );
+    setSearchHistory(updatedHistory);
+    localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+  };
+
+  // Filter suggestions based on search query
+  const filteredSuggestions = searchSuggestions
+    .filter(
+      (suggestion) =>
+        suggestion.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        suggestion.toLowerCase() !== searchQuery.toLowerCase()
+    )
+    .slice(0, 6);
 
   const toggleDialog = () => setShowDialog((prev) => !prev);
   const toggleMobileMenu = () => setShowMobileMenu((prev) => !prev);
@@ -47,6 +121,10 @@ export default function Navbar() {
       ) {
         setShowMobileMenu(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+        setIsSearchFocused(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -59,10 +137,24 @@ export default function Navbar() {
     setShowDialog(false);
   };
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+  const handleSearch = (query = searchQuery) => {
+    const searchTerm = query.trim();
+    if (searchTerm) {
+      saveSearchToHistory(searchTerm);
+      router.push(`/products?search=${encodeURIComponent(searchTerm)}`);
+      setShowSuggestions(false);
+      setIsSearchFocused(false);
     }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    handleSearch(suggestion);
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+    setShowSuggestions(true);
   };
 
   const handleNavigation = (path) => {
@@ -121,22 +213,150 @@ export default function Navbar() {
               </span> */}
             </nav>
 
-            {/* Search Bar */}
-            <div className="flex w-full h-[48px] border-2 border-[#ACAAAA] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
-              <input
-                type="text"
-                placeholder="I am Looking for..."
-                className="search-input flex-grow px-4 text-base outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-              <button
-                onClick={handleSearch}
-                className="bg-[#d2b33a] text-black font-semibold px-8 hover:bg-[#c4a831] transition-all duration-200 text-base cursor-pointer hover:scale-105 transform"
+            {/* Enhanced Search Bar */}
+            <div className="relative" ref={searchRef}>
+              <div
+                className={`flex w-full h-[48px] border-2 rounded-lg overflow-hidden shadow-sm transition-all duration-300 ${
+                  isSearchFocused
+                    ? "border-[#d2b33a] shadow-lg ring-2 ring-[#d2b33a]/20"
+                    : "border-[#ACAAAA] hover:shadow-md hover:border-[#d2b33a]/50"
+                }`}
               >
-                Search
-              </button>
+                <input
+                  type="text"
+                  placeholder="I am Looking for..."
+                  className="search-input flex-grow px-4 text-base outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  onFocus={handleSearchFocus}
+                />
+                <button
+                  onClick={() => handleSearch()}
+                  className="bg-[#d2b33a] text-black font-semibold px-8 hover:bg-[#c4a831] transition-all duration-200 text-base cursor-pointer hover:scale-105 transform flex items-center gap-2"
+                >
+                  <Search size={18} />
+                  Search
+                </button>
+              </div>
+
+              {/* Search Suggestions Dropdown */}
+              {showSuggestions && (isSearchFocused || searchQuery) && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 mt-1 max-h-96 overflow-y-auto">
+                  {/* Search History */}
+                  {searchHistory.length > 0 && (
+                    <div className="p-3 border-b border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                          <Clock size={16} />
+                          Recent Searches
+                        </h4>
+                        <button
+                          onClick={clearSearchHistory}
+                          className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                      <div className="space-y-1">
+                        {searchHistory.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between group"
+                          >
+                            <button
+                              onClick={() => handleSuggestionClick(item)}
+                              className="flex-1 text-left text-sm text-gray-600 hover:text-[#d2b33a] transition-colors py-1"
+                            >
+                              {item}
+                            </button>
+                            <button
+                              onClick={() => removeFromHistory(item)}
+                              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Popular Searches */}
+                  {!searchQuery && (
+                    <div className="p-3 border-b border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <TrendingUp size={16} />
+                        Popular Searches
+                      </h4>
+                      <div className="space-y-1">
+                        {popularSearches.map((item, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(item)}
+                            className="block w-full text-left text-sm text-gray-600 hover:text-[#d2b33a] hover:bg-gray-50 transition-colors py-1 px-2 rounded"
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dynamic Suggestions */}
+                  {searchQuery && filteredSuggestions.length > 0 && (
+                    <div className="p-3">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Suggestions
+                      </h4>
+                      <div className="space-y-1">
+                        {filteredSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="block w-full text-left text-sm text-gray-600 hover:text-[#d2b33a] hover:bg-gray-50 transition-colors py-1 px-2 rounded"
+                          >
+                            <span className="font-medium">
+                              {suggestion.substring(
+                                0,
+                                suggestion
+                                  .toLowerCase()
+                                  .indexOf(searchQuery.toLowerCase())
+                              )}
+                            </span>
+                            <span className="bg-yellow-200">
+                              {suggestion.substring(
+                                suggestion
+                                  .toLowerCase()
+                                  .indexOf(searchQuery.toLowerCase()),
+                                suggestion
+                                  .toLowerCase()
+                                  .indexOf(searchQuery.toLowerCase()) +
+                                  searchQuery.length
+                              )}
+                            </span>
+                            <span className="font-medium">
+                              {suggestion.substring(
+                                suggestion
+                                  .toLowerCase()
+                                  .indexOf(searchQuery.toLowerCase()) +
+                                  searchQuery.length
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No Results */}
+                  {searchQuery && filteredSuggestions.length === 0 && (
+                    <div className="p-4 text-center text-gray-500 text-sm">
+                      No suggestions found for "{searchQuery}"
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -206,21 +426,118 @@ export default function Navbar() {
 
       {/* Mobile Search Bar */}
       <div className="lg:hidden px-4 pb-3">
-        <div className="flex w-full h-[44px] border-2 border-[#ACAAAA] rounded-lg overflow-hidden shadow-sm">
-          <input
-            type="text"
-            placeholder="I am Looking for..."
-            className="flex-grow px-3 text-base outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-[#d2b33a] text-black font-semibold px-4 hover:bg-[#c4a831] transition-colors duration-200 text-sm cursor-pointer"
+        <div className="relative">
+          <div
+            className={`flex w-full h-[44px] border-2 rounded-lg overflow-hidden shadow-sm transition-all duration-300 ${
+              isSearchFocused
+                ? "border-[#d2b33a] shadow-lg ring-2 ring-[#d2b33a]/20"
+                : "border-[#ACAAAA]"
+            }`}
           >
-            Search
-          </button>
+            <input
+              type="text"
+              placeholder="I am Looking for..."
+              className="flex-grow px-3 text-base outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              onFocus={handleSearchFocus}
+            />
+            <button
+              onClick={() => handleSearch()}
+              className="bg-[#d2b33a] text-black font-semibold px-4 hover:bg-[#c4a831] transition-colors duration-200 text-sm cursor-pointer flex items-center gap-1"
+            >
+              <Search size={16} />
+              Search
+            </button>
+          </div>
+
+          {/* Mobile Search Suggestions */}
+          {showSuggestions && isMobile && (isSearchFocused || searchQuery) && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 mt-1 max-h-80 overflow-y-auto">
+              {/* Search History - Mobile */}
+              {searchHistory.length > 0 && (
+                <div className="p-3 border-b border-gray-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Clock size={14} />
+                      Recent
+                    </h4>
+                    <button
+                      onClick={clearSearchHistory}
+                      className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    {searchHistory.slice(0, 3).map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between group"
+                      >
+                        <button
+                          onClick={() => handleSuggestionClick(item)}
+                          className="flex-1 text-left text-sm text-gray-600 hover:text-[#d2b33a] transition-colors py-1"
+                        >
+                          {item}
+                        </button>
+                        <button
+                          onClick={() => removeFromHistory(item)}
+                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Popular Searches - Mobile */}
+              {!searchQuery && (
+                <div className="p-3">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <TrendingUp size={14} />
+                    Popular
+                  </h4>
+                  <div className="space-y-1">
+                    {popularSearches.slice(0, 3).map((item, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSuggestionClick(item)}
+                        className="block w-full text-left text-sm text-gray-600 hover:text-[#d2b33a] hover:bg-gray-50 transition-colors py-1 px-2 rounded"
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Dynamic Suggestions - Mobile */}
+              {searchQuery && filteredSuggestions.length > 0 && (
+                <div className="p-3">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Suggestions
+                  </h4>
+                  <div className="space-y-1">
+                    {filteredSuggestions
+                      .slice(0, 4)
+                      .map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="block w-full text-left text-sm text-gray-600 hover:text-[#d2b33a] hover:bg-gray-50 transition-colors py-1 px-2 rounded"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

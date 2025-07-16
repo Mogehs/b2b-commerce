@@ -62,6 +62,7 @@ const Page = () => {
 
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+  const categoryParam = searchParams.get("category") || "";
 
   // Initialize search input from URL params
   useEffect(() => {
@@ -69,6 +70,13 @@ const Page = () => {
       setSearchInput(searchQuery);
     }
   }, [searchQuery]);
+
+  // Initialize category selection from URL params
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [categoryParam]);
 
   useEffect(() => {
     const fetchProducts = async () => {
