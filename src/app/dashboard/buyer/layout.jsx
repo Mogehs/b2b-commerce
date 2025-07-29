@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/app/components/common/Navbar";
+import Footer from "@/app/components/common/Footer";
 
 export default function BuyerDashboardLayout({ children }) {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function BuyerDashboardLayout({ children }) {
     <>
       <Navbar />
       <div>
-        <div className="w-full bg-[#ebebeb] py-7 flex justify-center">
+        <div className="w-full bg-[#F1F1F1] py-7 flex justify-center">
           <div className="flex flex-wrap gap-5 justify-center px-4">
             {tabs.map((tab) => (
               <button
@@ -70,8 +71,9 @@ export default function BuyerDashboardLayout({ children }) {
         </div>
 
         {/* Page content */}
-        <div className="container mx-auto max-w-7xl px-4 py-8">{children}</div>
+        <div className="w-full">{children}</div>
       </div>
+      <Footer />
     </>
   );
 }

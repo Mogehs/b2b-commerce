@@ -244,41 +244,26 @@ export default function Dashboard({ activeTab }) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen p-6">
+    <div className="bg-[#F1F1F1] min-h-screen p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Profile Info */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+        <div className="bg-white shadow-lg border border-[#ACAAAA] p-2 md:py-[1rem] md:px-[0.5rem] hover:shadow-xl transition-all duration-300">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="flex-shrink-0">
-              {profile?.image ? (
-                <img
-                  src={profile.image}
-                  alt={profile.name}
-                  className="w-20 h-20 rounded-full border-4 border-[#C9AF2F]/20 shadow-lg"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] flex items-center justify-center shadow-lg">
-                  <span className="text-2xl font-bold text-white">
-                    {profile?.name?.charAt(0) ||
-                      session?.user?.name?.charAt(0) ||
-                      "U"}
-                  </span>
-                </div>
-              )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-3xl font-bold text-gray-800">
+                <h2 className="md:text-[2rem] text-[1.25rem] font-bold text-[#000000]">
                   {profile?.name || session?.user?.name}
                 </h2>
-                <span className="px-3 py-1 bg-gradient-to-r from-[#C9AF2F]/10 to-[#B8A028]/10 text-[#C9AF2F] rounded-full text-sm font-medium border border-[#C9AF2F]/20">
+                {/* <span className="px-3 py-1 bg-gradient-to-r from-[#C9AF2F]/10 to-[#B8A028]/10 text-[#C9AF2F] rounded-full text-sm font-medium border border-[#C9AF2F]/20">
                   Buyer
-                </span>
+                </span> */}
               </div>
-              <p className="text-lg text-gray-600 mb-1">
+              {/* <p className="text-lg text-gray-600 mb-1">
                 {profile?.email || session?.user?.email}
-              </p>
-              <p className="text-sm text-gray-500 bg-gray-50/80 px-4 py-2 rounded-lg inline-block">
+              </p> */}
+              <p className="md:text-[1.25rem] text-[#000000] inline-block">
                 {formatMembershipDuration(
                   profile?.createdAt || session?.user?.createdAt
                 )}
@@ -288,7 +273,7 @@ export default function Dashboard({ activeTab }) {
         </div>
 
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-16 md:px-16 px-4">
           {cards.map((card, idx) => {
             const Icon = card.icon;
             const getCount = () => {
@@ -317,15 +302,15 @@ export default function Dashboard({ activeTab }) {
               <div
                 onClick={() => activeTab(card.link)}
                 key={idx}
-                className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden"
+                className="group bg-white rounded-[0.625rem] shadow-lg border border-gray-100 py-[1rem] px-[0.5rem] cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden"
               >
                 {/* Background Gradient */}
-                <div
+                {/* <div
                   className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:opacity-10 transition-opacity duration-300`}
-                ></div>
+                ></div> */}
 
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
+                  {/* <div className="flex items-center justify-between mb-4">
                     <div
                       className={`w-12 h-12 bg-gradient-to-r ${card.color} rounded-xl flex items-center justify-center shadow-lg`}
                     >
@@ -339,9 +324,9 @@ export default function Dashboard({ activeTab }) {
                         </div>
                       </div>
                     )}
-                  </div>
+                  </div> */}
 
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-200">
+                  <h3 className="md:text-[1.25rem] text-[1rem] font-semibold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-200">
                     {card.title}
                   </h3>
 
@@ -351,11 +336,12 @@ export default function Dashboard({ activeTab }) {
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-gray-700">
+                  <div className="flex items-center justify-end gap-1">
+                    <span className="md:text-[1.25rem] text-[1rem] text-black/50">Total</span>
+                    <span className="md:text-[1.25rem] text-[1rem] text-black/50">-</span>
+                    <span className="md:text-[1.25rem] text-[1rem] text-black/50">
                       {count}
                     </span>
-                    <span className="text-sm text-gray-500">Total</span>
                   </div>
                 </div>
               </div>
