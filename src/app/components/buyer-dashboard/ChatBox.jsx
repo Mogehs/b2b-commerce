@@ -193,9 +193,7 @@ export default function ChatBox() {
 
   return (
     <div className="md:min-h-screen bg-gray-100 text-gray-800 p-4">
-      <h1 className="text-3xl font-bold mb-6 text-[#C9AF2F]">
-        💬 Conversations
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-[#C9AF2F]">Conversations</h1>
 
       <div className="flex flex-col md:flex-row md:h-[80vh] overflow-hidden bg-white shadow-lg rounded-lg">
         {/* Sidebar */}

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
-import Navbar from "@/app/components/common/Navbar";
 import {
   MapPin,
   Phone,
@@ -157,15 +156,15 @@ export default function SuppliersPage() {
 
     return (
       <div
-        className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden ${
+        className={`bg-white shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200 ${
           isGridView ? "h-full" : "flex"
         }`}
       >
         {/* Store Banner/Image */}
         <div
           className={`${
-            isGridView ? "h-48" : "w-48 flex-shrink-0"
-          } bg-gradient-to-br from-[#C9AF2F] to-[#B8A028] relative`}
+            isGridView ? "h-40" : "w-40 flex-shrink-0"
+          } bg-[#C9AF2F] relative`}
         >
           {store.bannerImage?.url ? (
             <img
@@ -175,10 +174,10 @@ export default function SuppliersPage() {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Building2 className="w-16 h-16 text-white opacity-80" />
+              <Building2 className="w-12 h-12 text-white opacity-80" />
             </div>
           )}
-          <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-medium">
+          <div className="absolute top-2 right-2 bg-white px-2 py-0.5 text-xs font-medium">
             {store.isVerified ? (
               <span className="text-green-600">✓ Verified</span>
             ) : (
@@ -188,52 +187,52 @@ export default function SuppliersPage() {
         </div>
 
         {/* Store Details */}
-        <div className={`p-4 ${isGridView ? "" : "flex-1"}`}>
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+        <div className={`p-3 ${isGridView ? "" : "flex-1"}`}>
+          <div className="flex justify-between items-start mb-1.5">
+            <h3 className="text-base font-semibold text-gray-900 line-clamp-1">
               {store.name}
             </h3>
             <div className="flex items-center text-yellow-500">
-              <Star className="w-4 h-4 fill-current" />
-              <span className="text-sm text-gray-600 ml-1">4.5</span>
+              <Star className="w-3 h-3 fill-current" />
+              <span className="text-xs text-gray-600 ml-1">4.5</span>
             </div>
           </div>
 
-          <p className="text-sm text-gray-600 mb-2">{store.businessType}</p>
+          <p className="text-xs text-gray-600 mb-1.5">{store.businessType}</p>
 
-          <p className="text-sm text-gray-700 line-clamp-2 mb-3">
+          <p className="text-xs text-gray-700 line-clamp-2 mb-2">
             {store.description}
           </p>
 
           {/* Location */}
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+          <div className="flex items-center text-xs text-gray-600 mb-1.5">
+            <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
             <span className="line-clamp-1">
               {store.location?.formattedAddress || store.address}
             </span>
           </div>
 
           {/* Contact Info */}
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <Phone className="w-4 h-4 mr-1 flex-shrink-0" />
+          <div className="flex items-center text-xs text-gray-600 mb-1.5">
+            <Phone className="w-3 h-3 mr-1 flex-shrink-0" />
             <span>{store.phone}</span>
           </div>
 
           {/* Categories */}
           {store.productCategories && store.productCategories.length > 0 && (
-            <div className="flex items-center text-sm text-gray-600 mb-3">
-              <Package className="w-4 h-4 mr-1 flex-shrink-0" />
+            <div className="flex items-center text-xs text-gray-600 mb-2">
+              <Package className="w-3 h-3 mr-1 flex-shrink-0" />
               <div className="flex flex-wrap gap-1">
                 {store.productCategories.slice(0, 2).map((category, index) => (
                   <span
                     key={index}
-                    className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs"
+                    className="bg-gray-100 text-gray-700 px-1.5 py-0.5 text-[10px]"
                   >
                     {category}
                   </span>
                 ))}
                 {store.productCategories.length > 2 && (
-                  <span className="text-gray-500 text-xs">
+                  <span className="text-gray-500 text-[10px]">
                     +{store.productCategories.length - 2}
                   </span>
                 )}
@@ -243,19 +242,19 @@ export default function SuppliersPage() {
 
           {/* Branding Services */}
           {store.brandingServices && store.brandingServices.length > 0 && (
-            <div className="flex items-center text-sm text-gray-600 mb-3">
-              <div className="w-4 h-4 mr-1 flex-shrink-0 text-[#C9AF2F]">★</div>
+            <div className="flex items-center text-xs text-gray-600 mb-2">
+              <div className="w-3 h-3 mr-1 flex-shrink-0 text-[#C9AF2F]">★</div>
               <div className="flex flex-wrap gap-1">
                 {store.brandingServices.slice(0, 2).map((service, index) => (
                   <span
                     key={index}
-                    className="bg-[#C9AF2F] bg-opacity-10 text-[#C9AF2F] px-2 py-1 rounded-full text-xs font-medium"
+                    className="bg-[#C9AF2F] bg-opacity-10 text-black px-1.5 py-0.5 text-[10px] font-medium"
                   >
                     {service}
                   </span>
                 ))}
                 {store.brandingServices.length > 2 && (
-                  <span className="text-[#C9AF2F] text-xs font-medium">
+                  <span className="text-[#C9AF2F] text-[10px] font-medium">
                     +{store.brandingServices.length - 2}
                   </span>
                 )}
@@ -266,9 +265,9 @@ export default function SuppliersPage() {
           {/* Action Button */}
           <button
             onClick={() => handleViewDetails(store.owner._id)}
-            className="w-full bg-[#C9AF2F] hover:bg-[#B8A028] text-white py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-[#C9AF2F] hover:bg-[#B8A028] text-black py-1.5 px-3 text-xs transition-colors duration-200 flex items-center justify-center gap-1"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3 h-3" />
             View Details
           </button>
         </div>
@@ -277,38 +276,37 @@ export default function SuppliersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen bg-[#F1F1F1]">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-5">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">
             Find Suppliers
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600">
             Discover verified suppliers and their business profiles
           </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white shadow-sm p-4 mb-5 border border-gray-200">
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="flex gap-4">
+          <form onSubmit={handleSearch} className="mb-3">
+            <div className="flex gap-3">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search suppliers, products, or business types..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C9AF2F] focus:border-transparent"
+                  className="w-full pl-9 pr-3 py-1.5 border border-gray-300 focus:ring-1 focus:ring-[#C9AF2F] focus:border-transparent text-sm"
                 />
               </div>
               <button
                 type="submit"
-                className="bg-[#C9AF2F] hover:bg-[#B8A028] text-white px-6 py-2 rounded-md transition-colors duration-200"
+                className="bg-[#C9AF2F] hover:bg-[#B8A028] text-black px-5 py-1.5 text-sm transition-colors duration-200"
               >
                 Search
               </button>
@@ -319,38 +317,38 @@ export default function SuppliersPage() {
           <div className="flex justify-between items-center">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 text-sm"
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-3.5 h-3.5" />
               Filters
             </button>
 
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-600">
                 {pagination.totalStores} suppliers found
               </span>
 
               {/* View Mode Toggle */}
-              <div className="flex border border-gray-300 rounded-md overflow-hidden">
+              <div className="flex border border-gray-300 overflow-hidden">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 ${
+                  className={`p-1.5 ${
                     viewMode === "grid"
                       ? "bg-[#C9AF2F] text-white"
                       : "bg-white text-gray-600"
                   }`}
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 ${
+                  className={`p-1.5 ${
                     viewMode === "list"
                       ? "bg-[#C9AF2F] text-white"
                       : "bg-white text-gray-600"
                   }`}
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -358,11 +356,11 @@ export default function SuppliersPage() {
 
           {/* Expandable Filters */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {/* Region Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Region
                   </label>
                   <select
@@ -370,7 +368,7 @@ export default function SuppliersPage() {
                     onChange={(e) =>
                       handleFilterChange("region", e.target.value)
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#C9AF2F] focus:border-transparent"
+                    className="w-full border border-gray-300 px-2 py-1.5 text-xs focus:ring-1 focus:ring-[#C9AF2F] focus:border-transparent"
                   >
                     <option value="all">All Regions</option>
                     {filterOptions.regions.map((region) => (
@@ -383,7 +381,7 @@ export default function SuppliersPage() {
 
                 {/* Category Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Category
                   </label>
                   <select
@@ -391,7 +389,7 @@ export default function SuppliersPage() {
                     onChange={(e) =>
                       handleFilterChange("category", e.target.value)
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#C9AF2F] focus:border-transparent"
+                    className="w-full border border-gray-300 px-2 py-1.5 text-xs focus:ring-1 focus:ring-[#C9AF2F] focus:border-transparent"
                   >
                     <option value="all">All Categories</option>
                     {filterOptions.categories.map((category) => (
@@ -404,7 +402,7 @@ export default function SuppliersPage() {
 
                 {/* Service Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Branding Service
                   </label>
                   <select
@@ -412,7 +410,7 @@ export default function SuppliersPage() {
                     onChange={(e) =>
                       handleFilterChange("service", e.target.value)
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#C9AF2F] focus:border-transparent"
+                    className="w-full border border-gray-300 px-2 py-1.5 text-xs focus:ring-1 focus:ring-[#C9AF2F] focus:border-transparent"
                   >
                     <option value="all">All Services</option>
                     {filterOptions.services.map((service) => (
@@ -425,7 +423,7 @@ export default function SuppliersPage() {
 
                 {/* Sort By */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Sort By
                   </label>
                   <select
@@ -433,7 +431,7 @@ export default function SuppliersPage() {
                     onChange={(e) =>
                       handleFilterChange("sortBy", e.target.value)
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-[#C9AF2F] focus:border-transparent"
+                    className="w-full border border-gray-300 px-2 py-1.5 text-xs focus:ring-1 focus:ring-[#C9AF2F] focus:border-transparent"
                   >
                     <option value="createdAt">Newest First</option>
                     <option value="name">Name (A-Z)</option>
@@ -445,13 +443,13 @@ export default function SuppliersPage() {
                 <div className="flex items-end gap-2">
                   <button
                     onClick={applyFilters}
-                    className="flex-1 bg-[#C9AF2F] hover:bg-[#B8A028] text-white py-2 px-4 rounded-md text-sm transition-colors duration-200"
+                    className="flex-1 bg-[#C9AF2F] hover:bg-[#B8A028] text-black py-1.5 px-3 text-xs transition-colors duration-200"
                   >
                     Apply
                   </button>
                   <button
                     onClick={resetFilters}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-md text-sm transition-colors duration-200"
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 text-xs transition-colors duration-200"
                   >
                     Reset
                   </button>
@@ -463,8 +461,8 @@ export default function SuppliersPage() {
 
         {/* Loading State */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#C9AF2F]"></div>
+          <div className="flex justify-center items-center py-10">
+            <div className="animate-spin h-6 w-6 border-b-2 border-[#C9AF2F]"></div>
           </div>
         ) : (
           <>
@@ -473,8 +471,8 @@ export default function SuppliersPage() {
               <div
                 className={
                   viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
-                    : "space-y-4 mb-8"
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6"
+                    : "space-y-3 mb-6"
                 }
               >
                 {stores.map((store) => (
@@ -486,17 +484,17 @@ export default function SuppliersPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <div className="text-center py-10 bg-white border border-gray-200 shadow-sm">
+                <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-base font-medium text-gray-900 mb-1.5">
                   No suppliers found
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-sm text-gray-600 mb-3">
                   Try adjusting your search criteria or filters
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="bg-[#C9AF2F] hover:bg-[#B8A028] text-white py-2 px-4 rounded-md transition-colors duration-200"
+                  className="bg-[#C9AF2F] hover:bg-[#B8A028] text-black py-1.5 px-4 text-sm transition-colors duration-200"
                 >
                   Clear all filters
                 </button>
@@ -505,13 +503,13 @@ export default function SuppliersPage() {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2">
+              <div className="flex justify-center items-center gap-1.5">
                 <button
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={!pagination.hasPrevPage}
-                  className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="p-1.5 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
 
                 {[...Array(pagination.totalPages)].map((_, index) => {
@@ -529,7 +527,7 @@ export default function SuppliersPage() {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 py-2 rounded-md border ${
+                        className={`px-2.5 py-1.5 border text-xs ${
                           isCurrentPage
                             ? "bg-[#C9AF2F] text-white border-[#C9AF2F]"
                             : "border-gray-300 hover:bg-gray-50"
@@ -543,7 +541,7 @@ export default function SuppliersPage() {
                     pageNum === pagination.currentPage + 3
                   ) {
                     return (
-                      <span key={pageNum} className="px-2">
+                      <span key={pageNum} className="px-1.5 text-xs">
                         ...
                       </span>
                     );
@@ -554,9 +552,9 @@ export default function SuppliersPage() {
                 <button
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={!pagination.hasNextPage}
-                  className="p-2 rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="p-1.5 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             )}

@@ -7,7 +7,6 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import Navbar from "../components/common/Navbar";
 import { sellerApplicationSchema } from "@/lib/validations";
 import Link from "next/link";
 import Map, { Marker, NavigationControl, GeolocateControl } from "react-map-gl";
@@ -259,7 +258,6 @@ const SellerProfile = () => {
   if (status === "loading" || checkingApplication) {
     return (
       <>
-        <Navbar />
         <main className="bg-gray-100 py-10 px-4 min-h-screen">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9AF2F]"></div>
@@ -273,7 +271,6 @@ const SellerProfile = () => {
     const { status, adminNotes, reason } = existingApplication;
     return (
       <>
-        <Navbar />
         <main className="bg-gray-100 py-10 px-4 min-h-screen flex flex-col items-center justify-center">
           <div className="bg-white shadow-xl rounded-xl p-8 max-w-2xl w-full text-center space-y-6">
             {status === "pending" && (
@@ -384,7 +381,6 @@ const SellerProfile = () => {
 
   return (
     <>
-      <Navbar />
       <main className="bg-gray-100 py-10 px-4 min-h-screen">
         <h1 className="text-center text-[#C9AF2F] text-3xl font-bold mb-10 uppercase">
           Become a Supplier

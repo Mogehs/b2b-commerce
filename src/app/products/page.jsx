@@ -3,8 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { LuSearch } from "react-icons/lu";
-import Navbar from "../components/common/Navbar";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import BulkPriceDialog from "../components/common/BulkPriceDialog";
 
 export default function SearchProducts() {
@@ -12,6 +11,7 @@ export default function SearchProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [resultsPerPage, setResultsPerPage] = useState(20);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
@@ -51,13 +51,18 @@ export default function SearchProducts() {
     );
   }, [filteredProducts, currentPage, resultsPerPage]);
 
-  const handleCardClick = (id) => {
-    console.log("View Product ID:", id);
+  // Navigate to business profile page
+  const navigateToBusinessProfile = (sellerId) => {
+    if (!sellerId) {
+      console.error("No seller ID available for this product");
+      return;
+    }
+    console.log(sellerId)
+    router.push(`/business-profile/${sellerId._id}`);
   };
 
   return (
     <>
-      <Navbar />
       <div className="flex flex-col md:flex-row min-h-screen bg-[#F5F5F5]">
         {/* Sidebar with static location search */}
         <aside className="w-full md:w-[220px] bg-[#F5F5F5] border-r border-gray-200 px-4 py-6">
@@ -94,33 +99,38 @@ export default function SearchProducts() {
                 {paginatedProducts.map((product, index) => (
                   <div
                     key={index}
-                    className="flex flex-col justify-between bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200"
+                    className="flex flex-col justify-between bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer"
                   >
-                    <img
-                      src={product.images[0]?.url}
-                      alt={product.name}
-                      className="w-full h-[240px] object-cover"
-                    />
+                    <div onClick={() => navigateToBusinessProfile(product.seller)}>
+                      <img
+                        src={product.images[0]?.url}
+                        alt={product.name}
+                        className="w-full h-[240px] object-cover"
+                      />
 
-                    <div className="p-4 flex flex-col gap-2 flex-1">
-                      <h3 className="font-medium text-base text-gray-900 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-700 text-sm">
-                        PKR {product.price?.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Min Qty - {product.minOrderQuantity || "N/A"} Pcs
-                      </p>
-                      <p className="text-sm text-gray-500 italic mt-1">
-                        {product.supplier || "Madina Traders"} -{" "}
-                        {product.location || "Lahore"}
-                      </p>
+                      <div className="p-4 flex flex-col gap-2 flex-1">
+                        <h3 className="font-medium text-base text-gray-900 line-clamp-2">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-700 text-sm">
+                          PKR {product.price?.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Min Qty - {product.minOrderQuantity || "N/A"} Pcs
+                        </p>
+                        <p className="text-sm text-gray-500 italic mt-1">
+                          {product.supplier || "Madina Traders"} -{" "}
+                          {product.location || "Lahore"}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="p-4 pt-0 grid grid-cols-2 gap-3">
                       <BulkPriceDialog product={product} />
-                      <button className="bg-black text-white hover:bg-gray-800 py-2 text-sm rounded-md">
+                      <button
+                        className="bg-black text-white hover:bg-gray-800 py-2 text-sm rounded-md"
+                        onClick={() => navigateToBusinessProfile(product.seller)}
+                      >
                         Contact Seller
                       </button>
                     </div>

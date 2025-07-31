@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import axios from "axios";
 
-import Navbar from "@/app/components/common/Navbar";
 import RelatedProducts from "@/app/components/detail-page/RelatedProducts";
 import { AiOutlineHeart, AiOutlineShareAlt } from "react-icons/ai";
 import MoreFromSeller from "@/app/components/detail-page/MoreFromSeller";
@@ -27,56 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import InfoCertificates from "@/app/components/common/information-certificates/InfoCertificates";
 
-const relatedProducts = [
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-  {
-    title:
-      "Kids Custom Name T Shirt Is Free Delivery All Across Pakistan.........",
-    price: "PKR - 2500",
-    minQty: "Min Qty - 100 Pcs",
-    seller: "Madina Traders - Lahore",
-    image: "/detail-page/related-products-image.jpg",
-  },
-];
+
 const thumbnails = [
   "/detail-page/product-image.png",
   "/detail-page/related-product-detail-1.png",
@@ -222,7 +172,6 @@ const Page = ({ params }) => {
 
   return (
     <>
-      <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-6 font-sans text-sm text-gray-800">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="mb-4 text-gray-500 text-sm">

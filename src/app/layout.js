@@ -6,6 +6,8 @@ import { authOptions } from "@/auth";
 import { SessionProviderWrapper } from "./lib/SessionProviderWrapper";
 import { getServerSession } from "next-auth";
 import { SocketProvider } from "./context/SocketContext";
+import Navbar from "./components/common/Navbar";
+import Footer from "./components/common/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,10 +61,14 @@ export default async function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-[#F1F1F1]`}
       >
         <SessionProviderWrapper session={session}>
-          <SocketProvider>{children}</SocketProvider>
+          <SocketProvider>
+            <Navbar />
+            <main className={`max-w-[1536px] mx-auto`}>{children}</main>
+            <Footer />
+          </SocketProvider>
         </SessionProviderWrapper>
         <Toaster />
       </body>

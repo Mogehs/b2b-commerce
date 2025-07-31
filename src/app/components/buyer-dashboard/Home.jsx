@@ -198,12 +198,12 @@ export default function Dashboard({ activeTab }) {
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-3">
           <div className="relative">
-            <div className="w-16 h-16 border-4 border-[#C9AF2F]/20 border-t-[#C9AF2F] rounded-full animate-spin mx-auto"></div>
-            <div className="w-12 h-12 border-4 border-[#B8A028]/20 border-t-[#B8A028] rounded-full animate-spin mx-auto absolute top-2 left-1/2 transform -translate-x-1/2"></div>
+            <div className="w-12 h-12 border-3 border-[#C9AF2F]/20 border-t-[#C9AF2F] rounded-full animate-spin mx-auto"></div>
+            <div className="w-9 h-9 border-3 border-[#B8A028]/20 border-t-[#B8A028] rounded-full animate-spin mx-auto absolute top-1.5 left-1/2 transform -translate-x-1/2"></div>
           </div>
-          <div className="text-xl font-semibold text-gray-700">
+          <div className="text-base font-semibold text-gray-700">
             Loading dashboard...
           </div>
         </div>
@@ -214,10 +214,10 @@ export default function Dashboard({ activeTab }) {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center max-w-md">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white p-6 shadow-md border border-gray-100 text-center max-w-md">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <svg
-              className="w-8 h-8 text-red-500"
+              className="w-6 h-6 text-red-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -230,11 +230,11 @@ export default function Dashboard({ activeTab }) {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-red-600 mb-2">Error</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h2 className="text-xl font-bold text-red-600 mb-2">Error</h2>
+          <p className="text-sm text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] text-white rounded-full hover:from-[#B8A028] hover:to-[#A69124] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="px-4 py-2 bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] text-white rounded-full hover:from-[#B8A028] hover:to-[#A69124] transition-all duration-300 shadow-md hover:shadow-lg text-sm"
           >
             Try Again
           </button>
@@ -244,26 +244,20 @@ export default function Dashboard({ activeTab }) {
   }
 
   return (
-    <div className="bg-[#F1F1F1] min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="bg-[#F1F1F1] min-h-screen p-4 md:p-5">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Profile Info */}
-        <div className="bg-white shadow-lg border border-[#ACAAAA] p-2 md:py-[1rem] md:px-[0.5rem] hover:shadow-xl transition-all duration-300">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div className="bg-white shadow-md border border-[#ACAAAA] p-2 md:py-3 md:px-4 hover:shadow-lg transition-all duration-300">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
             <div className="flex-shrink-0">
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="md:text-[2rem] text-[1.25rem] font-bold text-[#000000]">
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="md:text-lg text-base font-bold text-[#000000]">
                   {profile?.name || session?.user?.name}
                 </h2>
-                {/* <span className="px-3 py-1 bg-gradient-to-r from-[#C9AF2F]/10 to-[#B8A028]/10 text-[#C9AF2F] rounded-full text-sm font-medium border border-[#C9AF2F]/20">
-                  Buyer
-                </span> */}
               </div>
-              {/* <p className="text-lg text-gray-600 mb-1">
-                {profile?.email || session?.user?.email}
-              </p> */}
-              <p className="md:text-[1.25rem] text-[#000000] inline-block">
+              <p className="md:text-sm text-xs text-[#000000] inline-block">
                 {formatMembershipDuration(
                   profile?.createdAt || session?.user?.createdAt
                 )}
@@ -273,7 +267,7 @@ export default function Dashboard({ activeTab }) {
         </div>
 
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-16 md:px-16 px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 md:px-8 px-2">
           {cards.map((card, idx) => {
             const Icon = card.icon;
             const getCount = () => {
@@ -302,44 +296,23 @@ export default function Dashboard({ activeTab }) {
               <div
                 onClick={() => activeTab(card.link)}
                 key={idx}
-                className="group bg-white rounded-[0.625rem] shadow-lg border border-gray-100 py-[1rem] px-[0.5rem] cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative overflow-hidden"
+                className="group bg-white  shadow-md border border-gray-100 py-3 h-25 px-3 cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-102 relative overflow-hidden"
               >
-                {/* Background Gradient */}
-                {/* <div
-                  className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:opacity-10 transition-opacity duration-300`}
-                ></div> */}
-
                 <div className="relative z-10">
-                  {/* <div className="flex items-center justify-between mb-4">
-                    <div
-                      className={`w-12 h-12 bg-gradient-to-r ${card.color} rounded-xl flex items-center justify-center shadow-lg`}
-                    >
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    {showNotification && (
-                      <div className="relative">
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                        <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                          {unreadCount}
-                        </div>
-                      </div>
-                    )}
-                  </div> */}
-
-                  <h3 className="md:text-[1.25rem] text-[1rem] font-semibold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-200">
+                  <h3 className="md:text-sm text-xs font-semibold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-200">
                     {card.title}
                   </h3>
 
                   {showNotification && (
-                    <p className="text-sm text-red-600 font-medium mb-3">
+                    <p className="text-xs text-red-600 font-medium mb-2">
                       {unreadCount} {card.subtitle}
                     </p>
                   )}
 
                   <div className="flex items-center justify-end gap-1">
-                    <span className="md:text-[1.25rem] text-[1rem] text-black/50">Total</span>
-                    <span className="md:text-[1.25rem] text-[1rem] text-black/50">-</span>
-                    <span className="md:text-[1.25rem] text-[1rem] text-black/50">
+                    <span className="md:text-sm text-xs text-black/50">Total</span>
+                    <span className="md:text-sm text-xs text-black/50">-</span>
+                    <span className="md:text-sm text-xs text-black/50">
                       {count}
                     </span>
                   </div>
@@ -351,44 +324,44 @@ export default function Dashboard({ activeTab }) {
 
         {/* Recent Conversations Preview */}
         {conversations.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-md shadow-md border border-gray-100 p-4 hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] rounded-lg flex items-center justify-center mr-3">
-                  <MessageCircle className="w-5 h-5 text-white" />
+                <div className="w-6 h-6 bg-gradient-to-r from-[#C9AF2F] to-[#B8A028] rounded-md flex items-center justify-center mr-2">
+                  <MessageCircle className="w-3 h-3 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-sm font-semibold text-gray-800">
                   Recent Conversations
                 </h3>
               </div>
               <button
                 onClick={() => activeTab("Message")}
-                className="text-[#C9AF2F] hover:text-[#B8A028] font-medium text-sm transition-colors duration-200"
+                className="text-[#C9AF2F] hover:text-[#B8A028] font-medium text-xs transition-colors duration-200"
               >
                 View All
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {conversations.slice(0, 3).map((conversation, idx) => (
                 <div
                   key={conversation._id}
-                  className="flex items-center p-3 rounded-xl bg-gray-50/50 hover:bg-[#C9AF2F]/5 transition-all duration-200 cursor-pointer"
+                  className="flex items-center p-2 rounded-md bg-gray-50/50 hover:bg-[#C9AF2F]/5 transition-all duration-200 cursor-pointer"
                 >
-                  <div className="w-10 h-10 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-medium text-sm">
+                  <div className="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mr-2">
+                    <span className="text-white font-medium text-xs">
                       {conversation.participants?.[0]?.name?.charAt(0) || "U"}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-800">
+                    <p className="font-medium text-xs text-gray-800">
                       {conversation.participants?.[0]?.name || "Unknown User"}
                     </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-xs text-gray-500 truncate">
                       {conversation.lastMessage?.content || "No messages yet"}
                     </p>
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-[10px] text-gray-400">
                     {new Date(conversation.updatedAt).toLocaleDateString()}
                   </div>
                 </div>

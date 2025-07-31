@@ -15,8 +15,6 @@ export function SocketProvider({ children }) {
   useEffect(() => {
     // Check if we're in production (Render, Vercel, or other hosting)
     const isHostedEnvironment =
-      window.location.hostname.includes("vercel.app") ||
-      window.location.hostname.includes(".vercel.app") ||
       window.location.hostname.includes("onrender.com") ||
       window.location.hostname.includes(".onrender.com") ||
       process.env.NODE_ENV === "production";

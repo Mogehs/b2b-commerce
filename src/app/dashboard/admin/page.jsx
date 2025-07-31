@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/app/components/common/Navbar";
 import Applications from "@/app/components/admin-dashboard/Applications";
 import ApprovedSellersPage from "@/app/components/admin-dashboard/ApprovedSellersPage";
 import AdminChat from "@/app/components/admin-dashboard/AdminChat";
@@ -17,7 +16,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-sm border">

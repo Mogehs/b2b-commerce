@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Navbar from "@/app/components/common/Navbar";
-import Footer from "@/app/components/common/Footer";
 
 export default function BuyerDashboardLayout({ children }) {
   const router = useRouter();
@@ -50,7 +48,6 @@ export default function BuyerDashboardLayout({ children }) {
 
   return (
     <>
-      <Navbar />
       <div>
         <div className="w-full bg-[#F1F1F1] py-7 flex justify-center">
           <div className="flex flex-wrap gap-5 justify-center px-4">
@@ -73,7 +70,6 @@ export default function BuyerDashboardLayout({ children }) {
         {/* Page content */}
         <div className="w-full">{children}</div>
       </div>
-      <Footer />
     </>
   );
 }

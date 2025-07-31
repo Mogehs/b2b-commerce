@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Navbar from "@/app/components/common/Navbar";
 
 export default function SellerDashboardLayout({ children }) {
   const router = useRouter();
@@ -50,7 +49,6 @@ export default function SellerDashboardLayout({ children }) {
 
   return (
     <>
-      <Navbar />
       <div>
         <div className="w-full bg-[#ebebeb] py-7 flex justify-center">
           <div className="flex flex-wrap gap-5 justify-center px-4">
