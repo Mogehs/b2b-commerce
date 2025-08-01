@@ -5,6 +5,7 @@ import BPHome from "../../components/business-profile/BPHome";
 import BPAbout from "../../components/business-profile/BPAbout";
 import BPContact from "../../components/business-profile/BPContact";
 import BPProducts from "../../components/business-profile/BPProducts";
+import Loader from "@/app/components/common/Loader";
 import { CiSearch } from "react-icons/ci";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -76,22 +77,7 @@ const page = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="h-screen flex items-center justify-center">
-          <div className="text-center space-y-3">
-            <div className="relative">
-              <div className="w-12 h-12 border-3 border-[#C9AF2F]/20 border-t-[#C9AF2F] rounded-full animate-spin mx-auto"></div>
-              <div className="w-9 h-9 border-3 border-[#B8A028]/20 border-t-[#B8A028] rounded-full animate-spin mx-auto absolute top-1.5 left-1/2 transform -translate-x-1/2"></div>
-            </div>
-            <div className="text-lg font-semibold text-gray-700">
-              Loading seller profile...
-            </div>
-            <div className="text-sm text-gray-500">
-              Please wait while we fetch the details
-            </div>
-          </div>
-        </div>
-      </div>
+      <Loader/>
     );
   }
 
@@ -241,29 +227,35 @@ const page = () => {
         <div className="relative z-10 px-4 md:px-6">
           <div className="max-w-7xl mx-auto">
             <div className="bg-[#FFFFFF] backdrop-blur-lg shadow-sm rounded-[2px] border border-white/20 overflow-hidden">
-              <div className="px-4 py-3 lg:px-6 lg:py-4">
-                <div className="flex flex-col lg:flex-row items-center justify-evenly gap-4 text-nowrap">
+                <div className="px-4 py-2 lg:px-6 lg:py-3">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-3 text-nowrap">
                   {/* Left Navigation */}
                   <div className="flex items-center space-x-6">
                     <button
                       onClick={() => setSelectedComponent("home")}
-                      className={`relative px-3 py-1 font-semibold text-base ${
+                      className={`relative px-2 py-1 font-semibold text-sm tracking-wide ${
                         selectedComponent === "home"
                           ? "text-[#C9AF2F]"
-                          : "text-gray-800"
-                      }`}
+                          : "text-gray-800 hover:text-[#C9AF2F]/80"
+                      } transition-colors duration-200`}
                     >
                       HOME
+                      {selectedComponent === "home" && (
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C9AF2F]"></span>
+                      )}
                     </button>
                     <button
                       onClick={() => setSelectedComponent("products")}
-                      className={`relative px-3 py-1 font-semibold text-base ${
+                      className={`relative px-2 py-1 font-semibold text-sm tracking-wide ${
                         selectedComponent === "products"
                           ? "text-[#C9AF2F]"
-                          : "text-gray-800"
-                      }`}
+                          : "text-gray-800 hover:text-[#C9AF2F]/80"
+                      } transition-colors duration-200`}
                     >
                       PRODUCTS
+                      {selectedComponent === "products" && (
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C9AF2F]"></span>
+                      )}
                     </button>
                   </div>
 
@@ -273,14 +265,14 @@ const page = () => {
                       <input
                         type="text"
                         placeholder="Search in this store..."
-                        className="w-full bg-[#F1F1F1] border border-gray-200/50 rounded-[2px] px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-1 focus:ring-[#C9AF2F]/30 focus:border-[#C9AF2F] transition-all duration-300"
+                        className="w-full bg-[#F1F1F1] border border-gray-200/50 rounded-[2px] px-4 py-1.5 pl-8 text-xs focus:outline-none focus:ring-1 focus:ring-[#C9AF2F]/30 focus:border-[#C9AF2F] transition-all duration-300"
                       />
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                        <CiSearch className="w-4 h-4 text-gray-400 group-focus-within:text-[#C9AF2F] transition-colors duration-300" />
+                      <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
+                        <CiSearch className="w-3 h-3 text-gray-400 group-focus-within:text-[#C9AF2F] transition-colors duration-300" />
                       </div>
-                      <button className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-gray-800">
+                      <button className="absolute top-1/2 right-2.5 -translate-y-1/2 p-0.5 text-gray-800">
                         <svg
-                          className="w-4 h-4"
+                          className="w-3 h-3"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -300,23 +292,29 @@ const page = () => {
                   <div className="flex items-center space-x-6">
                     <button
                       onClick={() => setSelectedComponent("about")}
-                      className={`relative px-3 py-1 font-semibold text-base ${
+                      className={`relative px-2 py-1 font-semibold text-sm tracking-wide ${
                         selectedComponent === "about"
                           ? "text-[#C9AF2F]"
-                          : "text-gray-800"
-                      }`}
+                          : "text-gray-800 hover:text-[#C9AF2F]/80"
+                      } transition-colors duration-200`}
                     >
                       ABOUT US
+                      {selectedComponent === "about" && (
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C9AF2F]"></span>
+                      )}
                     </button>
                     <button
                       onClick={() => setSelectedComponent("contact")}
-                      className={`relative px-4 py-2 font-semibold text-[20px] ${
+                      className={`relative px-2 py-1 font-semibold text-sm tracking-wide ${
                         selectedComponent === "contact"
                           ? "text-[#C9AF2F]"
-                          : "text-gray-800"
-                      }`}
+                          : "text-gray-800 hover:text-[#C9AF2F]/80"
+                      } transition-colors duration-200`}
                     >
                       CONTACT US
+                      {selectedComponent === "contact" && (
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C9AF2F]"></span>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -331,7 +329,7 @@ const page = () => {
         {selectedComponent === "home" && (
           <BPHome sellerId={sellerId} sellerData={sellerData} />
         )}
-        {selectedComponent === "products" && <BPProducts sellerId={sellerId} />}
+        {selectedComponent === "products" && <BPProducts ducts sellerId={sellerId} />}
         {selectedComponent === "about" && (
           <BPAbout sellerId={sellerId} sellerData={sellerData} />
         )}

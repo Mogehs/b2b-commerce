@@ -5,6 +5,7 @@ import { FiSearch } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { format } from "date-fns";
+import Loader from "@/app/components/common/Loader";
 
 const statusColor = {
   Pending: "bg-yellow-100 text-yellow-800",
@@ -105,17 +106,7 @@ export default function MyRFQPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-8">
-          <div
-            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#C9AF2F] border-r-transparent align-[-0.125em] text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]"
-            role="status"
-          >
-            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-              Loading...
-            </span>
-          </div>
-          <p className="mt-2 text-gray-600">Loading your RFQs...</p>
-        </div>
+      <Loader/>
       ) : error ? (
         <div className="text-center py-8 text-red-500">{error}</div>
       ) : (

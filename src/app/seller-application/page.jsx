@@ -31,6 +31,7 @@ const SellerProfile = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [mapError, setMapError] = useState(false);
+  const [certificateImages, setCertificateImages] = useState([]);
   const searchTimeout = useRef(null);
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -92,6 +93,15 @@ const SellerProfile = () => {
       }
     }, 400);
   }, [searchQuery]);
+
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      certificateImages.forEach((image) => {
+        URL.revokeObjectURL(image.preview);
+      });
+    };
+  }, [certificateImages]);
 
   const handleSelectPlace = (feature) => {
     setSelectedLocation({
@@ -188,6 +198,25 @@ const SellerProfile = () => {
     }
   };
 
+  const handleCertificateUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+    }));
+    setCertificateImages((prev) => [...prev, ...newImages]);
+  };
+
+  const removeCertificateImage = (index) => {
+    setCertificateImages((prev) => {
+      const newImages = [...prev];
+      URL.revokeObjectURL(newImages[index].preview);
+      newImages.splice(index, 1);
+      return newImages;
+    });
+  };
+
   const onSubmit = async (data) => {
     if (!session) {
       toast.error("Please login to submit application");
@@ -205,14 +234,21 @@ const SellerProfile = () => {
       const formData = new FormData();
       formData.append("location", JSON.stringify(selectedLocation));
       formData.append("serviceRadius", serviceRadius.toString());
+
+      // Add certificate images
+      certificateImages.forEach((certImage, index) => {
+        formData.append(`certificateImages`, certImage.file);
+      });
+
       Object.keys(data).forEach((key) => {
         if (key !== "location" && data[key]) {
           formData.append(key, data[key]);
         }
       });
+
       const response = await axios.post("/api/seller/apply", formData, {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "multipart/form-data",
         },
         withCredentials: true,
         timeout: 60000,
@@ -228,6 +264,7 @@ const SellerProfile = () => {
         );
         reset();
         setSelectedLocation(null);
+        setCertificateImages([]);
         router.push("/dashboard/seller");
       }
     } catch (error) {
@@ -727,6 +764,59 @@ const SellerProfile = () => {
                   )}
                 </div>
               ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-[#C9AF2F] border-b pb-2 mb-6">
+              Business Certificates (Optional)
+            </h2>
+            <div className="space-y-4">
+              <p className="text-gray-600 text-sm">
+                Upload images of your business certificates, licenses, or other
+                relevant documents.
+              </p>
+              <div className="flex flex-col">
+                <label className="text-gray-700 font-medium mb-2">
+                  Certificate Images
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleCertificateUpload}
+                  className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#C9AF2F] transition-colors"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  You can upload multiple certificate images (JPG, PNG, WebP
+                  formats)
+                </p>
+                {certificateImages.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Selected Images ({certificateImages.length}):
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {certificateImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image.preview}
+                            alt={`Certificate ${index + 1}`}
+                            className="w-full h-20 object-cover rounded border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeCertificateImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 

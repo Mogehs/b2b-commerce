@@ -119,6 +119,19 @@ const sellerApplicationSchema = new mongoose.Schema(
         twitter: String,
         linkedin: String,
       },
+      certificates: {
+        certificateImages: [
+          {
+            url: String,
+            publicId: String,
+            name: String,
+            uploadedAt: {
+              type: Date,
+              default: Date.now,
+            },
+          },
+        ],
+      },
     },
 
     documents: [

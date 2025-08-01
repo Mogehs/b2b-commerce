@@ -458,7 +458,6 @@ const Page = ({ params }) => {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

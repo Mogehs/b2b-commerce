@@ -5,17 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="992f721d-3aeb-4dbc-b8e0-ce20e19a17cc" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/app/components/common/Loader.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(auth)/log-in/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(auth)/log-in/page.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(auth)/sign-up/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(auth)/sign-up/page.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/business-profile/[id]/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/business-profile/[id]/page.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/components/business-profile/ContactInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/business-profile/ContactInfo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/components/buyer-dashboard/ChatBox.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/buyer-dashboard/ChatBox.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/components/buyer-dashboard/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/buyer-dashboard/Home.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/context/SocketContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/context/SocketContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/dashboard/admin/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/dashboard/admin/page.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/business-profile/BPAbout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/business-profile/BPAbout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/business-profile/BPHome.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/business-profile/BPHome.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/business-profile/BPProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/business-profile/BPProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/buyer-dashboard/Profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/buyer-dashboard/Profile.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/buyer-dashboard/RFQ.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/buyer-dashboard/RFQ.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/home/BrandingCards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/home/BrandingCards.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/home/Products.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/home/Products.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/seller-dashboard/RFQ.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/seller-dashboard/RFQ.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/page.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/product-details/[id]/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/product-details/[id]/page.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/products/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/products/page.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/seller-application/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/seller-application/page.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/suppliers/page.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/suppliers/page.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,10 +30,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="30eD6Fgpn4Wv1Lk30kt9HQW05tP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -36,10 +41,12 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "js.debugger.nextJs.config.created.client": "true",
@@ -50,6 +57,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2025.1.4.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -83,6 +91,7 @@
       <option name="presentableId" value="Default" />
       <updated>1753978969739</updated>
       <workItem from="1753978971504" duration="6430000" />
+      <workItem from="1754066443365" duration="5969000" />
     </task>
     <servers />
   </component>

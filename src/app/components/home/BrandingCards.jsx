@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Loader from "@/app/components/common/Loader";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -172,9 +173,7 @@ const BrandingCards = ({ products, loading }) => {
       </div>
 
       {serviceLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9AF2F]"></div>
-        </div>
+        <Loader/>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg my-6">
           <p className="text-gray-500 text-lg">

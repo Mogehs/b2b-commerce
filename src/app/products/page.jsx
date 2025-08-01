@@ -5,6 +5,7 @@ import axios from "axios";
 import { LuSearch } from "react-icons/lu";
 import { useSearchParams, useRouter } from "next/navigation";
 import BulkPriceDialog from "../components/common/BulkPriceDialog";
+import Loader from "@/app/components/common/Loader";
 
 export default function SearchProducts() {
   const [products, setProducts] = useState([]);
@@ -57,7 +58,7 @@ export default function SearchProducts() {
       console.error("No seller ID available for this product");
       return;
     }
-    console.log(sellerId)
+    console.log(sellerId);
     router.push(`/business-profile/${sellerId._id}`);
   };
 
@@ -90,7 +91,7 @@ export default function SearchProducts() {
           )}
 
           {loading ? (
-            <p className="text-center text-gray-500">Loading products...</p>
+            <Loader />
           ) : filteredProducts.length === 0 ? (
             <p className="text-center text-gray-500">No products found.</p>
           ) : (
@@ -101,7 +102,9 @@ export default function SearchProducts() {
                     key={index}
                     className="flex flex-col justify-between bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer"
                   >
-                    <div onClick={() => navigateToBusinessProfile(product.seller)}>
+                    <div
+                      onClick={() => navigateToBusinessProfile(product.seller)}
+                    >
                       <img
                         src={product.images[0]?.url}
                         alt={product.name}
@@ -129,7 +132,9 @@ export default function SearchProducts() {
                       <BulkPriceDialog product={product} />
                       <button
                         className="bg-black text-white hover:bg-gray-800 py-2 text-sm rounded-md"
-                        onClick={() => navigateToBusinessProfile(product.seller)}
+                        onClick={() =>
+                          navigateToBusinessProfile(product.seller)
+                        }
                       >
                         Contact Seller
                       </button>

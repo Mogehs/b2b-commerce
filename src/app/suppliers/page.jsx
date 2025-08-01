@@ -21,6 +21,7 @@ import {
   Calendar,
   Package,
 } from "lucide-react";
+import Loader from "@/app/components/common/Loader";
 
 export default function SuppliersPage() {
   const router = useRouter();
@@ -277,7 +278,6 @@ export default function SuppliersPage() {
 
   return (
     <div className="min-h-screen bg-[#F1F1F1]">
-
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-6">
         {/* Header */}
         <div className="mb-5">
@@ -461,9 +461,7 @@ export default function SuppliersPage() {
 
         {/* Loading State */}
         {loading ? (
-          <div className="flex justify-center items-center py-10">
-            <div className="animate-spin h-6 w-6 border-b-2 border-[#C9AF2F]"></div>
-          </div>
+          <Loader />
         ) : (
           <>
             {/* Stores Grid/List */}

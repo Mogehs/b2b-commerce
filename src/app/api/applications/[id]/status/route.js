@@ -94,6 +94,10 @@ export async function PUT(request, { params }) {
           offers: appData.offers,
           bannerImage: appData.titleImage,
           socialLinks: appData.socialMedia,
+          brandingServices: appData.brandingServices,
+          certifications: {
+            certificateImages: appData.certificates?.certificateImages || [],
+          },
           originalApplication: application._id,
           isActive: true,
           isVerified: true,

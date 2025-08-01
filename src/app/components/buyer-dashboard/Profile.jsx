@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react"
+import Loader from "@/app/components/common/Loader";
 import axios from "axios";
 
 export default function Profile() {
@@ -160,9 +161,7 @@ export default function Profile() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin" size={48} />
-      </div>
+    <Loader/>
     );
   }
 

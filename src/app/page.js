@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
-import Navbar from "./components/common/Navbar";
 import Header from "./components/home/Header";
 import Hero from "./components/home/Hero";
 import Badge from "./components/home/Badge";
@@ -13,7 +12,6 @@ import BrandingCards from "./components/home/BrandingCards";
 import Products from "./components/home/Products";
 import Brands from "./components/home/Brands";
 import Region from "./components/home/Region";
-import Footer from "./components/common/Footer";
 
 const Home = () => {
   const router = useRouter();
@@ -50,7 +48,6 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden">
-      <Navbar />
       <Header onCategorySelect={handleCategorySelect} />
       <Hero />
       <div className="bg-[#F1F1F1] p-4">
@@ -84,7 +81,6 @@ const Home = () => {
           handleCardClick={handleSuppliersClick}
         />
         <Region />
-        <Footer />
       </div>
     </div>
   );

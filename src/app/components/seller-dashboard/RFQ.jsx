@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Loader from "@/app/components/common/Loader";
 import { FiSearch, FiEye } from "react-icons/fi";
 import { Dialog } from "@/components/ui/dialog";
 import {
@@ -134,11 +135,7 @@ export default function SellerRFQPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan="5" className="text-center px-6 py-4">
-                  Loading...
-                </td>
-              </tr>
+             <Loader/>
             ) : filteredRfqs.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center px-6 py-4 text-gray-500">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Loader from "@/app/components/common/Loader";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import axios from "axios";
@@ -103,9 +104,7 @@ const Products = ({ selectedCategory, products, loading }) => {
     <>
       <div className="my-8">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9AF2F]"></div>
-          </div>
+         <Loader/>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500">No products found in this category.</p>

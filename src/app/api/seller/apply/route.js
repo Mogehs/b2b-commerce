@@ -4,6 +4,14 @@ import SellerApplication from "@/models/SellerApplication";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request) {
   try {
@@ -105,6 +113,48 @@ export async function POST(request) {
       linkedin: formData.get("linkedin") || "",
     };
 
+    // Handle certificate images upload
+    const certificateImages = [];
+    const certificateFiles = formData.getAll("certificateImages");
+
+    if (certificateFiles && certificateFiles.length > 0) {
+      for (const file of certificateFiles) {
+        if (file instanceof File && file.size > 0) {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            // Upload to Cloudinary
+            const uploadResult = await new Promise((resolve, reject) => {
+              cloudinary.uploader
+                .upload_stream(
+                  {
+                    resource_type: "image",
+                    folder: "seller-certificates",
+                    format: "webp",
+                    quality: "auto",
+                  },
+                  (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                  }
+                )
+                .end(buffer);
+            });
+
+            certificateImages.push({
+              url: uploadResult.secure_url,
+              publicId: uploadResult.public_id,
+              name: file.name,
+            });
+          } catch (error) {
+            console.error("Error uploading certificate image:", error);
+            // Continue with other images even if one fails
+          }
+        }
+      }
+    }
+
     if (
       !businessName ||
       !location ||
@@ -192,6 +242,9 @@ export async function POST(request) {
       titleImage,
       socialMedia,
       brandingServices,
+      certificates: {
+        certificateImages,
+      },
     };
 
     let application;

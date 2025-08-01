@@ -73,24 +73,55 @@ const storeSchema = new mongoose.Schema(
       nationalTaxNumber: {
         certType: String,
         year: String,
+        image: {
+          url: String,
+          publicId: String,
+        },
       },
       professionalTax: {
         certType: String,
         year: String,
+        image: {
+          url: String,
+          publicId: String,
+        },
       },
       iso9001: {
         certType: String,
         year: String,
+        image: {
+          url: String,
+          publicId: String,
+        },
       },
       chamberOfCommerce: {
         certType: String,
         year: String,
+        image: {
+          url: String,
+          publicId: String,
+        },
       },
       otherCertifications: [
         {
           name: String,
           year: String,
           documentUrl: String,
+          image: {
+            url: String,
+            publicId: String,
+          },
+        },
+      ],
+      certificateImages: [
+        {
+          url: String,
+          publicId: String,
+          name: String,
+          uploadedAt: {
+            type: Date,
+            default: Date.now,
+          },
         },
       ],
     },
